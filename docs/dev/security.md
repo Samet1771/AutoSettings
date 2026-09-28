@@ -45,6 +45,28 @@ Therefore placeholders are **never expanded in `command.run` scripts** (the fiel
 `AUTOSETTINGS_APP_PATH`, ...), which a script reads as data, not code. New action fields that are interpreted as code
 must opt out the same way.
 
+## Updates
+
+The service installs updates as SYSTEM, so the update path is treated as privileged:
+
+- Releases are read from `https://api.github.com/repos/<Repository>/releases` over HTTPS. Download addresses must be
+  HTTPS on `github.com` or `*.githubusercontent.com`.
+- Only an asset named `AutoSettings-<version>-x64.msi` is considered, and only versions higher than the installed one
+  (no downgrades). Drafts are ignored; pre-releases only with the opt-in.
+- The MSI is downloaded into `%ProgramData%\AutoSettings\updates\<version>`, whose ACL is reset to SYSTEM and
+  Administrators (full control) and Users (read). A user therefore cannot replace the file between verification and
+  installation.
+- Before installing, the SHA-256 of the file must match `SHA256SUMS.txt` of the same release **and** the asset digest
+  from the GitHub API when present; at least one of the two is required.
+- If the running `AutoSettings.Service.exe` is Authenticode-signed, the MSI must have a valid, trusted signature from
+  the same certificate subject. A signed installation never accepts an unsigned update. Unsigned builds rely on the
+  checksums and on the integrity of the GitHub repository and account: protect the account with two-factor
+  authentication, and consider signing releases (see [releasing](building.md#releasing)).
+- Users can only trigger the check and the install of the verified official release, or change the mode; they cannot
+  choose the file, the URL or the repository. Administrators can lock the settings with `AllowUserChanges: false`
+  in `%ProgramData%\AutoSettings\appsettings.json`.
+- `msiexec` is started with an argument list (no shell), with a verbose log next to the download.
+
 ## Reporting a vulnerability
 
 Please open a private security advisory on the GitHub repository instead of a public issue.

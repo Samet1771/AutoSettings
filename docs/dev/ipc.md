@@ -13,6 +13,10 @@ The contracts are in `src/AutoSettings.Core/Ipc/Contracts.cs`.
 | `RegisterAgentAsync(AgentHello)` → `ServiceHello` | Registers the agent for its session. The service answers with its version, the process monitor in use and the session's user. Pending logon events are delivered right after. |
 | `GetMachineActivityAsync()` | The machine activity log, shown in the agent's Activity tab. |
 | `AgentExitingAsync()` | The user closed the agent: do not restart it until the next sign-in. |
+| `GetUpdateStatusAsync()` → `UpdateStatus` | Current update status (installed and newest version, state, settings). |
+| `CheckForUpdatesAsync()` → `UpdateStatus` | Check GitHub now. |
+| `InstallUpdateAsync()` → `string?` | Download if needed, verify and install the available update; returns an error message or null. The calling agent is closed during the install, so the call usually ends with a lost connection. |
+| `SetUpdateSettingsAsync(UpdateSettings)` → `string?` | Change the update mode and the beta opt-in; refused when an administrator locked them. |
 
 ## Service → agent (`IAgentApi`)
 
@@ -22,6 +26,8 @@ The contracts are in `src/AutoSettings.Core/Ipc/Contracts.cs`.
 | `ExecuteActionAsync(RemoteAction)` → `bool` | Run a user action on behalf of a machine automation. |
 | `CaptureActionAsync(RemoteAction)` → `string?` | Capture the current value for a revertible action (machine profiles). |
 | `RestoreActionAsync(RemoteAction, string?)` | Restore a captured value. |
+| `OnUpdateStatusChangedAsync(UpdateStatus)` | The update status changed. On `Installing` the agent exits with code 0 (not restarted); the updated service starts the new agent. |
+| `IsBusyAsync()` → `bool` | Whether a full-screen app is in the foreground; automatic installs wait for it. |
 
 `RemoteAction` carries the action type, its parameters as a JSON object (`PlainJson`), the triggering event and the
 automation's id and name.

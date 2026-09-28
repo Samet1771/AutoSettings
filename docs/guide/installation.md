@@ -56,6 +56,9 @@ service, adds the Start menu shortcut, and starts the service.
 
 ## Update
 
+AutoSettings [updates itself](updates.md) from GitHub: by default it downloads a new version and asks before
+installing it. You can also update by hand:
+
 - **Installer**: run the new MSI. It replaces the old version and keeps your automations.
 - **Portable**: run `install.ps1` from the new version's folder. It stops the service and the agents, replaces the
   files and starts the service again.
@@ -81,5 +84,11 @@ each user's `%AppData%\AutoSettings`. Delete those folders if you do not need th
 | `AgentPath` | *(service folder)* | Location of `AutoSettings.Agent.exe`. |
 | `MaxRunsPerMinute` | `20` | Loop guard for machine automations (see [engine](../dev/engine.md#loop-guard)). |
 | `LogAllEvents` | `false` | Write every received event to the machine activity log (verbose, for troubleshooting). |
+
+The `Updates` section is described in [Updates](updates.md#company-computers).
+
+The installer replaces this file on every update. To keep your own values, put them in
+`%ProgramData%\AutoSettings\appsettings.json` instead (same format, only the settings you change); that file wins
+and is never touched by updates.
 
 Restart the service after changing it: `Restart-Service AutoSettings`.

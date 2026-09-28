@@ -107,6 +107,11 @@ Unit tests cover the engine; the Windows integration needs a real machine or VM.
     notification banners, Do Not Disturb, keyboard layout, airplane mode, `settings.open`; each reverts with a profile.
 17. MSI: install on a clean VM (service running, tray icon after sign-in, Start menu entry), install a newer version
     over it (upgrade, automations kept), uninstall (service removed, `%ProgramData%\AutoSettings` kept).
+18. Updates: publish `v0.2.0` and then `v0.2.1` (or a test repository set in
+    `%ProgramData%\AutoSettings\appsettings.json`). Install 0.2.0; **Settings → Updates → Check now** shows 0.2.1
+    and a notification; **Install 0.2.1**: the app closes and comes back, Activity says *updated from 0.2.0 to
+    0.2.1*. Repeat with *Install automatically* while a full-screen app runs (waits) and after closing it.
+    Edit `SHA256SUMS.txt` of a test release: the download is rejected. A portable install only notifies.
 
 ## Releasing
 
@@ -116,8 +121,12 @@ Unit tests cover the engine; the Windows integration needs a real machine or VM.
      `SIGNING_PASSWORD` secrets exist;
    - builds `AutoSettings-X.Y.Z-x64.msi` and the portable `AutoSettings-X.Y.Z-win-x64.zip`;
    - fills the winget manifests from `packaging/winget` with the version, URL and SHA256;
+   - writes `SHA256SUMS.txt`, which the app's updater requires;
+   - marks tags with a label (`v0.3.0-beta.1`) as pre-releases, which are only offered to users who opted in;
    - creates the GitHub Release with all of these.
-3. Submit the winget manifests to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs)
+3. Installed copies find the release within about 12 hours (see [updates](../guide/updates.md)). Keep the asset
+   names: the updater looks for `AutoSettings-<version>-x64.msi` and `SHA256SUMS.txt`.
+4. Submit the winget manifests to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs)
    (for example with `wingetcreate submit`).
 
 ### Documentation site

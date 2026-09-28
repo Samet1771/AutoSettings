@@ -1,6 +1,7 @@
 using AutoSettings.Core;
 using AutoSettings.Core.Engine;
 using AutoSettings.Service;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.WindowsServices;
@@ -16,6 +17,10 @@ var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
     Args = args,
     ContentRootPath = AppContext.BaseDirectory,
 });
+
+// Machine-specific settings that survive updates (the installer replaces appsettings.json in the program folder).
+// Only administrators can write to %ProgramData%\AutoSettings.
+builder.Configuration.AddJsonFile(Path.Combine(Product.MachineDataDirectory, "appsettings.json"), optional: true, reloadOnChange: false);
 
 builder.Services.AddWindowsService(options => options.ServiceName = Product.ServiceName);
 if (WindowsServiceHelpers.IsWindowsService())

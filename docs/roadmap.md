@@ -23,7 +23,8 @@
 - **Milestone 5 – More settings**: HDR, main display, display scaling, Night light, accent color, power mode,
   notification banners, Do Not Disturb, keyboard layout, airplane mode, Settings pages (`settings.open`).
 - **Milestone 6 – Distribution**: MSI installer (WiX) with service registration, Start-menu entry and upgrades;
-  release workflow with optional code signing; winget manifests; documentation site on GitHub Pages.
+  release workflow with optional code signing; winget manifests; documentation site on GitHub Pages; automatic
+  updates from GitHub Releases.
 
 ## Next
 

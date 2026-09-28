@@ -88,6 +88,11 @@ errors (for example after a hand edit). Open **Edit whole file**, fix the lines 
 The Activity tab lists every restore. If the value could not be read before the profile applied it (device
 unplugged, access denied), a warning says so and that setting is not restored.
 
+### "Updates do not work"
+
+See [Updates → Problems](updates.md#problems). The update status and the last error are shown in
+**Settings → Updates**, and every check, download and install is in the machine activity.
+
 ## FAQ
 
 **Does AutoSettings need to run as administrator?**

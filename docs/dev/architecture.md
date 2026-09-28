@@ -37,7 +37,7 @@ flowchart LR
 |---|---|---|---|
 | **Core** | `src/AutoSettings.Core` (net10.0, no Windows APIs) | library | Configuration model, YAML reader/writer, validation, component catalog, JSON Schema, rule engine, profile manager, IPC contracts, editing model (`Editing/`: document operations, merge/import/export, templates, YAML autocomplete) |
 | **Platform** | `src/AutoSettings.Platform` (net10.0-windows) | library | Win32/WinRT interop, process/focus monitors, session helpers, all action and condition handlers |
-| **Service** | `src/AutoSettings.Service` | SYSTEM, session 0 | Boot/sign-in/lock/process events, machine automations, agent supervision, pipe server, routing of user actions |
+| **Service** | `src/AutoSettings.Service` | SYSTEM, session 0 | Boot/sign-in/lock/process events, machine automations, agent supervision, pipe server, routing of user actions, updates (`UpdateService`) |
 | **Agent** | `src/AutoSettings.Agent` (WPF) | the user | Focus events, personal automations, tray icon, window (WPF-UI), visual and YAML editors (AvalonEdit), localization, notifications |
 | **DocGen** | `src/AutoSettings.DocGen` | tool | Generates `docs/reference` and the JSON Schema from the catalog |
 | **Tests** | `tests/AutoSettings.Core.Tests` | tool | Unit tests for Core; validates every example and every catalog entry |

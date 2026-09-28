@@ -59,6 +59,7 @@ profiles:
 - **Personal and machine automations** — each user has their own; administrators can add machine-wide ones (e.g. at boot or for a specific user signing in).
 - **Visual and YAML editor, like Home Assistant** — build automations with forms (app and user pickers included) or write YAML with autocomplete, hover help and error squiggles; switch between them at any time.
 - **Templates** — gaming, presentation, night, meeting, battery saver and focus, ready to adjust.
+- **Automatic updates** from GitHub releases — asks before installing by default; checksums verified.
 - **English and Turkish**, light and dark theme.
 - **Readable YAML with helpful errors** — line numbers and "did you mean ...?" suggestions; a bad edit never replaces a working configuration.
 - **Activity timeline** — see what fired, why something did *not* run, and what changed.
@@ -84,6 +85,7 @@ Full guide: **[docs/guide/getting-started.md](docs/guide/getting-started.md)**.
 | [Personal vs. machine automations](docs/guide/personal-and-machine.md) | who runs what, and with which rights |
 | [The app](docs/guide/the-app.md) | window, tray menu, activity timeline, settings, pause, dry run |
 | [The editor](docs/guide/editor.md) | visual and YAML editor, templates, import/export |
+| [Updates](docs/guide/updates.md) | automatic updates, beta versions, company settings |
 | [Examples](docs/examples/) | gaming mode, presentations, day/night, meetings, company PCs |
 | [Reference](docs/reference/index.md) | every trigger, condition and action with all fields (generated) |
 | [Troubleshooting & FAQ](docs/guide/troubleshooting.md) | logs, common problems |
