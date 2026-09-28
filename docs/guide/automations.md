@@ -146,6 +146,9 @@ More dedicated actions are added over time; see the [roadmap](../roadmap.md).
 Text fields of actions can include details of the event, such as `{{ user }}`, `{{ app }}`, `{{ window_title }}`
 or `{{ now }}`. See [placeholders](../reference/placeholders.md). A value that **starts** with `{{` must be quoted.
 
+Scripts (`command.run`) are the exception: for safety, placeholders are not pasted into script text. The same values
+are available to the script as environment variables, e.g. `$env:AUTOSETTINGS_USER` or `$env:AUTOSETTINGS_APP_PATH`.
+
 ## Cooldown and "still running"
 
 - While an automation's actions are running (for example during a `delay`), new triggers for it are ignored.

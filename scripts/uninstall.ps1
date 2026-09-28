@@ -22,6 +22,8 @@ if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) {
 }
 Get-Process -Name 'AutoSettings.Agent' -ErrorAction SilentlyContinue | Stop-Process -Force
 
+Remove-Item -Path (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\AutoSettings.lnk') -ErrorAction SilentlyContinue
+
 if (Test-Path $InstallDir) {
     Remove-Item -Path $InstallDir -Recurse -Force
 }

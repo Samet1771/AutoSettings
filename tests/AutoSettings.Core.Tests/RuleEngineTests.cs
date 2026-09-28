@@ -395,6 +395,31 @@ public class RuleEngineTests
         Assert.Single(_notify.Calls);
     }
 
+    [Fact]
+    public async Task Placeholders_are_not_expanded_in_scripts()
+    {
+        var command = new RecordingAction("command.run");
+        _handlers.Add(command);
+        var engine = CreateEngine("""
+            version: 1
+            automations:
+              - id: a
+                triggers:
+                  - type: app_focused
+                    app: "*"
+                actions:
+                  - type: command.run
+                    command: "echo {{ window_title }}"
+                  - type: notify
+                    message: "{{ window_title }}"
+            """, _handlers);
+
+        await engine.SendAsync(App(SystemEventKind.AppFocused, "evil.exe", title: "'; rm -rf / #"));
+
+        Assert.Equal("echo {{ window_title }}", Assert.Single(command.Calls).GetString("command"));
+        Assert.Equal("'; rm -rf / #", Assert.Single(_notify.Calls).GetString("message"));
+    }
+
     private const string StackedProfiles = """
         version: 1
         profiles:

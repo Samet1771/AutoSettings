@@ -55,8 +55,14 @@ public sealed record FieldDescriptor(string Name, FieldType Type, string Descrip
     /// <summary>Example value for docs and placeholders in the editor.</summary>
     public string? Example { get; init; }
 
+    /// <summary>
+    /// Overrides whether placeholders are replaced in this field. Script fields set this to false:
+    /// substituting event data (window titles, file names) into code would allow command injection.
+    /// </summary>
+    public bool? AllowPlaceholders { get; init; }
+
     /// <summary>Whether <c>{{ placeholders }}</c> are replaced in this field before the action runs.</summary>
-    public bool SupportsPlaceholders => Type is FieldType.String or FieldType.Multiline or FieldType.Path;
+    public bool SupportsPlaceholders => AllowPlaceholders ?? Type is FieldType.String or FieldType.Multiline or FieldType.Path;
 }
 
 /// <summary>Shorthand factory methods for <see cref="FieldDescriptor"/>s.</summary>

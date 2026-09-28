@@ -25,6 +25,7 @@ The script:
 
 - copies the files to `C:\Program Files\AutoSettings`,
 - creates the **AutoSettings** service with *Automatic* start and restart-on-failure,
+- adds an **AutoSettings** shortcut to the Start menu,
 - starts it. The service then starts the agent (the tray icon) in every signed-in user's session.
 
 From now on AutoSettings starts with Windows. You do not need to add anything to the Startup folder.

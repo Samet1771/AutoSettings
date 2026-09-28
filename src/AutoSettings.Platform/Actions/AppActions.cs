@@ -241,6 +241,8 @@ public sealed class CommandRunAction : IActionHandler
         startInfo.WindowStyle = hidden ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal;
         startInfo.RedirectStandardOutput = wait;
         startInfo.RedirectStandardError = wait;
+        foreach (var (name, value) in Placeholders.ValuesFor(context, DateTimeOffset.Now))
+            startInfo.Environment[EnvironmentVariableName(name)] = value ?? "";
 
         Process process;
         try
@@ -279,6 +281,10 @@ public sealed class CommandRunAction : IActionHandler
                 context.Log.Info(ActivitySources.Action, $"Command output: {Tail(stdout)}", context.AutomationId);
         }
     }
+
+    /// <summary>Environment variable that carries a placeholder's value, e.g. <c>app.path</c> → <c>AUTOSETTINGS_APP_PATH</c>.</summary>
+    public static string EnvironmentVariableName(string placeholder) =>
+        "AUTOSETTINGS_" + placeholder.ToUpperInvariant().Replace('.', '_');
 
     /// <summary>Builds the process start info for a shell and command.</summary>
     public static ProcessStartInfo BuildStartInfo(string shell, string command)

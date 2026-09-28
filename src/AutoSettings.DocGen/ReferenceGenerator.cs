@@ -189,6 +189,26 @@ public static class ReferenceGenerator
         sb.AppendLine("```");
         sb.AppendLine();
         sb.AppendLine("> In YAML, a value that **starts** with `{{` must be quoted, otherwise it is read as a map.");
+        sb.AppendLine();
+        sb.AppendLine("## Scripts");
+        sb.AppendLine();
+        sb.AppendLine("Placeholders are **not** replaced inside `command.run` scripts: window titles and file names are chosen by other");
+        sb.AppendLine("programs, and pasting them into code could run unintended commands. Instead, every value is passed to the script");
+        sb.AppendLine("as an environment variable named `AUTOSETTINGS_` + the placeholder name in capitals, with dots replaced by underscores:");
+        sb.AppendLine();
+        sb.AppendLine("| Placeholder | PowerShell | cmd |");
+        sb.AppendLine("|---|---|---|");
+        foreach (var (name, _) in Placeholders.All)
+        {
+            var variable = "AUTOSETTINGS_" + name.ToUpperInvariant().Replace('.', '_');
+            sb.AppendLine($"| `{{{{ {name} }}}}` | `$env:{variable}` | `%{variable}%` |");
+        }
+        sb.AppendLine();
+        sb.AppendLine("```yaml");
+        sb.AppendLine("actions:");
+        sb.AppendLine("  - type: command.run");
+        sb.AppendLine("    command: Add-Content \"$env:TEMP\\apps.log\" \"$env:AUTOSETTINGS_NOW started $env:AUTOSETTINGS_APP\"");
+        sb.AppendLine("```");
         return Finish(sb);
     }
 

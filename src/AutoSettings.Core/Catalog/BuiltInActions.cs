@@ -448,8 +448,9 @@ public static class BuiltInActions
                 : ExecutionScope.User,
             Fields =
             [
-                Fields.Multiline("command", "The script or command line. Placeholders such as {{ user }} and {{ app }} are replaced before it runs.", required: true,
-                    example: "Write-Output 'Hello {{ user }}'"),
+                Fields.Multiline("command",
+                    "The script or command line. Details of the event are available as environment variables, e.g. $env:AUTOSETTINGS_USER and $env:AUTOSETTINGS_APP_PATH in PowerShell or %AUTOSETTINGS_USER% in cmd ({{ placeholders }} are deliberately not replaced in scripts).",
+                    required: true, example: "Write-Output \"Hello $env:AUTOSETTINGS_USER\"") with { AllowPlaceholders = false },
                 Fields.Choice("shell", "powershell (Windows PowerShell 5.1), pwsh (PowerShell 7), cmd, or none (run the command line directly).",
                     ["powershell", "pwsh", "cmd", "none"], defaultValue: "powershell"),
                 Fields.Choice("run_as", "user runs as the signed-in user; system runs as the local SYSTEM account (machine automations only).",
@@ -464,7 +465,7 @@ public static class BuiltInActions
                 command: |
                   Stop-Process -Name OneDrive -ErrorAction SilentlyContinue
                 """,
-            Notes = "Scripts in machine automations can only be edited by administrators, because they may run as SYSTEM.",
+            Notes = "Every [placeholder](../placeholders.md) is available to the script as an environment variable named AUTOSETTINGS_ followed by the placeholder name in capitals with dots replaced by underscores: {{ user }} → AUTOSETTINGS_USER, {{ app.path }} → AUTOSETTINGS_APP_PATH. Placeholders are not replaced inside the script text itself, because window titles and file names are chosen by other programs and could otherwise inject commands. Scripts in machine automations can only be edited by administrators, because they may run as SYSTEM.",
         },
         new()
         {

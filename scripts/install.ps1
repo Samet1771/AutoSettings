@@ -51,6 +51,15 @@ if (-not $existing) {
     sc.exe failure $serviceName reset= 86400 actions= restart/5000/restart/10000/restart/60000 | Out-Null
 }
 
+# Start menu shortcut for all users (opens the window, or starts the agent if it was closed).
+$shortcutPath = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\AutoSettings.lnk'
+$shell = New-Object -ComObject WScript.Shell
+$shortcut = $shell.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = Join-Path $InstallDir 'AutoSettings.Agent.exe'
+$shortcut.WorkingDirectory = $InstallDir
+$shortcut.Description = 'AutoSettings: automatic Windows settings'
+$shortcut.Save()
+
 Write-Host 'Starting the service...'
 Start-Service -Name $serviceName
 Write-Host 'AutoSettings is installed. The tray icon appears in a few seconds.'

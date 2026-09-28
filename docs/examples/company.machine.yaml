@@ -10,7 +10,8 @@ automations:
     actions:
       - type: command.run
         run_as: system
-        command: Add-Content -Path "$env:ProgramData\AutoSettings\boot.log" -Value "{{ now }} {{ boot_type }}"
+        # Event details are passed as environment variables (AUTOSETTINGS_NOW, AUTOSETTINGS_BOOT_TYPE, ...).
+        command: Add-Content -Path "$env:ProgramData\AutoSettings\boot.log" -Value "$env:AUTOSETTINGS_NOW $env:AUTOSETTINGS_BOOT_TYPE"
 
   - id: guest-welcome
     name: Welcome guests
