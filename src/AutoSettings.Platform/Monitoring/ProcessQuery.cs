@@ -28,8 +28,25 @@ public static class ProcessQuery
     }
 
     /// <summary>Session id of a process, or null.</summary>
-    public static int? TryGetSessionId(int processId) =>
-        Native.ProcessIdToSessionId(processId, out var session) ? session : null;
+    /// <remarks>
+    /// ProcessIdToSessionId needs query access to the process, which a normal user does not have for the service
+    /// (SYSTEM). The system process list, which <see cref="Process.SessionId"/> reads, has every process's session
+    /// without that access, like Task Manager.
+    /// </remarks>
+    public static int? TryGetSessionId(int processId)
+    {
+        if (Native.ProcessIdToSessionId(processId, out var session))
+            return session;
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            return process.SessionId;
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or Win32Exception)
+        {
+            return null;
+        }
+    }
 
     /// <summary>Describes a running process, or returns null if it already exited.</summary>
     public static ProcessInfo? TryDescribe(int processId)

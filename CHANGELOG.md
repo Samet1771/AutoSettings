@@ -2,6 +2,8 @@
 
 ## 0.2.0 (unreleased)
 
+- Fixed: the app did not connect to the AutoSettings service ("Refusing pipe server ...: it is not a Windows
+  service"), so sign-in automations and machine features did not work.
 - New app window (Fluent design) with pages for automations, profiles, templates, activity and settings.
 - Visual editor and YAML editor with autocomplete, hover help and error squiggles; switch between them at any
   time. Whole-file editor that keeps comments.
