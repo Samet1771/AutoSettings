@@ -26,7 +26,29 @@ concurrency:
   group: release-${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
 
 jobs:
+  # Publishing a release on the website also pushes its tag, which starts this workflow a second time.
+  # The tag-push run is only needed when no release exists yet (git tag + git push).
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && gh release view "$TAG" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            echo "::notice::A release for $TAG already exists; it is built by its own release run, so this tag-push run is skipped."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
   release:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: windows-latest
     env:
       # Optional code signing: add these repository secrets (base64 .pfx and its password).
