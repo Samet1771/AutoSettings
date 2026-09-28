@@ -31,6 +31,17 @@ public static class PlatformHandlers
         new NotifyAction(notifier),
         new OpenAction(),
         new RegistrySetAction(),
+        new AccentColorAction(),
+        new HdrAction(),
+        new ScalingAction(),
+        new PrimaryMonitorAction(),
+        new NightLightAction(),
+        new PowerModeAction(),
+        new NotificationBannersAction(),
+        new DoNotDisturbAction(),
+        new KeyboardLayoutAction(),
+        new AirplaneModeAction(),
+        new SettingsOpenAction(),
     ];
 
     /// <summary>Actions the service runs itself, as SYSTEM.</summary>

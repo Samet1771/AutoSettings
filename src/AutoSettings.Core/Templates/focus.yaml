@@ -22,3 +22,5 @@ profiles:
     actions:
       - type: audio.mute
         state: mute
+      - type: notifications.banners
+        enabled: false

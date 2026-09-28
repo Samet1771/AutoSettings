@@ -22,6 +22,8 @@ public static class BuiltInActions
         public const string Devices = "Network & devices";
         /// <summary>Launch/close apps, scripts, notifications.</summary>
         public const string Apps = "Apps & scripts";
+        /// <summary>Notification banners, Do Not Disturb.</summary>
+        public const string Notifications = "Notifications";
         /// <summary>Registry and services.</summary>
         public const string Advanced = "Advanced";
     }
@@ -39,6 +41,39 @@ public static class BuiltInActions
     public static readonly IReadOnlyList<string> RevertOnValues = ["auto", "app_unfocused", "app_closed", "logoff", "lock", "never"];
 
     private static readonly IReadOnlyList<string> OnOffToggle = ["on", "off", "toggle"];
+
+    /// <summary>Pages accepted by <c>settings.open</c>, mapped to their ms-settings: links.</summary>
+    public static readonly IReadOnlyDictionary<string, string> SettingsPages = new Dictionary<string, string>
+    {
+        ["display"] = "ms-settings:display",
+        ["night_light"] = "ms-settings:nightlight",
+        ["sound"] = "ms-settings:sound",
+        ["notifications"] = "ms-settings:notifications",
+        ["focus"] = "ms-settings:quiethours",
+        ["power"] = "ms-settings:powersleep",
+        ["battery"] = "ms-settings:batterysaver",
+        ["bluetooth"] = "ms-settings:bluetooth",
+        ["wifi"] = "ms-settings:network-wifi",
+        ["network"] = "ms-settings:network-status",
+        ["personalization"] = "ms-settings:personalization",
+        ["background"] = "ms-settings:personalization-background",
+        ["colors"] = "ms-settings:colors",
+        ["taskbar"] = "ms-settings:taskbar",
+        ["mouse"] = "ms-settings:mousetouchpad",
+        ["keyboard"] = "ms-settings:keyboard",
+        ["language"] = "ms-settings:regionlanguage",
+        ["date_time"] = "ms-settings:dateandtime",
+        ["apps"] = "ms-settings:appsfeatures",
+        ["default_apps"] = "ms-settings:defaultapps",
+        ["storage"] = "ms-settings:storagesense",
+        ["privacy"] = "ms-settings:privacy",
+        ["windows_update"] = "ms-settings:windowsupdate",
+        ["about"] = "ms-settings:about",
+    };
+
+    private const string MonitorHelp = "all, primary, a monitor number (2) or a device name such as \\\\.\\DISPLAY2.";
+
+    private const string BestEffort = "This setting has no official programming interface; AutoSettings changes it the way Windows stores it internally. It works on current Windows 10 and 11 builds but may stop working after a Windows update. If it fails, the error says so; use `settings.open` to open the Settings page instead.";
 
     private static FieldDescriptor AudioDevice => Fields.Text(
         "device",
@@ -499,6 +534,195 @@ public static class BuiltInActions
                 """,
         },
 
+        // ---------------------------------------------------------------- Milestone 5 settings
+        new()
+        {
+            Type = "theme.accent_color",
+            Kind = ComponentKind.Action,
+            Category = Categories.Personalization,
+            Title = "Accent color",
+            Description = "Sets the Windows accent color, and optionally shows it on Start/taskbar and title bars.",
+            Revertible = true,
+            Fields =
+            [
+                Fields.Text("color", "Color as #RRGGBB.", required: true, example: "#2563EB"),
+                Fields.Boolean("show_on_taskbar", "Show the accent color on Start and the taskbar."),
+                Fields.Boolean("show_on_title_bars", "Show the accent color on title bars and window borders."),
+            ],
+            Validate = c => ValidationRules.Require(IsHexColor(c.GetString("color")), "'color' must look like #2563EB"),
+            Example = """
+                type: theme.accent_color
+                color: "#E11D48"
+                show_on_title_bars: true
+                """,
+            Notes = "Quote the color in YAML (\"#E11D48\"), because # starts a comment. Also turns off 'automatically pick an accent color from my background'.",
+        },
+        new()
+        {
+            Type = "display.hdr",
+            Kind = ComponentKind.Action,
+            Category = Categories.Display,
+            Title = "HDR",
+            Description = "Turns HDR (Windows HD Color) on or off for HDR-capable displays.",
+            Revertible = true,
+            KeyFields = ["monitor"],
+            Fields =
+            [
+                Fields.Choice("state", "on, off, or toggle.", OnOffToggle, required: true),
+                Fields.Text("monitor", "Which display: " + MonitorHelp, defaultValue: "all"),
+            ],
+            Example = """
+                type: display.hdr
+                state: on
+                """,
+            Notes = "Displays that do not support HDR are skipped; the action fails if none does.",
+        },
+        new()
+        {
+            Type = "display.primary",
+            Kind = ComponentKind.Action,
+            Category = Categories.Display,
+            Title = "Main display",
+            Description = "Makes a monitor the main display (the one with the taskbar clock and where new windows open).",
+            Revertible = true,
+            Fields = [Fields.Text("monitor", "A monitor number (2) or a device name such as \\\\.\\DISPLAY2.", required: true, example: "2")],
+            Example = """
+                type: display.primary
+                monitor: "2"
+                """,
+            Notes = "Monitor numbers are the ones shown by Settings > System > Display > Identify.",
+        },
+        new()
+        {
+            Type = "display.scaling",
+            Kind = ComponentKind.Action,
+            Category = Categories.Display,
+            Title = "Display scaling",
+            Description = "Changes the scale (text, apps and other items size) of a display.",
+            Revertible = true,
+            KeyFields = ["monitor"],
+            Fields =
+            [
+                Fields.Integer("percent", "Scale in percent: 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 450 or 500.", required: true, min: 100, max: 500, example: "125"),
+                Fields.Text("monitor", "Which display: " + MonitorHelp, defaultValue: "primary"),
+            ],
+            Validate = c => ValidationRules.Require(c.GetInteger("percent") is not { } p || ScaleSteps.Contains((int)p),
+                "'percent' must be one of 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 450, 500"),
+            Example = """
+                type: display.scaling
+                percent: 150
+                """,
+            Notes = "Each display only allows the steps up to its maximum (shown in Settings > Display > Scale). " + BestEffort,
+        },
+        new()
+        {
+            Type = "display.night_light",
+            Kind = ComponentKind.Action,
+            Category = Categories.Display,
+            Title = "Night light",
+            Description = "Turns Night light (warmer screen colors) on or off.",
+            Revertible = true,
+            Fields = [Fields.Choice("state", "on, off, or toggle.", OnOffToggle, required: true)],
+            Example = """
+                type: display.night_light
+                state: on
+                """,
+            Notes = BestEffort,
+        },
+        new()
+        {
+            Type = "power.mode",
+            Kind = ComponentKind.Action,
+            Category = Categories.Power,
+            Title = "Power mode",
+            Description = "Sets the Windows power mode (the Settings > Power slider): best power efficiency, balanced or best performance.",
+            Revertible = true,
+            Fields = [Fields.Choice("mode", "The power mode.", ["best_efficiency", "balanced", "best_performance"], required: true)],
+            Example = """
+                type: power.mode
+                mode: best_performance
+                """,
+            Notes = "Available on computers that show the Power mode setting (most Windows 10/11 PCs with the Balanced plan active).",
+        },
+        new()
+        {
+            Type = "notifications.banners",
+            Kind = ComponentKind.Action,
+            Category = Categories.Notifications,
+            Title = "Notification banners",
+            Description = "Turns app notification banners on or off (Settings > System > Notifications).",
+            Revertible = true,
+            Fields = [Fields.Boolean("enabled", "true to show notifications.")],
+            Validate = c => ValidationRules.Require(c.Has("enabled"), "'enabled' is required"),
+            Example = """
+                type: notifications.banners
+                enabled: false
+                """,
+            Notes = "AutoSettings' own notifications are hidden too while banners are off.",
+        },
+        new()
+        {
+            Type = "notifications.do_not_disturb",
+            Kind = ComponentKind.Action,
+            Category = Categories.Notifications,
+            Title = "Do Not Disturb",
+            Description = "Turns Do Not Disturb (Focus assist) on or off.",
+            Revertible = true,
+            Fields =
+            [
+                Fields.Choice("state", "on or off.", ["on", "off"], required: true),
+                Fields.Choice("level", "When on: priority (priority notifications still show) or alarms (only alarms).", ["priority", "alarms"], defaultValue: "priority"),
+            ],
+            Example = """
+                type: notifications.do_not_disturb
+                state: on
+                """,
+            Notes = BestEffort,
+        },
+        new()
+        {
+            Type = "keyboard.layout",
+            Kind = ComponentKind.Action,
+            Category = Categories.Devices,
+            Title = "Keyboard layout",
+            Description = "Switches the keyboard layout (input language) of the active app and the default for new apps.",
+            Revertible = true,
+            Fields = [Fields.Text("layout", "A language tag (tr-TR, en-US, de-DE) or a keyboard layout id (0000041F).", required: true, example: "tr-TR")],
+            Example = """
+                type: keyboard.layout
+                layout: en-US
+                """,
+            Notes = "The layout must be installed (Settings > Time & language > Language & region).",
+        },
+        new()
+        {
+            Type = "radio.airplane_mode",
+            Kind = ComponentKind.Action,
+            Category = Categories.Devices,
+            Title = "Airplane mode",
+            Description = "Turns all wireless radios (Wi-Fi, Bluetooth, mobile broadband) off (on) or back on (off).",
+            Revertible = true,
+            Fields = [Fields.Choice("state", "on turns every radio off; off turns them on.", ["on", "off"], required: true)],
+            Example = """
+                type: radio.airplane_mode
+                state: on
+                """,
+            Notes = "Reverting restores each radio's previous state.",
+        },
+        new()
+        {
+            Type = "settings.open",
+            Kind = ComponentKind.Action,
+            Category = Categories.Apps,
+            Title = "Open a Settings page",
+            Description = "Opens a Windows Settings page, for settings that should be changed by hand.",
+            Fields = [Fields.Choice("page", "Which page.", SettingsPages.Keys.ToList(), required: true)],
+            Example = """
+                type: settings.open
+                page: display
+                """,
+        },
+
         // ---------------------------------------------------------------- Advanced
         new()
         {
@@ -556,6 +780,12 @@ public static class BuiltInActions
             Notes = "Machine automations only (requires administrator rights).",
         },
     ];
+
+    /// <summary>Display scaling steps Windows supports.</summary>
+    public static readonly IReadOnlyList<int> ScaleSteps = [100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 450, 500];
+
+    private static bool IsHexColor(string? value) =>
+        value is { Length: 7 } && value[0] == '#' && value[1..].All(Uri.IsHexDigit);
 
     private static IEnumerable<string> ValidateResolution(ComponentConfig c)
     {
