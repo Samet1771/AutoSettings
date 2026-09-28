@@ -3,7 +3,7 @@
 #   mkdocs serve
 site_name: AutoSettings
 site_description: Windows settings that change themselves.
-repo_url: https://github.com/Samet1771/WindowsSettingAutomation
+repo_url: https://github.com/Samet1771/AutoSettings
 edit_uri: edit/main/docs/
 docs_dir: docs
 

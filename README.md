@@ -67,7 +67,7 @@ profiles:
 
 ## Getting started
 
-1. Download `AutoSettings-x.y.z-x64.msi` from the [releases](https://github.com/Samet1771/WindowsSettingAutomation/releases) and run it.
+1. Download `AutoSettings-x.y.z-x64.msi` from the [releases](https://github.com/Samet1771/AutoSettings/releases) and run it.
    (A portable zip with an install script is there too.)
 2. The tray icon appears. Open it and turn on an example, or pick one from **Templates**.
 3. Double-click an automation to change it in the visual or the YAML editor.

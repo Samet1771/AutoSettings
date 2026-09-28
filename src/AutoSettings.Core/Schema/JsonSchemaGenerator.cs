@@ -24,7 +24,7 @@ public static class JsonSchemaGenerator
         var root = new JsonObject
         {
             ["$schema"] = "http://json-schema.org/draft-07/schema#",
-            ["$id"] = "https://github.com/Samet1771/WindowsSettingAutomation/docs/reference/automations.schema.json",
+            ["$id"] = "https://github.com/Samet1771/AutoSettings/docs/reference/automations.schema.json",
             ["title"] = $"{Product.Name} automations",
             ["description"] = $"An {Product.Name} automations.yaml file: automations (when/if/then rules) and profiles (named sets of actions).",
             ["type"] = "object",

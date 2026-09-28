@@ -11,7 +11,7 @@ public static class StarterConfig
         # A profile is a named set of actions that can be undone automatically.
         #
         # The examples below are disabled. Set "enabled: true" (or delete the line) to use them.
-        # Full reference: https://github.com/Samet1771/WindowsSettingAutomation/tree/main/docs
+        # Full reference: https://github.com/Samet1771/AutoSettings/tree/main/docs
         version: 1
 
         automations:
@@ -69,7 +69,7 @@ public static class StarterConfig
         # user's own settings (theme, audio, notifications, ...) are sent to the agent of the user the
         # event belongs to.
         #
-        # Full reference: https://github.com/Samet1771/WindowsSettingAutomation/tree/main/docs
+        # Full reference: https://github.com/Samet1771/AutoSettings/tree/main/docs
         version: 1
 
         automations:

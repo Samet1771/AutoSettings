@@ -49,5 +49,5 @@ public static class Product
     public static string AgentLogDirectory => Path.Combine(UserLocalDirectory, "logs");
 
     /// <summary>Link to the documentation site.</summary>
-    public const string DocumentationUrl = "https://github.com/Samet1771/WindowsSettingAutomation/tree/main/docs";
+    public const string DocumentationUrl = "https://github.com/Samet1771/AutoSettings/tree/main/docs";
 }

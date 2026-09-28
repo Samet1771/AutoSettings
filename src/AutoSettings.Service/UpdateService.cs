@@ -23,7 +23,7 @@ public sealed class UpdateOptions
     public bool Enabled { get; set; } = true;
 
     /// <summary>The GitHub repository (<c>owner/name</c>) whose releases are installed.</summary>
-    public string Repository { get; set; } = "Samet1771/WindowsSettingAutomation";
+    public string Repository { get; set; } = "Samet1771/AutoSettings";
 
     /// <summary>Hours between checks.</summary>
     public double CheckIntervalHours { get; set; } = 12;

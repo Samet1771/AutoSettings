@@ -20,7 +20,7 @@
 
     <Icon Id="AppIcon" SourceFile="$(var.IconPath)" />
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Samet1771/WindowsSettingAutomation" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Samet1771/AutoSettings" />
 
     <!-- Close running agents so their files can be replaced; the service is stopped by ServiceControl. -->
     <util:CloseApplication Id="CloseAgent" Target="AutoSettings.Agent.exe" CloseMessage="yes" RebootPrompt="no" />

@@ -14,6 +14,7 @@
 - Security: placeholders are no longer expanded inside `command.run` scripts; their values are passed as
   `AUTOSETTINGS_*` environment variables instead.
 - MSI installer, release workflow, winget manifests, documentation site.
+- The project moved to https://github.com/Samet1771/AutoSettings; updates come from there.
 - Automatic updates from GitHub Releases: ask first (default), install automatically, only notify or off; optional
   beta versions; checksum and signature verification; administrators can lock the settings.
 - License changed from MIT to a source-available license: use only; no modification, redistribution or sale.

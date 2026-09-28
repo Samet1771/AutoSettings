@@ -1,6 +1,6 @@
 # Updates
 
-AutoSettings keeps itself up to date from its [GitHub releases](https://github.com/Samet1771/WindowsSettingAutomation/releases).
+AutoSettings keeps itself up to date from its [GitHub releases](https://github.com/Samet1771/AutoSettings/releases).
 Updates are checked by the AutoSettings service, so they also work for users without administrator rights, and
 installing one does not show a Windows permission prompt.
 
@@ -56,7 +56,7 @@ only administrators can write to that folder, and updates never change it):
 {
   "Updates": {
     "Enabled": true,
-    "Repository": "Samet1771/WindowsSettingAutomation",
+    "Repository": "Samet1771/AutoSettings",
     "CheckIntervalHours": 12,
     "DefaultMode": "AskFirst",
     "DefaultIncludePrereleases": false,

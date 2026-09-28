@@ -13,7 +13,7 @@ public sealed class ConfigDocument
     /// <summary>Header written at the top of files saved by the editor.</summary>
     public const string Header = """
         AutoSettings automations. Edited with the AutoSettings editor.
-        Reference: https://github.com/Samet1771/WindowsSettingAutomation/tree/main/docs/reference
+        Reference: https://github.com/Samet1771/AutoSettings/tree/main/docs/reference
         """;
 
     private readonly ComponentCatalog _catalog;

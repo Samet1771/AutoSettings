@@ -186,4 +186,4 @@ are available to the script as environment variables, e.g. `$env:AUTOSETTINGS_US
   ```
 - Comments start with `#`. They are kept when you edit the file yourself.
 - VS Code users: install the *YAML* extension and add this line at the top of the file for autocomplete:
-  `# yaml-language-server: $schema=https://raw.githubusercontent.com/Samet1771/WindowsSettingAutomation/main/docs/reference/automations.schema.json`
+  `# yaml-language-server: $schema=https://raw.githubusercontent.com/Samet1771/AutoSettings/main/docs/reference/automations.schema.json`
