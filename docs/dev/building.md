@@ -141,6 +141,9 @@ To promote a beta: open a pull request from `beta` to `main`, merge it, and rele
 2. Create the release, in either way:
    - **On the website**: *Releases → Draft a new release → Choose a tag*, type a **new** tag such as `v0.2.0`
      (target `beta` for a beta, `main` for a stable release), write a title and notes, tick *Set as a pre-release* for betas, and **Publish**.
+   - **From the Actions tab**: *Actions → Release → Run workflow*, enter the tag (`v0.2.0-beta.1`) and the branch
+     (`beta` for betas, `main` for stable releases). A tag that does not exist yet is created on the head of that
+     branch, and the release is created with a generated title and notes.
    - **From the command line**: `git tag v0.2.0` and `git push origin v0.2.0`. The release is then created with a
      generated title and notes.
 
@@ -156,7 +159,8 @@ To promote a beta: open a pull request from `beta` to `main`, merge it, and rele
    - attaches all of these to the release. A release made on the website keeps its title, notes and pre-release
      box; for a pushed tag, labels (`v0.3.0-beta.1`) make it a pre-release.
 
-   If it failed, fix the cause and start it again from *Actions → Release → Run workflow* with the same tag.
+   If it failed, fix the cause and start it again from *Actions → Release → Run workflow* with the same tag
+   (it already exists, so the branch is ignored).
 4. Installed copies find the release within about 12 hours (see [updates](../guide/updates.md)). Pre-releases are
    only offered to users who opted in to beta versions. Keep the asset names: the updater looks for
    `AutoSettings-<version>-x64.msi` and `SHA256SUMS.txt`.
