@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Threading;
 using AutoSettings.Core;
 using AutoSettings.Platform.Actions;
