@@ -55,17 +55,21 @@ profiles:
 
 - **Profiles with automatic undo** — apply a set of settings while an app is running or focused; AutoSettings remembers the previous values and restores them afterwards. Overlapping profiles resolve by priority.
 - **Conditions** — time of day, weekdays, power source, battery level, Wi‑Fi network, number of monitors, other apps running, full-screen, user, and `and`/`or`/`not`.
-- **Actions** — light/dark mode, wallpaper, taskbar, brightness (laptop + DDC/CI monitors), resolution & refresh rate, power plans and timeouts, volume, mute, default audio devices, Wi‑Fi/Bluetooth radios, mouse speed, launch/close apps, PowerShell/cmd scripts, notifications, URLs and `ms-settings:` pages, and — for everything else — registry values and services.
+- **Actions** — light/dark mode, wallpaper, taskbar, brightness (laptop + DDC/CI monitors), resolution & refresh rate, power plans and timeouts, volume, mute, default audio devices, Wi‑Fi/Bluetooth/airplane mode, HDR, main display, scaling, Night light, accent color, power mode, notification banners and Do Not Disturb, keyboard layout, mouse speed, launch/close apps, PowerShell/cmd scripts, notifications, URLs and `ms-settings:` pages, and — for everything else — registry values and services.
 - **Personal and machine automations** — each user has their own; administrators can add machine-wide ones (e.g. at boot or for a specific user signing in).
+- **Visual and YAML editor, like Home Assistant** — build automations with forms (app and user pickers included) or write YAML with autocomplete, hover help and error squiggles; switch between them at any time.
+- **Templates** — gaming, presentation, night, meeting, battery saver and focus, ready to adjust.
+- **English and Turkish**, light and dark theme.
 - **Readable YAML with helpful errors** — line numbers and "did you mean ...?" suggestions; a bad edit never replaces a working configuration.
 - **Activity timeline** — see what fired, why something did *not* run, and what changed.
 - **Safety** — loop guard, dry-run mode, test button, pause from the tray.
 
 ## Getting started
 
-1. Download the latest `AutoSettings-win-x64` build (CI artifact for now; an MSI installer is planned).
-2. In an **administrator** PowerShell, in that folder: `.\install.ps1`
-3. The tray icon appears. Open it, go to **YAML editor**, enable an example, **Save**.
+1. Download `AutoSettings-x.y.z-x64.msi` from the [releases](https://github.com/Samet1771/WindowsSettingAutomation/releases) and run it.
+   (A portable zip with an install script is there too.)
+2. The tray icon appears. Open it and turn on an example, or pick one from **Templates**.
+3. Double-click an automation to change it in the visual or the YAML editor.
 
 Full guide: **[docs/guide/getting-started.md](docs/guide/getting-started.md)**.
 
@@ -78,7 +82,8 @@ Full guide: **[docs/guide/getting-started.md](docs/guide/getting-started.md)**.
 | [Writing automations](docs/guide/automations.md) | the file format, triggers, conditions, actions, placeholders |
 | [Profiles](docs/guide/profiles.md) | apply-and-revert sets of settings, priorities |
 | [Personal vs. machine automations](docs/guide/personal-and-machine.md) | who runs what, and with which rights |
-| [The app](docs/guide/the-app.md) | tray menu, activity timeline, YAML editor, pause, dry run |
+| [The app](docs/guide/the-app.md) | window, tray menu, activity timeline, settings, pause, dry run |
+| [The editor](docs/guide/editor.md) | visual and YAML editor, templates, import/export |
 | [Examples](docs/examples/) | gaming mode, presentations, day/night, meetings, company PCs |
 | [Reference](docs/reference/index.md) | every trigger, condition and action with all fields (generated) |
 | [Troubleshooting & FAQ](docs/guide/troubleshooting.md) | logs, common problems |

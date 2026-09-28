@@ -6,7 +6,7 @@ Automations live in a YAML file:
 - **Machine automations**: `%ProgramData%\AutoSettings\automations.yaml`. Administrators only; they run in the service.
   See [Personal and machine automations](personal-and-machine.md).
 
-You can edit the file in the app's **YAML editor** tab, or in any text editor. It is reloaded automatically when it
+You can edit the file in the app (the [visual or YAML editor](editor.md), or **Edit whole file**), or in any text editor. It is reloaded automatically when it
 changes. If it contains errors, the previous version keeps running and the errors are shown in the app, in the
 Activity tab and as a notification.
 
@@ -122,13 +122,20 @@ unless that action has `continue_on_error: true`.
 Categories:
 
 - **Flow**: `profile.apply`, `profile.revert`, `delay`
-- **Personalization**: `theme.mode`, `theme.transparency`, `wallpaper.set`, `taskbar.autohide`
-- **Display**: `display.brightness`, `display.resolution`
-- **Power**: `power.plan`, `power.screen_timeout`, `power.sleep_timeout`
+- **Personalization**: `theme.mode`, `theme.transparency`, `theme.accent_color`, `wallpaper.set`, `taskbar.autohide`
+- **Display**: `display.brightness`, `display.resolution`, `display.hdr`, `display.primary`, `display.scaling`,
+  `display.night_light`
+- **Power**: `power.plan`, `power.mode`, `power.screen_timeout`, `power.sleep_timeout`
 - **Audio**: `audio.volume`, `audio.mute`, `audio.default_device`
-- **Network & devices**: `radio.set` (Wi‑Fi, Bluetooth, mobile broadband), `mouse.speed`
-- **Apps & scripts**: `app.launch`, `app.close`, `command.run`, `notify`, `open`
+- **Notifications**: `notifications.banners`, `notifications.do_not_disturb`
+- **Network & devices**: `radio.set` (Wi‑Fi, Bluetooth, mobile broadband), `radio.airplane_mode`, `mouse.speed`,
+  `keyboard.layout`
+- **Apps & scripts**: `app.launch`, `app.close`, `command.run`, `notify`, `open`, `settings.open`
 - **Advanced**: `registry.set`, `service.control`
+
+`display.scaling`, `display.night_light` and `notifications.do_not_disturb` rely on how Windows stores these settings
+internally (there is no official interface). They check that Windows accepted the change and fail with a clear
+message otherwise; `settings.open` then opens the right Settings page.
 
 ### Any other Windows setting
 
@@ -137,7 +144,8 @@ Many Windows settings have no official programming interface. For those:
 - **`registry.set`** writes the registry value behind the setting. With `broadcast: true`, running apps are told
   that settings changed. In a profile, the old value is restored (or deleted again) when the profile is reverted.
 - **`command.run`** runs PowerShell, so anything you can script, you can automate.
-- **`open`** with an `ms-settings:` link opens the right Settings page when a setting cannot be changed automatically.
+- **`settings.open`** (or `open` with any `ms-settings:` link) opens the right Settings page when a setting cannot be
+  changed automatically.
 
 More dedicated actions are added over time; see the [roadmap](../roadmap.md).
 

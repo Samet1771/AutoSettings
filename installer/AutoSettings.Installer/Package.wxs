@@ -75,7 +75,8 @@
                   Target="[INSTALLFOLDER]AutoSettings.Agent.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="AppIcon" />
-        <RegistryValue Root="HKLM" Key="Software\AutoSettings" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+        <!-- Windows Installer rules (ICE38/43/57) want the key path of a Start menu component under HKCU. -->
+        <RegistryValue Root="HKCU" Key="Software\AutoSettings" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
       </Component>
     </StandardDirectory>
   </Fragment>

@@ -13,27 +13,23 @@
 - Tray app with pause, profiles, activity timeline and a validating YAML editor.
 - Generated reference docs and JSON Schema, user and developer documentation, CI with a self-contained build.
 
+## Done (v0.2)
+
+- **Milestone 4 – Editor**: visual editor with cards generated from the catalog, app picker (running and installed
+  apps, with icons) and user picker; YAML view with highlighting, autocomplete, hover help and error squiggles
+  (AvalonEdit), switching back and forth like Home Assistant; whole-file editor that keeps comments; template
+  gallery (gaming, presentation, night, meeting, battery saver, focus); enable/disable, duplicate, reorder,
+  import/export; Fluent look (WPF-UI) with light/dark theme; English and Turkish.
+- **Milestone 5 – More settings**: HDR, main display, display scaling, Night light, accent color, power mode,
+  notification banners, Do Not Disturb, keyboard layout, airplane mode, Settings pages (`settings.open`).
+- **Milestone 6 – Distribution**: MSI installer (WiX) with service registration, Start-menu entry and upgrades;
+  release workflow with optional code signing; winget manifests; documentation site on GitHub Pages.
+
 ## Next
 
-### Milestone 4 – Editor
-
-- Visual editor: "When [app] [is focused] and [on battery] → apply [profile]" forms generated from the catalog,
-  with an app picker (running and installed apps, with icons) and a user picker.
-- YAML view with autocomplete, hover help and inline errors (Monaco in WebView2, driven by the JSON Schema),
-  switching back and forth like Home Assistant.
-- Template gallery: Gaming, Presentation, Night, Meeting, Battery saver, Focus.
-- Enable/disable from the list; import/export.
-- Modern look (WPF-UI Fluent), English + Turkish.
-
-### Milestone 5 – More settings
-
-Night light, HDR, display scaling, primary monitor, accent color, Do Not Disturb / notification banners,
-keyboard layout, airplane mode, default browser page, and more `ms-settings` helpers. Suggestions welcome.
-
-### Milestone 6 – Distribution
-
-- MSI installer (WiX) with service registration, Start-menu entry and upgrades; winget package.
-- Signed binaries, release workflow, documentation site (MkDocs) on GitHub Pages.
+- Submit the winget package once the first release is published.
+- Screenshots in the README and the guide.
+- Testing on more hardware (HDR monitors, DDC/CI brightness, multi-monitor scaling).
 
 ## Ideas
 

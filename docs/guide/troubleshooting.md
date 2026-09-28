@@ -3,7 +3,7 @@
 ## First steps
 
 1. Open the **Activity** tab. It says what happened, what did not happen, and why.
-2. Open the **Status** tab. Is the service connected? Did the file load without errors?
+2. Open **Settings** in the app (the status is at the top). Is the service connected? Did the file load without errors?
 3. Try the automation with **Run now** (Automations tab).
 4. Look at the logs:
    - agent: `%LocalAppData%\AutoSettings\logs\agent-YYYYMMDD.log`
@@ -62,6 +62,20 @@ On Windows 11 24H2 and later, desktop apps need **location access** to read the 
 
 Many modern laptops only have *Balanced*. The error lists the available plans. Use one of those names, or a plan GUID.
 
+### "HDR, scaling, Night light or Do Not Disturb did not change"
+
+- `display.hdr` only works on displays that support HDR (Settings > Display shows *Use HDR*).
+- `display.scaling` only allows the steps your display offers (see the Scale list in Settings > Display).
+- Night light and Do Not Disturb have no official interface. If a Windows update changes how they are stored, the
+  action fails with a message saying so. Use `settings.open` (`page: night_light` or `page: focus`) as a fallback, and
+  please open an issue.
+- Night light must have been turned on once in Settings before AutoSettings can switch it.
+
+### "The editor says the file has errors"
+
+The visual editor works on the last valid version of the file, so it refuses to open while `automations.yaml` has
+errors (for example after a hand edit). Open **Edit whole file**, fix the lines marked in red, and save.
+
 ### "A command works in PowerShell but not in AutoSettings"
 
 - Commands run hidden and non-interactive by default. Use `hidden: false` to see the window.
@@ -87,8 +101,12 @@ system hook. Automations only run when their triggers fire.
 Yes, the YAML file is plain text. Copy automations between files or share them with others.
 
 **Are comments in my file kept?**
-Yes, as long as you edit the file yourself (the YAML editor saves your text as-is). The planned visual editor will
-rewrite the file and cannot keep comments, like Home Assistant's editor.
+With **Edit whole file** or another text editor, yes. The automation editor (visual/YAML per automation) rewrites the
+whole file in a standard format and does not keep comments, like Home Assistant's editor. It asks once before doing so.
+
+**Can I use AutoSettings in Turkish?**
+Yes: Settings → Language → Türkçe, then restart the agent (tray icon → Exit, open AutoSettings from the Start menu).
+The reference documentation is in English.
 
 **How do I stop everything quickly?**
 Tray icon → Pause automations → Until I resume.

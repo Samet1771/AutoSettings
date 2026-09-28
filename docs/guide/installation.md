@@ -8,11 +8,30 @@
 
 ## Install
 
-> An MSI installer is on the [roadmap](../roadmap.md). Until then, use the published folder and the install script.
+### With the installer (recommended)
 
-1. Download the **AutoSettings-win-x64** build:
-   open the repository's **Actions** tab, pick the latest successful **CI** run, and download the artifact
-   (or build it yourself with `scripts/publish.ps1`, see [Building](../dev/building.md)).
+1. Download `AutoSettings-<version>-x64.msi` from the repository's **Releases** page. Builds of the latest code are
+   also on the **Actions** tab: open the latest successful **CI** run and download the **AutoSettings-msi** artifact.
+2. Run it. Windows asks for administrator permission.
+
+The installer:
+
+- copies AutoSettings to `C:\Program Files\AutoSettings`,
+- registers the **AutoSettings** service with *Automatic* start and restart-on-failure, and starts it,
+- adds **AutoSettings** to the Start menu.
+
+The service then starts the agent (the tray icon) in every signed-in user's session. From now on AutoSettings starts
+with Windows; you do not need to add anything to the Startup folder.
+
+With winget (once the package is published): `winget install AutoSettings.AutoSettings`.
+
+> The binaries are not code-signed unless the release was built with a signing certificate, so Windows SmartScreen
+> may warn the first time. Choose *More info → Run anyway*.
+
+### Without the installer (portable folder)
+
+1. Download the **AutoSettings-win-x64** zip (from a release or the CI artifacts), or build it with
+   `scripts/publish.ps1` (see [Building](../dev/building.md)).
 2. Unzip it anywhere.
 3. Open **PowerShell as administrator** in that folder and run:
 
@@ -21,14 +40,8 @@
    .\install.ps1
    ```
 
-The script:
-
-- copies the files to `C:\Program Files\AutoSettings`,
-- creates the **AutoSettings** service with *Automatic* start and restart-on-failure,
-- adds an **AutoSettings** shortcut to the Start menu,
-- starts it. The service then starts the agent (the tray icon) in every signed-in user's session.
-
-From now on AutoSettings starts with Windows. You do not need to add anything to the Startup folder.
+The script does the same as the installer: it copies the files to `C:\Program Files\AutoSettings`, creates the
+service, adds the Start menu shortcut, and starts the service.
 
 ## Where things are
 
@@ -43,19 +56,22 @@ From now on AutoSettings starts with Windows. You do not need to add anything to
 
 ## Update
 
-Run `install.ps1` from the new version's folder. It stops the service and the agents, replaces the files and starts
-the service again. Your automations are not touched.
+- **Installer**: run the new MSI. It replaces the old version and keeps your automations.
+- **Portable**: run `install.ps1` from the new version's folder. It stops the service and the agents, replaces the
+  files and starts the service again.
 
 ## Uninstall
 
-In an administrator PowerShell:
+- **Installer**: Settings → Apps → Installed apps → AutoSettings → Uninstall.
+- **Portable**: in an administrator PowerShell:
 
-```powershell
-& "C:\Program Files\AutoSettings\uninstall.ps1"            # keeps your automations
-& "C:\Program Files\AutoSettings\uninstall.ps1" -RemoveData  # also removes machine automations and logs
-```
+  ```powershell
+  & "C:\Program Files\AutoSettings\uninstall.ps1"             # keeps your automations
+  & "C:\Program Files\AutoSettings\uninstall.ps1" -RemoveData  # also removes machine automations and logs
+  ```
 
-Personal automations stay in each user's `%AppData%\AutoSettings` folder; delete it if you do not need it anymore.
+Your automations are kept either way: machine automations in `%ProgramData%\AutoSettings`, personal automations in
+each user's `%AppData%\AutoSettings`. Delete those folders if you do not need them anymore.
 
 ## Service settings (`appsettings.json`)
 

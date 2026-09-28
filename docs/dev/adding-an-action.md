@@ -92,7 +92,18 @@ dotnet test
 ```
 
 `CatalogTests` automatically checks that the new descriptor has a title, descriptions for every field and a valid
-example. Add an example to `docs/examples/` if it enables a new scenario; those files are validated by the tests too.
+example.
+
+### 5. Translate the title
+
+The app shows component titles in the user's language. Add the Turkish title to `CATALOG_TR` in
+`tools/strings.py` and regenerate the resources:
+
+```bash
+python3 tools/strings.py
+```
+
+`LocalizationTests` fails if a component or category has no Turkish title. Add an example to `docs/examples/` if it enables a new scenario; those files are validated by the tests too.
 
 ## Adding a condition
 

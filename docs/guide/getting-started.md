@@ -8,18 +8,22 @@ undone automatically.
 After [installation](installation.md) the AutoSettings icon (a blue square with a switch) is in the notification area,
 next to the clock. It may be hidden under the **^** arrow; drag it onto the taskbar to keep it visible.
 
-Double-click it to open the window. You will see these tabs:
+Double-click it to open the window. The sidebar on the left has these pages:
 
 - **Automations**: your rules, with a plain-language summary of when they run and what they do.
 - **Profiles**: groups of settings you can apply and revert.
+- **Templates**: ready-made automations to start from.
 - **Activity**: what happened and why, newest first.
-- **YAML editor**: where you write automations.
-- **Status**: whether everything is connected, and where files are.
+- **Settings**: language, theme, dry run, status, and where files are.
 
 ## 2. Look at the starter file
 
 On first start AutoSettings creates `%AppData%\AutoSettings\automations.yaml` with a few **disabled** examples.
-Open the **YAML editor** tab. An automation looks like this:
+They are listed on the **Automations** page. Flip the switch in the **On** column to turn one on.
+
+Double-click an automation to open the [editor](editor.md). It has a **Visual** tab, with forms for *When*, *If*
+and *Then*, and a **YAML** tab with the same automation as text. You can use either one. In YAML an automation looks
+like this:
 
 ```yaml
 automations:
@@ -37,7 +41,14 @@ Indentation matters in YAML: use spaces (not tabs), and keep items of a list ali
 
 ## 3. Your first automation: dark mode in the evening
 
-Add this under `automations:` (keep the two-space indentation of the other items):
+**With the visual editor:** click **New** on the Automations page. Name it *Dark mode in the evening*, then:
+
+- **+ Add trigger** → *Sign-in*, and again → *Screen unlocked*;
+- **+ Add condition** → *Time*, with *after* `19:00` and *before* `07:00`;
+- **+ Add action** → *Light or dark mode*, with *mode* `dark`.
+
+**With YAML:** open the **YAML** tab of a new automation, or **Edit whole file**, and write (in the whole file, keep
+the two-space indentation of the other items under `automations:`):
 
 ```yaml
   - id: evening-dark-mode
@@ -54,10 +65,11 @@ Add this under `automations:` (keep the two-space indentation of the other items
         mode: dark
 ```
 
-Click **Save**. If there is a mistake, the list under the editor shows the line and what is wrong. Double-click an
+Click **Save**. If there is a mistake, the list under the editor shows what is wrong (and, in the YAML view, the
+line). Double-click an
 entry to jump to it. A file with errors is never saved, and the previous automations keep running.
 
-Now lock the screen (Win+L) and unlock it. If it is after 19:00, Windows switches to dark mode. The **Activity** tab
+Now lock the screen (Win+L) and unlock it. If it is after 19:00, Windows switches to dark mode. The **Activity** page
 shows what happened:
 
 ```
@@ -68,9 +80,9 @@ shows what happened:
 ```
 
 If it is not evening, you will see *"...was triggered (screen unlocked) but condition 1 (time ...) was not met"*.
-The Activity tab always tells you why something did or did not run.
+The Activity page always tells you why something did or did not run.
 
-**Tip:** select the automation in the **Automations** tab and click **Run, ignoring conditions** to try the actions
+**Tip:** select the automation on the **Automations** page and click **Run, ignoring conditions** to try the actions
 right away.
 
 ## 4. A profile that undoes itself
@@ -106,6 +118,7 @@ Read more in [Profiles](profiles.md).
 
 ## 5. Next steps
 
+- Add a template from the **Templates** page (gaming, presentation, night, meeting, battery saver, focus).
 - Browse the [examples](../examples/README.md) (gaming mode, meetings, day/night, company PCs).
 - Learn the [file format](automations.md) and the [reference](../reference/index.md) of everything you can use.
 - Use **Pause** in the tray menu when you want AutoSettings to leave your settings alone for a while.

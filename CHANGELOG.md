@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0 (unreleased)
+
+- New app window (Fluent design) with pages for automations, profiles, templates, activity and settings.
+- Visual editor and YAML editor with autocomplete, hover help and error squiggles; switch between them at any
+  time. Whole-file editor that keeps comments.
+- App picker and user picker; file and folder browser.
+- Templates: gaming, presentation, night, meeting, battery saver, focus.
+- Enable/disable, duplicate, reorder, delete, import/export automations.
+- English and Turkish; light, dark or system theme.
+- 11 new actions: HDR, main display, display scaling, Night light, accent color, power mode, notification
+  banners, Do Not Disturb, keyboard layout, airplane mode, Settings pages.
+- Security: placeholders are no longer expanded inside `command.run` scripts; their values are passed as
+  `AUTOSETTINGS_*` environment variables instead.
+- MSI installer, release workflow, winget manifests, documentation site.
+
 ## 0.1.0 (unreleased)
 
 First version.

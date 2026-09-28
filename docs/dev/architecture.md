@@ -35,10 +35,10 @@ flowchart LR
 
 | Component | Project | Runs as | Responsibilities |
 |---|---|---|---|
-| **Core** | `src/AutoSettings.Core` (net10.0, no Windows APIs) | library | Configuration model, YAML reader/writer, validation, component catalog, JSON Schema, rule engine, profile manager, IPC contracts |
+| **Core** | `src/AutoSettings.Core` (net10.0, no Windows APIs) | library | Configuration model, YAML reader/writer, validation, component catalog, JSON Schema, rule engine, profile manager, IPC contracts, editing model (`Editing/`: document operations, merge/import/export, templates, YAML autocomplete) |
 | **Platform** | `src/AutoSettings.Platform` (net10.0-windows) | library | Win32/WinRT interop, process/focus monitors, session helpers, all action and condition handlers |
 | **Service** | `src/AutoSettings.Service` | SYSTEM, session 0 | Boot/sign-in/lock/process events, machine automations, agent supervision, pipe server, routing of user actions |
-| **Agent** | `src/AutoSettings.Agent` (WPF) | the user | Focus events, personal automations, tray icon, window, notifications |
+| **Agent** | `src/AutoSettings.Agent` (WPF) | the user | Focus events, personal automations, tray icon, window (WPF-UI), visual and YAML editors (AvalonEdit), localization, notifications |
 | **DocGen** | `src/AutoSettings.DocGen` | tool | Generates `docs/reference` and the JSON Schema from the catalog |
 | **Tests** | `tests/AutoSettings.Core.Tests` | tool | Unit tests for Core; validates every example and every catalog entry |
 
@@ -91,6 +91,7 @@ where it may be used, whether it is revertible, an example and notes. The same m
 - the JSON Schema (`JsonSchemaGenerator`) used for editor autocomplete,
 - the reference docs (`DocGen`),
 - plain-language summaries in the UI (`ComponentSummary`),
+- the visual editor's forms (`EditorViewModels`) and the YAML autocomplete and hover help (`YamlAssist`),
 - tests that check every example is valid.
 
 Handlers (Platform) only implement behavior.
@@ -98,6 +99,8 @@ Handlers (Platform) only implement behavior.
 ## Technology
 
 - .NET 10 (LTS), C# latest, nullable enabled.
-- WPF for the window, WinForms `NotifyIcon` for the tray icon.
+- WPF with [WPF-UI](https://wpfui.lepo.co/) (Fluent design) and CommunityToolkit.Mvvm for the window, AvalonEdit for
+  the YAML editor, WinForms `NotifyIcon` for the tray icon.
+- WiX 5 for the MSI installer.
 - YamlDotNet (YAML), StreamJsonRpc + System.Text.Json (IPC), Microsoft.Diagnostics.Tracing.TraceEvent (ETW),
   System.Management (WMI), Serilog (logs), Microsoft.Extensions.Hosting (service).

@@ -57,6 +57,30 @@ from the Actions tab.
 |---|---|---|
 | Build, test & publish | `windows-latest` | restore, build (Release), test, publish self-contained `win-x64` service + agent + scripts, upload the `AutoSettings-win-x64` artifact |
 | Reference docs up to date | `ubuntu-latest` | `DocGen --check` |
+| Docs site | `ubuntu-latest` | `mkdocs build --strict` |
+
+The Windows job also builds the MSI and uploads it as the `AutoSettings-msi` artifact.
+
+## MSI installer
+
+The installer project is `installer/AutoSettings.Installer` (WiX 5, restored from NuGet; no separate WiX install
+needed). It packages a publish folder:
+
+```powershell
+.\scripts\publish.ps1
+dotnet build installer/AutoSettings.Installer -c Release -p:PublishDir=$PWD\artifacts\AutoSettings\ -p:ProductVersion=0.2.0
+# -> installer/AutoSettings.Installer/bin/x64/Release/AutoSettings-x64.msi
+```
+
+The MSI installs to `C:\Program Files\AutoSettings`, registers the service (automatic start, restarts on failure),
+adds a Start menu shortcut and upgrades older versions in place (fixed `UpgradeCode`). Uninstall stops the service
+and closes the agents; automation files in `%ProgramData%` and `%AppData%` stay.
+
+## Translations
+
+The UI texts live in `tools/strings.py` (English and Turkish side by side). Edit that file and run
+`python3 tools/strings.py` to regenerate the `.resx` files in `src/AutoSettings.Agent/Resources`.
+`LocalizationTests` checks that both languages have the same keys and that every component has a Turkish title.
 
 ## Manual test checklist
 
@@ -74,9 +98,30 @@ Unit tests cover the engine; the Windows integration needs a real machine or VM.
 9. Exit the agent from the tray: it is not restarted; sign out and in: it starts again.
 10. Kill the agent in Task Manager: the service restarts it within seconds.
 11. Save a broken YAML file: previous automations keep running, the error is shown with its line number.
+12. Editor: create an automation in the visual view, switch to YAML and back; nothing changes. Break the YAML: the
+    visual tab stays locked, squiggles and the issue list point to the line. Autocomplete after `type:` and for fields.
+13. App picker and user picker list the right items; Browse fills the path.
+14. Add every template, save, and check they validate. Import and export a file with clashing ids.
+15. Switch the language to Turkish and the theme to dark and light; restart the agent: the choice is kept.
+16. New actions on real hardware: HDR on/off, main display, scaling 125 %, Night light, accent color, power mode,
+    notification banners, Do Not Disturb, keyboard layout, airplane mode, `settings.open`; each reverts with a profile.
+17. MSI: install on a clean VM (service running, tray icon after sign-in, Start menu entry), install a newer version
+    over it (upgrade, automations kept), uninstall (service removed, `%ProgramData%\AutoSettings` kept).
 
 ## Releasing
 
 1. Update `CHANGELOG.md` and `<Version>` in `Directory.Build.props`.
-2. Tag `vX.Y.Z` and push. Download the CI artifact of that commit and attach it to a GitHub release.
-   (An MSI and a release workflow are on the [roadmap](../roadmap.md).)
+2. Tag `vX.Y.Z` and push the tag. `.github/workflows/release.yml` then:
+   - runs the tests, publishes, and signs the executables and the MSI when the `SIGNING_CERT` (base64 .pfx) and
+     `SIGNING_PASSWORD` secrets exist;
+   - builds `AutoSettings-X.Y.Z-x64.msi` and the portable `AutoSettings-X.Y.Z-win-x64.zip`;
+   - fills the winget manifests from `packaging/winget` with the version, URL and SHA256;
+   - creates the GitHub Release with all of these.
+3. Submit the winget manifests to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs)
+   (for example with `wingetcreate submit`).
+
+### Documentation site
+
+`.github/workflows/docs-pages.yml` publishes the MkDocs site to GitHub Pages on pushes to `main`. Enable it once:
+**Settings → Pages → Source: GitHub Actions**, then add the repository variable `PAGES_ENABLED` = `true`
+(**Settings → Secrets and variables → Actions → Variables**).

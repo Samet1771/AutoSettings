@@ -15,7 +15,14 @@ Before opening a pull request:
 
 1. `dotnet build` and `dotnet test` pass.
 2. If you changed the catalog, regenerate the reference docs: `dotnet run --project src/AutoSettings.DocGen`.
-3. User-visible changes are documented (guide pages, `CHANGELOG.md`).
+3. New or changed UI texts and component titles are in `tools/strings.py` in English and Turkish; run
+   `python3 tools/strings.py` to regenerate the resources.
+4. User-visible changes are documented (guide pages, `CHANGELOG.md`).
+
+## Translations
+
+All UI texts are in `tools/strings.py`. To improve the Turkish texts or add a language, edit that file and run it;
+see [docs/dev/building.md](docs/dev/building.md#translations).
 
 ## Style
 

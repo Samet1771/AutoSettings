@@ -49,6 +49,7 @@ nav:
       - Profiles: guide/profiles.md
       - Personal and machine automations: guide/personal-and-machine.md
       - The app: guide/the-app.md
+      - The editor: guide/editor.md
       - Troubleshooting and FAQ: guide/troubleshooting.md
       - Examples: examples/README.md
   - Reference:
