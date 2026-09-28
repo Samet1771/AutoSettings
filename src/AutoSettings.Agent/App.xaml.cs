@@ -1,8 +1,10 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using AutoSettings.Agent.Localization;
 using AutoSettings.Core;
 using Microsoft.Extensions.Logging;
+using Wpf.Ui.Appearance;
 using Serilog;
 using Serilog.Extensions.Logging;
 
@@ -23,7 +25,25 @@ public partial class App : Application
     private TrayIcon? _tray;
     private AgentHost? _host;
     private MainWindow? _window;
+    private AgentSettings _settings = new();
     private bool _exiting;
+
+    /// <summary>Applies "system", "light" or "dark".</summary>
+    public static void ApplyTheme(string theme)
+    {
+        switch (theme)
+        {
+            case "light":
+                ApplicationThemeManager.Apply(ApplicationTheme.Light);
+                break;
+            case "dark":
+                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                break;
+            default:
+                ApplicationThemeManager.ApplySystemTheme();
+                break;
+        }
+    }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -64,6 +84,10 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
             logger.LogCritical(args.ExceptionObject as Exception, "Unhandled exception");
 
+        _settings = AgentSettings.Load();
+        Strings.Use(_settings.Language);
+        ApplyTheme(_settings.Theme);
+
         _showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, ShowSignalName);
         ThreadPool.RegisterWaitForSingleObject(_showSignal, (_, _) => Dispatcher.InvokeAsync(ShowMainWindow), null, Timeout.Infinite, executeOnlyOnce: false);
 
@@ -78,7 +102,7 @@ public partial class App : Application
         catch (Exception ex)
         {
             logger.LogCritical(ex, "The agent could not start");
-            MessageBox.Show($"{Product.Name} could not start:\n\n{ex.Message}", Product.Name, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(Strings.Format("CouldNotStart", Product.Name, ex.Message), Product.Name, MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
             return;
         }
@@ -93,7 +117,7 @@ public partial class App : Application
             return;
         if (_window is null)
         {
-            _window = new MainWindow(_host);
+            _window = new MainWindow(_host, _settings);
             _window.Closed += (_, _) => _window = null;
         }
         _window.Show();

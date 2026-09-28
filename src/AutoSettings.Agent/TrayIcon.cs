@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Threading;
+using AutoSettings.Agent.Localization;
 using AutoSettings.Core;
 using AutoSettings.Platform.Actions;
 using Forms = System.Windows.Forms;
@@ -49,7 +50,7 @@ public sealed class TrayIcon : INotifier, IDisposable
     {
         if (_host is null)
             return;
-        var text = $"{Product.Name} — {(_host.Engine.IsPaused ? "paused" : $"{_host.Engine.Config.Automations.Count(a => a.Enabled)} automations on")}";
+        var text = $"{Product.Name} — {(_host.Engine.IsPaused ? Strings.Get("Paused") : Strings.Format("AutomationsOn", _host.Engine.Config.Automations.Count(a => a.Enabled), _host.Engine.Config.Automations.Count))}";
         _icon.Text = text.Length > 127 ? text[..127] : text;
     }
 
@@ -60,26 +61,26 @@ public sealed class TrayIcon : INotifier, IDisposable
         var menu = _icon.ContextMenuStrip!;
         menu.Items.Clear();
 
-        var open = new Forms.ToolStripMenuItem($"Open {Product.Name}", null, (_, _) => _open?.Invoke());
+        var open = new Forms.ToolStripMenuItem(Strings.Format("OpenProduct", Product.Name), null, (_, _) => _open?.Invoke());
         open.Font = new System.Drawing.Font(open.Font, System.Drawing.FontStyle.Bold);
         menu.Items.Add(open);
         menu.Items.Add(new Forms.ToolStripSeparator());
 
         if (host.Engine.IsPaused)
         {
-            var until = host.Engine.PausedUntil is { } time ? $" (paused until {time:t})" : " (paused)";
-            menu.Items.Add(new Forms.ToolStripMenuItem("Resume automations" + until, null, (_, _) => host.Engine.Resume()));
+            var until = host.Engine.PausedUntil is { } time ? " (" + Strings.Format("PausedUntil", time.ToString("t", Strings.Culture)) + ")" : "";
+            menu.Items.Add(new Forms.ToolStripMenuItem(Strings.Get("ResumeAutomations") + until, null, (_, _) => host.Engine.Resume()));
         }
         else
         {
-            var pause = new Forms.ToolStripMenuItem("Pause automations");
-            pause.DropDownItems.Add("For 15 minutes", null, (_, _) => host.Engine.Pause(TimeSpan.FromMinutes(15)));
-            pause.DropDownItems.Add("For 1 hour", null, (_, _) => host.Engine.Pause(TimeSpan.FromHours(1)));
-            pause.DropDownItems.Add("Until I resume", null, (_, _) => host.Engine.Pause());
+            var pause = new Forms.ToolStripMenuItem(Strings.Get("PauseAutomations"));
+            pause.DropDownItems.Add(Strings.Get("For15Minutes"), null, (_, _) => host.Engine.Pause(TimeSpan.FromMinutes(15)));
+            pause.DropDownItems.Add(Strings.Get("For1Hour"), null, (_, _) => host.Engine.Pause(TimeSpan.FromHours(1)));
+            pause.DropDownItems.Add(Strings.Get("UntilIResume"), null, (_, _) => host.Engine.Pause());
             menu.Items.Add(pause);
         }
 
-        var profiles = new Forms.ToolStripMenuItem("Profiles");
+        var profiles = new Forms.ToolStripMenuItem(Strings.Get("Profiles"));
         foreach (var profile in host.Engine.Config.Profiles)
         {
             var active = host.Engine.IsProfileActive(profile.Id);
@@ -88,15 +89,15 @@ public sealed class TrayIcon : INotifier, IDisposable
             profiles.DropDownItems.Add(item);
         }
         if (profiles.DropDownItems.Count == 0)
-            profiles.DropDownItems.Add(new Forms.ToolStripMenuItem("No profiles yet") { Enabled = false });
+            profiles.DropDownItems.Add(new Forms.ToolStripMenuItem(Strings.Get("NoProfilesYet")) { Enabled = false });
         menu.Items.Add(profiles);
 
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add("Edit automations file", null, (_, _) => OpenInEditor(host.Store.FilePath));
-        menu.Items.Add("Reload automations", null, (_, _) => host.Store.Load());
-        menu.Items.Add("Open log folder", null, (_, _) => OpenFolder(Product.AgentLogDirectory));
+        menu.Items.Add(Strings.Get("EditAutomationsFile"), null, (_, _) => OpenInEditor(host.Store.FilePath));
+        menu.Items.Add(Strings.Get("ReloadAutomations"), null, (_, _) => host.Store.Load());
+        menu.Items.Add(Strings.Get("OpenLogFolder"), null, (_, _) => OpenFolder(Product.AgentLogDirectory));
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add("Exit", null, (_, _) => _exit?.Invoke());
+        menu.Items.Add(Strings.Get("Exit"), null, (_, _) => _exit?.Invoke());
     }
 
     /// <summary>Opens a file in the user's editor for its type, or Notepad.</summary>

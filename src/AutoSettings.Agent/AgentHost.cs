@@ -140,6 +140,40 @@ public sealed class AgentHost
     public Task RunAutomationAsync(string automationId, bool checkConditions) =>
         RunSafely(() => Engine.RunAutomationAsync(automationId, checkConditions));
 
+    /// <summary>Runs the actions of an automation that may not be saved yet (the editor's Test button).</summary>
+    public Task TestActionsAsync(Core.Model.Automation automation) => RunSafely(async () =>
+    {
+        var context = new ActionContext(null, automation.Id, automation.DisplayName, Activity) { CurrentUser = User };
+        Activity.Info(ActivitySources.Automation, $"Testing '{automation.DisplayName}'.", automation.Id);
+        foreach (var action in automation.Actions)
+        {
+            if (!await Engine.ExecuteActionAsync(action, context, CancellationToken.None).ConfigureAwait(false)
+                && action.GetBoolean("continue_on_error") != true)
+                break;
+        }
+    });
+
+    /// <summary>
+    /// Changes the configuration through the editor model and saves it. Refuses while the file has errors,
+    /// because the editor works on the last valid version and would overwrite the user's unfinished edit.
+    /// </summary>
+    public ConfigLoadResult Edit(Action<Core.Editing.ConfigDocument> change)
+    {
+        if (Store.LastResult?.HasErrors == true)
+            throw new InvalidOperationException(Localization.Strings.Get("FixFileFirst"));
+        var document = new Core.Editing.ConfigDocument(Store.Current, ExecutionScope.User);
+        change(document);
+        return Store.Save(document.ToYaml());
+    }
+
+    /// <summary>A copy of the current configuration for editing.</summary>
+    public Core.Editing.ConfigDocument BeginEdit()
+    {
+        if (Store.LastResult?.HasErrors == true)
+            throw new InvalidOperationException(Localization.Strings.Get("FixFileFirst"));
+        return new Core.Editing.ConfigDocument(Store.Current, ExecutionScope.User);
+    }
+
     private async Task RunSafely(Func<Task> action)
     {
         try
@@ -160,7 +194,7 @@ public sealed class AgentHost
             var first = result.Errors.First();
             Activity.Error(ActivitySources.Config,
                 $"automations.yaml has {result.Errors.Count()} error(s); the previous automations keep running. {first}");
-            _notifier.Notify($"{Product.Name}: automations.yaml has errors", first.ToString());
+            _notifier.Notify(Localization.Strings.Format("FileErrorsTitle", Product.Name), first.ToString());
         }
         else
         {

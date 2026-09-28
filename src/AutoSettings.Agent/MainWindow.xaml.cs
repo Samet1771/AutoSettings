@@ -1,19 +1,23 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
+using AutoSettings.Agent.Dialogs;
+using AutoSettings.Agent.Localization;
 using AutoSettings.Core;
 using AutoSettings.Core.Catalog;
 using AutoSettings.Core.Config;
+using AutoSettings.Core.Editing;
 using AutoSettings.Core.Engine;
+using Microsoft.Win32;
 
 namespace AutoSettings.Agent;
 
 /// <summary>One row in the automation list.</summary>
-public sealed record AutomationRow(string Id, string Enabled, string Name, string When, string If, string Then);
+public sealed record AutomationRow(string Id, bool Enabled, string Name, string When, string If, string Then);
 
 /// <summary>One row in the profile list.</summary>
 public sealed record ProfileRow(string Id, string Status, string Name, int Priority, string Actions);
@@ -21,26 +25,30 @@ public sealed record ProfileRow(string Id, string Status, string Name, int Prior
 /// <summary>One row in the activity list.</summary>
 public sealed record ActivityRow(string Icon, Brush Brush, string Time, string Message);
 
-/// <summary>The main window.</summary>
-public partial class MainWindow : Window
+/// <summary>The main window: automations, profiles, templates, activity and settings.</summary>
+public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
     private static readonly Brush InfoBrush = Brushes.SteelBlue;
     private static readonly Brush SuccessBrush = Brushes.SeaGreen;
     private static readonly Brush WarningBrush = Brushes.DarkOrange;
-    private static readonly Brush ErrorBrush = Brushes.Firebrick;
+    private static readonly Brush ErrorBrush = Brushes.IndianRed;
 
     private readonly AgentHost _host;
+    private readonly AgentSettings _settings;
     private readonly ObservableCollection<ActivityRow> _activity = [];
-    private bool _yamlDirty;
-    private bool _loadingYaml;
+    private bool _loadingSettings;
 
-    public MainWindow(AgentHost host)
+    public MainWindow(AgentHost host, AgentSettings settings)
     {
         _host = host;
+        _settings = settings;
         InitializeComponent();
+        if (settings.Theme == "system")
+            Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
 
         ActivityList.ItemsSource = _activity;
-        DryRunCheck.IsChecked = host.Engine.DryRun;
+        TemplateList.ItemsSource = Templates.All;
+        LoadSettingsPage();
 
         host.Activity.EntryAdded += OnActivityAdded;
         host.StatusChanged += OnStatusChanged;
@@ -53,78 +61,301 @@ public partial class MainWindow : Window
         };
 
         LoadPersonalActivity();
-        LoadYaml();
         Refresh();
     }
 
-    // ------------------------------------------------------------------ refresh
+    // ------------------------------------------------------------------ navigation and refresh
+
+    private void OnNavigationChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (AutomationsPage is null || Navigation.SelectedItem is not ListBoxItem { Tag: string page })
+            return;
+        AutomationsPage.Visibility = page == "automations" ? Visibility.Visible : Visibility.Collapsed;
+        ProfilesPage.Visibility = page == "profiles" ? Visibility.Visible : Visibility.Collapsed;
+        TemplatesPage.Visibility = page == "templates" ? Visibility.Visible : Visibility.Collapsed;
+        ActivityPage.Visibility = page == "activity" ? Visibility.Visible : Visibility.Collapsed;
+        SettingsPage.Visibility = page == "settings" ? Visibility.Visible : Visibility.Collapsed;
+        if (page == "settings")
+            StatusDetails.Text = BuildStatus();
+    }
+
+    private void ShowPage(string page)
+    {
+        foreach (var item in Navigation.Items.OfType<ListBoxItem>())
+            item.IsSelected = (string)item.Tag == page;
+    }
 
     private void OnStatusChanged(object? sender, EventArgs e) => Dispatcher.InvokeAsync(Refresh);
 
-    private void OnConfigLoaded(object? sender, ConfigLoadResult result) =>
-        Dispatcher.InvokeAsync(() =>
-        {
-            if (!_yamlDirty)
-                LoadYaml();
-            Refresh();
-        });
+    private void OnConfigLoaded(object? sender, ConfigLoadResult result) => Dispatcher.InvokeAsync(Refresh);
 
     private void Refresh()
     {
         var engine = _host.Engine;
         var config = engine.Config;
 
-        var selectedAutomation = (AutomationList.SelectedItem as AutomationRow)?.Id;
-        AutomationList.ItemsSource = config.Automations.Select(a => new AutomationRow(
+        var selectedAutomations = AutomationList.SelectedItems.OfType<AutomationRow>().Select(r => r.Id).ToHashSet();
+        var automationRows = config.Automations.Select(a => new AutomationRow(
             a.Id,
-            a.Enabled ? (engine.SuspendedAutomations.Contains(a.Id) ? "⏸" : "✓") : "—",
-            a.DisplayName,
-            ComponentSummary.DescribeAll(ComponentKind.Trigger, a.Triggers, " or "),
-            a.Conditions.Count == 0 ? "always" : ComponentSummary.DescribeAll(ComponentKind.Condition, a.Conditions, " and "),
+            a.Enabled,
+            a.DisplayName + (engine.SuspendedAutomations.Contains(a.Id) ? " ⏸" : ""),
+            ComponentSummary.DescribeAll(ComponentKind.Trigger, a.Triggers, Strings.Get("OrSeparator")),
+            a.Conditions.Count == 0 ? Strings.Get("Always") : ComponentSummary.DescribeAll(ComponentKind.Condition, a.Conditions, Strings.Get("AndSeparator")),
             ComponentSummary.DescribeAll(ComponentKind.Action, a.Actions, " → "))).ToList();
-        AutomationList.SelectedItem = (AutomationList.ItemsSource as List<AutomationRow>)?.FirstOrDefault(r => r.Id == selectedAutomation);
+        AutomationList.ItemsSource = automationRows;
+        foreach (var row in automationRows.Where(r => selectedAutomations.Contains(r.Id)))
+            AutomationList.SelectedItems.Add(row);
 
         var active = engine.ActiveProfiles.ToDictionary(p => p.Id, StringComparer.OrdinalIgnoreCase);
         var selectedProfile = (ProfileList.SelectedItem as ProfileRow)?.Id;
-        ProfileList.ItemsSource = config.Profiles.Select(p => new ProfileRow(
+        var profileRows = config.Profiles.Select(p => new ProfileRow(
             p.Id,
             active.TryGetValue(p.Id, out var info)
-                ? $"● Active{(info.RevertsWhen is null ? "" : $", reverts {info.RevertsWhen}")}"
-                : "Off",
+                ? "● " + (info.RevertsWhen is null ? Strings.Get("Active") : Strings.Format("ActiveReverts", info.RevertsWhen))
+                : Strings.Get("Off"),
             p.DisplayName,
             p.Priority,
             ComponentSummary.DescribeAll(ComponentKind.Action, p.Actions, "; "))).ToList();
-        ProfileList.SelectedItem = (ProfileList.ItemsSource as List<ProfileRow>)?.FirstOrDefault(r => r.Id == selectedProfile);
+        ProfileList.ItemsSource = profileRows;
+        ProfileList.SelectedItem = profileRows.FirstOrDefault(r => r.Id == selectedProfile);
 
         var enabled = config.Automations.Count(a => a.Enabled);
-        var paused = engine.IsPaused
-            ? engine.PausedUntil is { } until ? $"Paused until {until:t}" : "Paused"
-            : $"{enabled} of {config.Automations.Count} automations on";
-        var profiles = active.Count == 0 ? "" : $" · Active profiles: {string.Join(", ", active.Values.Select(p => p.Name))}";
-        HeaderStatus.Text = $"{paused}{profiles} · {(_host.Service.IsConnected ? "Service connected" : "Service not connected")}";
-        PauseButton.Content = engine.IsPaused ? "Resume" : "Pause";
+        var state = engine.IsPaused
+            ? engine.PausedUntil is { } until ? Strings.Format("PausedUntil", until.ToString("t", Strings.Culture)) : Strings.Get("Paused")
+            : Strings.Format("AutomationsOn", enabled, config.Automations.Count);
+        var profiles = active.Count == 0 ? "" : "\n" + Strings.Format("ActiveProfiles", string.Join(", ", active.Values.Select(p => p.Name)));
+        var errors = _host.Store.LastResult?.HasErrors == true ? "\n⚠ " + Strings.Get("FileHasErrors") : "";
+        HeaderStatus.Text = $"{state}{profiles}\n{(_host.Service.IsConnected ? Strings.Get("ServiceConnected") : Strings.Get("ServiceNotConnected"))}{errors}";
+        PauseButton.Content = engine.IsPaused ? Strings.Get("Resume") : Strings.Get("PauseOneHour");
 
-        StatusDetails.Text = BuildStatus();
+        if (SettingsPage.Visibility == Visibility.Visible)
+            StatusDetails.Text = BuildStatus();
     }
 
     private string BuildStatus()
     {
         var sb = new StringBuilder();
         var load = _host.Store.LastResult;
-        sb.AppendLine($"Signed in as: {_host.User.QualifiedName} (session {_host.SessionId})");
-        sb.AppendLine($"Service: {(_host.Service.IsConnected ? "connected" : "not connected — sign-in and lock/unlock detection need the service")}");
-        sb.AppendLine($"App start/close detection: {_host.AppDetection}");
-        sb.AppendLine($"Focus detection: {_host.Foreground.Name}, current app: {_host.Foreground.CurrentApp?.Name ?? "unknown"}");
-        sb.AppendLine($"Automations: {(_host.Engine.IsPaused ? "paused" : "running")}{(_host.Engine.DryRun ? " (dry run)" : "")}");
-        sb.AppendLine($"Configuration file: {_host.Store.FilePath}");
+        sb.AppendLine(Strings.Format("StatusUser", _host.User.QualifiedName, _host.SessionId));
+        sb.AppendLine(Strings.Format("StatusService", _host.Service.IsConnected ? Strings.Get("Connected") : Strings.Get("NotConnectedLong")));
+        sb.AppendLine(Strings.Format("StatusAppDetection", _host.AppDetection));
+        sb.AppendLine(Strings.Format("StatusFocus", _host.Foreground.CurrentApp?.Name ?? "?"));
+        sb.AppendLine(Strings.Format("StatusEngine", _host.Engine.IsPaused ? Strings.Get("Paused") : Strings.Get("Running"), _host.Engine.DryRun ? Strings.Get("DryRunSuffix") : ""));
+        sb.AppendLine(Strings.Format("StatusFile", _host.Store.FilePath));
         if (load is not null)
-            sb.AppendLine($"Last load: {(load.HasErrors ? $"{load.Errors.Count()} error(s) — the previous version is still running" : "OK")}{(load.Warnings.Any() ? $", {load.Warnings.Count()} warning(s)" : "")}");
-        sb.AppendLine($"Machine automations: {Product.MachineConfigPath} (editable by administrators)");
-        sb.AppendLine($"Logs: {Product.AgentLogDirectory}");
-        var suspended = _host.Engine.SuspendedAutomations;
-        if (suspended.Count > 0)
-            sb.AppendLine($"Suspended by the loop guard: {string.Join(", ", suspended)} (save the file or restart to resume)");
+            sb.AppendLine(Strings.Format("StatusLastLoad", load.HasErrors ? Strings.Format("ErrorsKeepPrevious", load.Errors.Count()) : "OK", load.Warnings.Count()));
+        sb.AppendLine(Strings.Format("StatusMachineFile", Product.MachineConfigPath));
+        sb.AppendLine(Strings.Format("StatusLogs", Product.AgentLogDirectory));
+        if (_host.Engine.SuspendedAutomations.Count > 0)
+            sb.AppendLine(Strings.Format("StatusSuspended", string.Join(", ", _host.Engine.SuspendedAutomations)));
         return sb.ToString();
+    }
+
+    // ------------------------------------------------------------------ editing helpers
+
+    /// <summary>Asks once whether the user accepts that the editor rewrites the file (comments are lost).</summary>
+    private bool ConfirmRewrite()
+    {
+        if (_settings.RewriteNoticeAccepted)
+            return true;
+        var answer = MessageBox.Show(this, Strings.Get("RewriteNotice"), Product.Name, MessageBoxButton.OKCancel, MessageBoxImage.Information);
+        if (answer != MessageBoxResult.OK)
+            return false;
+        _settings.RewriteNoticeAccepted = true;
+        _settings.Save();
+        return true;
+    }
+
+    private bool TryEdit(Action<ConfigDocument> change)
+    {
+        if (!ConfirmRewrite())
+            return false;
+        try
+        {
+            var result = _host.Edit(change);
+            if (!result.HasErrors)
+                return true;
+            ShowError(string.Join("\n", result.Errors.Take(5).Select(i => i.Message)));
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex.Message);
+        }
+        return false;
+    }
+
+    private ConfigDocument? BeginEdit()
+    {
+        if (!ConfirmRewrite())
+            return null;
+        try
+        {
+            return _host.BeginEdit();
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowError(ex.Message);
+            return null;
+        }
+    }
+
+    private void ShowError(string message) =>
+        MessageBox.Show(this, message, Product.Name, MessageBoxButton.OK, MessageBoxImage.Warning);
+
+    private string? SelectedAutomationId => (AutomationList.SelectedItem as AutomationRow)?.Id;
+
+    private string? SelectedProfileId => (ProfileList.SelectedItem as ProfileRow)?.Id;
+
+    // ------------------------------------------------------------------ automations
+
+    private void OnNewAutomationClick(object sender, RoutedEventArgs e)
+    {
+        if (BeginEdit() is { } document)
+            EditorWindow.ForAutomation(_host, document, null).ShowDialogWithOwner(this);
+    }
+
+    private void OnEditAutomationClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedAutomationId is not { } id || BeginEdit() is not { } document)
+            return;
+        EditorWindow.ForAutomation(_host, document, document.Config.FindAutomation(id)).ShowDialogWithOwner(this);
+    }
+
+    private void OnDuplicateAutomationClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedAutomationId is { } id)
+            TryEdit(document => document.DuplicateAutomation(id));
+    }
+
+    private void OnDeleteAutomationClick(object sender, RoutedEventArgs e)
+    {
+        var ids = AutomationList.SelectedItems.OfType<AutomationRow>().Select(r => r.Id).ToList();
+        if (ids.Count == 0)
+            return;
+        if (MessageBox.Show(this, Strings.Format("DeleteQuestion", ids.Count), Product.Name, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+        TryEdit(document => ids.ForEach(id => document.RemoveAutomation(id)));
+    }
+
+    private void OnMoveAutomationUpClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedAutomationId is { } id)
+            TryEdit(document => document.MoveAutomation(id, -1));
+    }
+
+    private void OnMoveAutomationDownClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedAutomationId is { } id)
+            TryEdit(document => document.MoveAutomation(id, 1));
+    }
+
+    private void OnToggleEnabledClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string id } element)
+            return;
+        var enabled = element is System.Windows.Controls.Primitives.ToggleButton { IsChecked: true };
+        if (!TryEdit(document => document.SetEnabled(id, enabled)))
+            Refresh();
+    }
+
+    private async void OnRunClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedAutomationId is { } id)
+            await _host.RunAutomationAsync(id, checkConditions: true);
+    }
+
+    private async void OnRunForcedClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedAutomationId is { } id)
+            await _host.RunAutomationAsync(id, checkConditions: false);
+    }
+
+    private void OnImportClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog { Filter = "YAML|*.yaml;*.yml|All files|*.*" };
+        if (dialog.ShowDialog(this) != true)
+            return;
+        var result = ConfigLoader.Load(File.ReadAllText(dialog.FileName), ExecutionScope.User);
+        if (result.HasErrors)
+        {
+            ShowError(Strings.Get("ImportInvalid") + "\n\n" + string.Join("\n", result.Errors.Take(5).Select(i => i.ToString())));
+            return;
+        }
+        MergeResult? merged = null;
+        if (TryEdit(document => merged = ConfigMerge.Merge(document.Config, result.Config)) && merged is not null)
+            MessageBox.Show(this, Strings.Format("Imported", merged.AutomationIds.Count, merged.ProfileIds.Count), Product.Name);
+    }
+
+    private void OnExportClick(object sender, RoutedEventArgs e)
+    {
+        var ids = AutomationList.SelectedItems.OfType<AutomationRow>().Select(r => r.Id).ToList();
+        if (ids.Count == 0)
+            ids = _host.Engine.Config.Automations.Select(a => a.Id).ToList();
+        var dialog = new SaveFileDialog { Filter = "YAML|*.yaml", FileName = "automations-export.yaml" };
+        if (dialog.ShowDialog(this) != true)
+            return;
+        var exported = ConfigMerge.Export(_host.Store.Current, ids, []);
+        File.WriteAllText(dialog.FileName, YamlConfigWriter.Write(exported, ConfigDocument.Header));
+    }
+
+    private void OnEditFileClick(object sender, RoutedEventArgs e)
+    {
+        var find = SelectedAutomationId is { } id && AutomationsPage.Visibility == Visibility.Visible ? $"id: {id}" : null;
+        new FileEditorWindow(_host, find) { Owner = this }.Show();
+    }
+
+    // ------------------------------------------------------------------ profiles
+
+    private void OnNewProfileClick(object sender, RoutedEventArgs e)
+    {
+        if (BeginEdit() is { } document)
+            EditorWindow.ForProfile(_host, document, null).ShowDialogWithOwner(this);
+    }
+
+    private void OnEditProfileClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedProfileId is not { } id || BeginEdit() is not { } document)
+            return;
+        EditorWindow.ForProfile(_host, document, document.Config.FindProfile(id)).ShowDialogWithOwner(this);
+    }
+
+    private void OnDuplicateProfileClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedProfileId is { } id)
+            TryEdit(document => document.DuplicateProfile(id));
+    }
+
+    private void OnDeleteProfileClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedProfileId is not { } id)
+            return;
+        if (MessageBox.Show(this, Strings.Format("DeleteQuestion", 1), Product.Name, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            TryEdit(document => document.RemoveProfile(id));
+    }
+
+    private async void OnApplyProfileClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedProfileId is { } id)
+            await _host.ApplyProfileAsync(id);
+    }
+
+    private async void OnRevertProfileClick(object sender, RoutedEventArgs e)
+    {
+        if (SelectedProfileId is { } id)
+            await _host.RevertProfileAsync(id);
+    }
+
+    // ------------------------------------------------------------------ templates
+
+    private void OnAddTemplateClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string id } || Templates.Find(id) is not { } template)
+            return;
+        MergeResult? merged = null;
+        if (!TryEdit(document => merged = ConfigMerge.Merge(document.Config, template.Load())) || merged is null)
+            return;
+        ShowPage("automations");
+        MessageBox.Show(this, Strings.Format("TemplateAdded", template.Title, merged.AutomationIds.Count, merged.ProfileIds.Count), Product.Name);
     }
 
     // ------------------------------------------------------------------ activity
@@ -146,24 +377,28 @@ public partial class MainWindow : Window
                 _activity.RemoveAt(_activity.Count - 1);
         });
 
-    private static ActivityRow ToRow(ActivityEntry entry) => entry.Level switch
+    private static ActivityRow ToRow(ActivityEntry entry)
     {
-        ActivityLevel.Success => new ActivityRow("✓", SuccessBrush, entry.Timestamp.ToString("HH:mm:ss"), entry.Message),
-        ActivityLevel.Warning => new ActivityRow("!", WarningBrush, entry.Timestamp.ToString("HH:mm:ss"), entry.Message),
-        ActivityLevel.Error => new ActivityRow("✗", ErrorBrush, entry.Timestamp.ToString("HH:mm:ss"), entry.Message),
-        _ => new ActivityRow("•", InfoBrush, entry.Timestamp.ToString("HH:mm:ss"), entry.Message),
-    };
+        var time = entry.Timestamp.ToString("HH:mm:ss", Strings.Culture);
+        return entry.Level switch
+        {
+            ActivityLevel.Success => new ActivityRow("✓", SuccessBrush, time, entry.Message),
+            ActivityLevel.Warning => new ActivityRow("!", WarningBrush, time, entry.Message),
+            ActivityLevel.Error => new ActivityRow("✗", ErrorBrush, time, entry.Message),
+            _ => new ActivityRow("•", InfoBrush, time, entry.Message),
+        };
+    }
 
     private async void OnActivitySourceChanged(object sender, RoutedEventArgs e)
     {
-        if (!IsLoaded && sender == PersonalActivity)
+        if (!IsLoaded)
             return;
         if (MachineActivity.IsChecked == true)
         {
             _activity.Clear();
             var entries = await _host.Service.GetMachineActivityAsync();
             if (entries.Count == 0)
-                _activity.Add(new ActivityRow("!", WarningBrush, "", _host.Service.IsConnected ? "No machine activity yet." : "The service is not connected."));
+                _activity.Add(new ActivityRow("!", WarningBrush, "", _host.Service.IsConnected ? Strings.Get("NoMachineActivity") : Strings.Get("ServiceNotConnected")));
             foreach (var entry in entries.Reverse())
                 _activity.Add(ToRow(entry));
         }
@@ -180,38 +415,7 @@ public partial class MainWindow : Window
         _activity.Clear();
     }
 
-    // ------------------------------------------------------------------ automations & profiles
-
-    private async void OnRunClick(object sender, RoutedEventArgs e)
-    {
-        if (AutomationList.SelectedItem is AutomationRow row)
-            await _host.RunAutomationAsync(row.Id, checkConditions: true);
-    }
-
-    private async void OnRunForcedClick(object sender, RoutedEventArgs e)
-    {
-        if (AutomationList.SelectedItem is AutomationRow row)
-            await _host.RunAutomationAsync(row.Id, checkConditions: false);
-    }
-
-    private void OnEditClick(object sender, RoutedEventArgs e)
-    {
-        Tabs.SelectedIndex = 3;
-        if (AutomationList.SelectedItem is AutomationRow row)
-            SelectText($"id: {row.Id}");
-    }
-
-    private async void OnApplyProfileClick(object sender, RoutedEventArgs e)
-    {
-        if (ProfileList.SelectedItem is ProfileRow row)
-            await _host.ApplyProfileAsync(row.Id);
-    }
-
-    private async void OnRevertProfileClick(object sender, RoutedEventArgs e)
-    {
-        if (ProfileList.SelectedItem is ProfileRow row)
-            await _host.RevertProfileAsync(row.Id);
-    }
+    // ------------------------------------------------------------------ pause and settings
 
     private void OnPauseClick(object sender, RoutedEventArgs e)
     {
@@ -221,112 +425,43 @@ public partial class MainWindow : Window
             _host.Engine.Pause(TimeSpan.FromHours(1));
     }
 
+    private void LoadSettingsPage()
+    {
+        _loadingSettings = true;
+        LanguageBox.ItemsSource = Strings.Languages.Select(l => new ComboBoxItem { Content = l.Code == "auto" ? Strings.Get("FollowWindows") : l.Name, Tag = l.Code }).ToList();
+        LanguageBox.SelectedItem = LanguageBox.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == _settings.Language) ?? LanguageBox.Items[0];
+        ThemeBox.ItemsSource = new[] { ("system", Strings.Get("FollowWindows")), ("light", Strings.Get("Light")), ("dark", Strings.Get("Dark")) }
+            .Select(t => new ComboBoxItem { Content = t.Item2, Tag = t.Item1 }).ToList();
+        ThemeBox.SelectedItem = ThemeBox.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == _settings.Theme) ?? ThemeBox.Items[0];
+        DryRunSwitch.IsChecked = _host.Engine.DryRun;
+        _loadingSettings = false;
+    }
+
+    private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || LanguageBox.SelectedItem is not ComboBoxItem { Tag: string code })
+            return;
+        _settings.Language = code;
+        _settings.Save();
+        RestartHint.Visibility = Visibility.Visible;
+    }
+
+    private void OnThemeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || ThemeBox.SelectedItem is not ComboBoxItem { Tag: string theme })
+            return;
+        _settings.Theme = theme;
+        _settings.Save();
+        App.ApplyTheme(theme);
+    }
+
     private void OnDryRunChanged(object sender, RoutedEventArgs e)
     {
-        _host.Engine.DryRun = DryRunCheck.IsChecked == true;
+        if (_loadingSettings)
+            return;
+        _host.Engine.DryRun = DryRunSwitch.IsChecked == true;
         Refresh();
     }
-
-    private void OnTabChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (e.Source == Tabs && Tabs.SelectedIndex == 4)
-            StatusDetails.Text = BuildStatus();
-    }
-
-    // ------------------------------------------------------------------ YAML editor
-
-    private void LoadYaml()
-    {
-        _loadingYaml = true;
-        YamlEditor.Text = _host.Store.ReadText();
-        _loadingYaml = false;
-        _yamlDirty = false;
-        ShowIssues(_host.Store.LastResult?.Issues ?? Array.Empty<ConfigIssue>());
-        YamlStatus.Text = "";
-    }
-
-    private void OnYamlChanged(object sender, TextChangedEventArgs e)
-    {
-        if (_loadingYaml)
-            return;
-        _yamlDirty = true;
-        YamlStatus.Text = "Unsaved changes";
-    }
-
-    private void OnValidateYamlClick(object sender, RoutedEventArgs e)
-    {
-        var result = ConfigLoader.Load(YamlEditor.Text, ExecutionScope.User);
-        ShowIssues(result.Issues);
-        YamlStatus.Text = result.HasErrors ? "Fix the errors before saving." : "No errors.";
-    }
-
-    private void OnSaveYamlClick(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            var result = _host.Store.Save(YamlEditor.Text);
-            ShowIssues(result.Issues);
-            if (result.HasErrors)
-            {
-                YamlStatus.Text = "Not saved: fix the errors first.";
-                return;
-            }
-            _yamlDirty = false;
-            YamlStatus.Text = $"Saved at {DateTime.Now:t}.";
-        }
-        catch (Exception ex)
-        {
-            YamlStatus.Text = "Not saved: " + ex.Message;
-        }
-    }
-
-    private void OnReloadYamlClick(object sender, RoutedEventArgs e) => LoadYaml();
-
-    private void OnExternalEditorClick(object sender, RoutedEventArgs e) => TrayIcon.OpenInEditor(_host.Store.FilePath);
-
-    private void ShowIssues(IEnumerable<ConfigIssue> issues)
-    {
-        IssueList.ItemsSource = issues.Select(i => new ListBoxItem
-        {
-            Content = i.ToString(),
-            Tag = i,
-            Foreground = i.Severity == IssueSeverity.Error ? ErrorBrush : WarningBrush,
-        }).ToList();
-    }
-
-    private void OnIssueDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-        if (IssueList.SelectedItem is ListBoxItem { Tag: ConfigIssue { Location: { } location } })
-            GoToLine(location.Line, location.Column);
-    }
-
-    private void GoToLine(int line, int column)
-    {
-        var index = 0;
-        for (var i = 1; i < line && index >= 0; i++)
-        {
-            index = YamlEditor.Text.IndexOf('\n', index);
-            if (index >= 0)
-                index++;
-        }
-        if (index < 0)
-            return;
-        YamlEditor.Focus();
-        YamlEditor.Select(Math.Min(index + Math.Max(0, column - 1), YamlEditor.Text.Length), 0);
-        YamlEditor.ScrollToLine(Math.Max(0, line - 1));
-    }
-
-    private void SelectText(string text)
-    {
-        var index = YamlEditor.Text.IndexOf(text, StringComparison.Ordinal);
-        if (index < 0)
-            return;
-        YamlEditor.Focus();
-        YamlEditor.Select(index, text.Length);
-        YamlEditor.ScrollToLine(YamlEditor.GetLineIndexFromCharacterIndex(index));
-    }
-
-    // ------------------------------------------------------------------ status tab
 
     private void OnOpenConfigFolderClick(object sender, RoutedEventArgs e) => TrayIcon.OpenFolder(Product.UserDataDirectory);
 
@@ -334,4 +469,15 @@ public partial class MainWindow : Window
 
     private void OnDocsClick(object sender, RoutedEventArgs e) =>
         Process.Start(new ProcessStartInfo(Product.DocumentationUrl) { UseShellExecute = true })?.Dispose();
+}
+
+/// <summary>Small window helpers.</summary>
+internal static class WindowExtensions
+{
+    /// <summary>Shows a dialog owned by <paramref name="owner"/>.</summary>
+    public static bool? ShowDialogWithOwner(this Window window, Window owner)
+    {
+        window.Owner = owner;
+        return window.ShowDialog();
+    }
 }

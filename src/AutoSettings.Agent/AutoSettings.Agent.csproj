@@ -22,12 +22,16 @@
 
   <ItemGroup>
     <PackageReference Include="StreamJsonRpc" Version="2.*" />
+    <PackageReference Include="WPF-UI" Version="4.*" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    <PackageReference Include="AvalonEdit" Version="6.*" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.*" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\AutoSettings.ico" />
+    <EmbeddedResource Include="Editor\Yaml.xshd" LogicalName="AutoSettings.Agent.Yaml.xshd" />
   </ItemGroup>
 
   <ItemGroup>

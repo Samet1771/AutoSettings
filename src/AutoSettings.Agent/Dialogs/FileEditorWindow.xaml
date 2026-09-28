@@ -1,0 +1,33 @@
+<ui:FluentWindow x:Class="AutoSettings.Agent.Dialogs.FileEditorWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:loc="clr-namespace:AutoSettings.Agent.Localization"
+                 xmlns:editor="clr-namespace:AutoSettings.Agent.Editor"
+                 Width="1000" Height="760" MinWidth="640" MinHeight="420"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ui:TitleBar x:Name="WindowTitleBar" Grid.Row="0" />
+        <TextBlock Grid.Row="1" Margin="16,4,16,8" Style="{StaticResource Hint}" Text="{loc:T FileEditorHint}" />
+        <editor:YamlEditor x:Name="Yaml" Grid.Row="2" Margin="16,0" />
+        <StackPanel Grid.Row="3" Margin="16,8,16,16">
+            <ListBox x:Name="IssueList" MaxHeight="120" Visibility="Collapsed" MouseDoubleClick="OnIssueDoubleClick" Margin="0,0,0,8" />
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="{loc:T OpenInOtherEditor}" Click="OnExternalClick" Margin="0,0,8,0" />
+                    <Button Content="{loc:T DiscardChanges}" Click="OnReloadClick" Margin="0,0,8,0" />
+                    <ui:Button Content="{loc:T Save}" Appearance="Primary" Click="OnSaveClick" />
+                </StackPanel>
+                <TextBlock x:Name="StatusText" VerticalAlignment="Center" Opacity="0.75" />
+            </DockPanel>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>
