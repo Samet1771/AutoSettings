@@ -45,8 +45,9 @@ dotnet run --project src/AutoSettings.DocGen            # rewrite docs/reference
 dotnet run --project src/AutoSettings.DocGen -- --check # what CI runs: fails if the files are out of date
 ```
 
-No .NET SDK at hand? Run the **Regenerate reference docs** workflow (Actions tab → *Run workflow* on your branch);
-it commits the regenerated files to the branch.
+No .NET SDK at hand? On feature branches the **Regenerate reference docs** workflow runs automatically when the
+catalog or DocGen changes and commits the regenerated files to the branch (pull afterwards). It can also be started
+from the Actions tab.
 
 ## Continuous integration
 

@@ -1,9 +1,21 @@
-# Regenerates docs/reference from the component catalog and commits the result to the chosen branch.
-# Handy when you change triggers, conditions or actions without a local .NET SDK.
+# Regenerates docs/reference from the component catalog and commits the result to the branch.
+# Runs automatically on feature branches when the catalog or DocGen changes, and on demand.
 name: Regenerate reference docs
 
 on:
   workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "src/AutoSettings.Core/Catalog/**"
+      - "src/AutoSettings.Core/Engine/Placeholders.cs"
+      - "src/AutoSettings.Core/Schema/**"
+      - "src/AutoSettings.DocGen/**"
+      - ".github/workflows/regenerate-docs.yml"
+
+concurrency:
+  group: regenerate-docs-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
