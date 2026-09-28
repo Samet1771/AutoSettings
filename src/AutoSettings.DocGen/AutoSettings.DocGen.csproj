@@ -3,8 +3,7 @@
   <!--
     Generates docs/reference (one page per trigger, condition and action) and the JSON Schema
     from the component catalog, so the documentation always matches the code.
-      dotnet run --project src/AutoSettings.DocGen            (write)
-      dotnet run --project src/AutoSettings.DocGen -- --check (fail if out of date; used by CI)
+    See docs/dev/building.md for the command line (write, or check mode used by CI).
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
