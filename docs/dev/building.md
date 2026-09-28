@@ -113,12 +113,34 @@ Unit tests cover the engine; the Windows integration needs a real machine or VM.
     0.2.1*. Repeat with *Install automatically* while a full-screen app runs (waits) and after closing it.
     Edit `SHA256SUMS.txt` of a test release: the download is rejected. A portable install only notifies.
 
+## Branches
+
+| Branch | Purpose |
+|---|---|
+| `beta` | Every change lands here first, through a pull request. Each merge can be released as a beta (pre-release). |
+| `main` | Only what was tested as a beta. `beta` is merged into `main` for a stable release. |
+
+Pull requests go to `beta`, never directly to `main`. Feature branches are started from `beta`.
+
 ## Releasing
 
-1. Update `CHANGELOG.md` and `<Version>` in `Directory.Build.props`, and merge to `main`.
+Betas and stable releases use the same workflow; only the tag differs.
+
+| Release | Branch | Tag | Who gets it |
+|---|---|---|---|
+| Beta | `beta` | `v0.2.0-beta.1`, `v0.2.0-beta.2`, … | Users who turned on *Include beta versions* |
+| Stable | `main` | `v0.2.0` | Everyone |
+
+`<Version>` in `Directory.Build.props` is the next stable version (for example `0.2.0`) while its betas are
+released. After a stable release, raise it: the last number for fixes (`0.2.1`), the middle one for new features
+(`0.3.0`).
+
+To promote a beta: open a pull request from `beta` to `main`, merge it, and release `vX.Y.Z` from `main`.
+
+1. Update `CHANGELOG.md` and `<Version>` in `Directory.Build.props`, and merge to the branch you release from.
 2. Create the release, in either way:
    - **On the website**: *Releases → Draft a new release → Choose a tag*, type a **new** tag such as `v0.2.0`
-     (target `main`), write a title and notes, tick *Set as a pre-release* for betas, and **Publish**.
+     (target `beta` for a beta, `main` for a stable release), write a title and notes, tick *Set as a pre-release* for betas, and **Publish**.
    - **From the command line**: `git tag v0.2.0` and `git push origin v0.2.0`. The release is then created with a
      generated title and notes.
 
