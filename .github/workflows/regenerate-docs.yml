@@ -1,11 +1,11 @@
 # Regenerates docs/reference from the component catalog and commits the result to the branch.
-# Runs automatically on feature branches when the catalog or DocGen changes, and on demand.
+# Runs automatically on feature branches (not main or beta, which only change through pull requests) when the catalog or DocGen changes, and on demand.
 name: Regenerate reference docs
 
 on:
   workflow_dispatch:
   push:
-    branches-ignore: [main]
+    branches-ignore: [main, beta]
     paths:
       - "src/AutoSettings.Core/Catalog/**"
       - "src/AutoSettings.Core/Engine/Placeholders.cs"
