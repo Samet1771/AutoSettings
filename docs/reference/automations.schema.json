@@ -1,0 +1,2386 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Samet1771/WindowsSettingAutomation/docs/reference/automations.schema.json",
+  "title": "AutoSettings automations",
+  "description": "An AutoSettings automations.yaml file: automations (when/if/then rules) and profiles (named sets of actions).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
+  "properties": {
+    "version": {
+      "description": "File format version.",
+      "const": 1
+    },
+    "automations": {
+      "description": "Rules: when a trigger fires and all conditions are true, run the actions.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/automation"
+      }
+    },
+    "profiles": {
+      "description": "Named sets of actions that can be applied and reverted as a unit.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/profile"
+      }
+    }
+  },
+  "definitions": {
+    "automation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "triggers",
+        "actions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique, stable id, e.g. gaming-mode. Generated from the name when missing."
+        },
+        "name": {
+          "type": "string",
+          "description": "Friendly name shown in the app and the activity log."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional notes."
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Set to false to keep the automation without running it."
+        },
+        "cooldown": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*(\\d+(\\.\\d+)?\\s*(ms|s|m|h|d)\\s*)+$|^\\d+:\\d{2}(:\\d{2})?$|^\\d+(\\.\\d+)?$"
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ],
+          "description": "Minimum time between two runs, e.g. 30s. Triggers during the cooldown are ignored."
+        },
+        "triggers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/trigger"
+          },
+          "description": "Any of these starts the automation."
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/condition"
+          },
+          "description": "All of these must be true for the actions to run."
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/action"
+          },
+          "description": "Run in order."
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "actions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique id, used by profile.apply."
+        },
+        "name": {
+          "type": "string",
+          "description": "Friendly name."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional notes."
+        },
+        "priority": {
+          "type": "integer",
+          "default": 0,
+          "description": "When active profiles change the same setting, the higher priority wins."
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/action"
+          },
+          "description": "The settings this profile applies."
+        }
+      }
+    },
+    "trigger": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "description": "The trigger type.",
+          "enum": [
+            "boot",
+            "logon",
+            "logoff",
+            "lock",
+            "unlock",
+            "app_started",
+            "app_closed",
+            "app_focused",
+            "app_unfocused"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "boot"
+              }
+            }
+          },
+          "then": {
+            "title": "Computer started",
+            "description": "Fires once each time the computer starts, before anyone signs in.",
+            "properties": {
+              "type": {
+                "const": "boot",
+                "description": "Fires once each time the computer starts, before anyone signs in."
+              },
+              "include_fast_startup": {
+                "type": "boolean",
+                "default": true,
+                "description": "Also fire when Windows starts with Fast Startup (the default shutdown mode on most PCs, which is really a hibernate). Turn off to react to full restarts only."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "logon"
+              }
+            }
+          },
+          "then": {
+            "title": "User signed in",
+            "description": "Fires when a user signs in to Windows. The user who signed in is available to conditions and to actions as {{ user }}.",
+            "properties": {
+              "type": {
+                "const": "logon",
+                "description": "Fires when a user signs in to Windows. The user who signed in is available to conditions and to actions as {{ user }}."
+              },
+              "user": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "samet"
+                ],
+                "description": "Only fire when one of these users signs in. Accepts a user name (samet), DOMAIN\\name, a SID, or wildcards (admin*). Leave empty for any user."
+              },
+              "session": {
+                "enum": [
+                  "any",
+                  "local",
+                  "remote"
+                ],
+                "default": "any",
+                "description": "Which kind of sign-in: at the computer (local), over Remote Desktop (remote), or either (any)."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "logoff"
+              }
+            }
+          },
+          "then": {
+            "title": "User signed out",
+            "description": "Fires when a user signs out.",
+            "properties": {
+              "type": {
+                "const": "logoff",
+                "description": "Fires when a user signs out."
+              },
+              "user": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "samet"
+                ],
+                "description": "Only fire when one of these users signs out. Accepts a user name (samet), DOMAIN\\name, a SID, or wildcards (admin*). Leave empty for any user."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "lock"
+              }
+            }
+          },
+          "then": {
+            "title": "Screen locked",
+            "description": "Fires when a user locks the computer (Win+L, or automatically after inactivity).",
+            "properties": {
+              "type": {
+                "const": "lock",
+                "description": "Fires when a user locks the computer (Win+L, or automatically after inactivity)."
+              },
+              "user": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "samet"
+                ],
+                "description": "Only fire when one of these users locks the screen. Accepts a user name (samet), DOMAIN\\name, a SID, or wildcards (admin*). Leave empty for any user."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "unlock"
+              }
+            }
+          },
+          "then": {
+            "title": "Screen unlocked",
+            "description": "Fires when a user unlocks the computer.",
+            "properties": {
+              "type": {
+                "const": "unlock",
+                "description": "Fires when a user unlocks the computer."
+              },
+              "user": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "samet"
+                ],
+                "description": "Only fire when one of these users unlocks the screen. Accepts a user name (samet), DOMAIN\\name, a SID, or wildcards (admin*). Leave empty for any user."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "app_started"
+              }
+            }
+          },
+          "then": {
+            "title": "App started",
+            "description": "Fires when an app starts.",
+            "properties": {
+              "type": {
+                "const": "app_started",
+                "description": "Fires when an app starts."
+              },
+              "app": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "chrome.exe"
+                ],
+                "description": "The app(s) that start. Use the exe name (chrome or chrome.exe), a full path (C:\\Games\\game.exe) or wildcards (*steam*). Use * for any app."
+              },
+              "instance": {
+                "enum": [
+                  "first",
+                  "any"
+                ],
+                "default": "first",
+                "description": "Many apps (browsers, games, Steam) start several processes. 'first' fires only when the first copy starts; 'any' fires for every process."
+              },
+              "user": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "samet"
+                ],
+                "description": "Only fire when one of these users start the app. Accepts a user name (samet), DOMAIN\\name, a SID, or wildcards (admin*). Leave empty for any user."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "app"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "app_closed"
+              }
+            }
+          },
+          "then": {
+            "title": "App closed",
+            "description": "Fires when an app exits.",
+            "properties": {
+              "type": {
+                "const": "app_closed",
+                "description": "Fires when an app exits."
+              },
+              "app": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "chrome.exe"
+                ],
+                "description": "The app(s) that close. Use the exe name (chrome or chrome.exe), a full path (C:\\Games\\game.exe) or wildcards (*steam*). Use * for any app."
+              },
+              "instance": {
+                "enum": [
+                  "last",
+                  "any"
+                ],
+                "default": "last",
+                "description": "'last' fires only when the last running copy exits (the app is fully closed); 'any' fires for every process that exits."
+              },
+              "user": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "samet"
+                ],
+                "description": "Only fire when one of these users close the app. Accepts a user name (samet), DOMAIN\\name, a SID, or wildcards (admin*). Leave empty for any user."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "app"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "app_focused"
+              }
+            }
+          },
+          "then": {
+            "title": "App focused",
+            "description": "Fires when a window of the app becomes the active (foreground) window.",
+            "properties": {
+              "type": {
+                "const": "app_focused",
+                "description": "Fires when a window of the app becomes the active (foreground) window."
+              },
+              "app": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "chrome.exe"
+                ],
+                "description": "The app(s) that gain focus. Use the exe name (chrome or chrome.exe), a full path (C:\\Games\\game.exe) or wildcards (*steam*). Use * for any app."
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "*YouTube*"
+                ],
+                "description": "Only fire when the window title matches one of these patterns (wildcards allowed, e.g. *YouTube*)."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "app"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "app_unfocused"
+              }
+            }
+          },
+          "then": {
+            "title": "App no longer focused",
+            "description": "Fires when the app stops being the active window, because another app was focused or the app was closed or minimized.",
+            "properties": {
+              "type": {
+                "const": "app_unfocused",
+                "description": "Fires when the app stops being the active window, because another app was focused or the app was closed or minimized."
+              },
+              "app": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "chrome.exe"
+                ],
+                "description": "The app(s) that lose focus. Use the exe name (chrome or chrome.exe), a full path (C:\\Games\\game.exe) or wildcards (*steam*). Use * for any app."
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "*YouTube*"
+                ],
+                "description": "Only fire when the title of the window that lost focus matches one of these patterns."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "app"
+            ]
+          }
+        }
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "description": "The condition type.",
+          "enum": [
+            "and",
+            "or",
+            "not",
+            "user",
+            "time",
+            "power_source",
+            "battery",
+            "app_running",
+            "app_focused",
+            "fullscreen",
+            "wifi",
+            "monitor_count",
+            "profile_active"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "and"
+              }
+            }
+          },
+          "then": {
+            "title": "All of",
+            "description": "True when every nested condition is true. (The top-level condition list already works like this; use `and` inside `or`/`not`.)",
+            "properties": {
+              "type": {
+                "const": "and",
+                "description": "True when every nested condition is true. (The top-level condition list already works like this; use `and` inside `or`/`not`.)"
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/condition"
+                },
+                "description": "The conditions that must all be true."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "conditions"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "or"
+              }
+            }
+          },
+          "then": {
+            "title": "Any of",
+            "description": "True when at least one nested condition is true.",
+            "properties": {
+              "type": {
+                "const": "or",
+                "description": "True when at least one nested condition is true."
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/condition"
+                },
+                "description": "At least one of these must be true."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "conditions"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "not"
+              }
+            }
+          },
+          "then": {
+            "title": "None of",
+            "description": "True when none of the nested conditions is true.",
+            "properties": {
+              "type": {
+                "const": "not",
+                "description": "True when none of the nested conditions is true."
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/condition"
+                },
+                "description": "None of these may be true."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "conditions"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "user"
+              }
+            }
+          },
+          "then": {
+            "title": "User is",
+            "description": "True when the user involved is one of the listed users. In machine automations this is the user from the event (who signed in or started the app); in personal automations it is you.",
+            "properties": {
+              "type": {
+                "const": "user",
+                "description": "True when the user involved is one of the listed users. In machine automations this is the user from the event (who signed in or started the app); in personal automations it is you."
+              },
+              "users": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "samet"
+                ],
+                "description": "User names, DOMAIN\\name, SIDs or wildcards."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "users"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "time"
+              }
+            }
+          },
+          "then": {
+            "title": "Time of day / weekday",
+            "description": "True during a time window and/or on certain weekdays. Windows that cross midnight (after 22:00, before 06:00) are supported.",
+            "properties": {
+              "type": {
+                "const": "time",
+                "description": "True during a time window and/or on certain weekdays. Windows that cross midnight (after 22:00, before 06:00) are supported."
+              },
+              "after": {
+                "type": "string",
+                "pattern": "^\\d{1,2}:\\d{2}(:\\d{2})?$",
+                "examples": [
+                  "22:00"
+                ],
+                "description": "Start of the window (inclusive), 24-hour clock."
+              },
+              "before": {
+                "type": "string",
+                "pattern": "^\\d{1,2}:\\d{2}(:\\d{2})?$",
+                "examples": [
+                  "06:00"
+                ],
+                "description": "End of the window (exclusive), 24-hour clock."
+              },
+              "weekdays": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "mon",
+                      "tue",
+                      "wed",
+                      "thu",
+                      "fri",
+                      "sat",
+                      "sun"
+                    ]
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "mon",
+                        "tue",
+                        "wed",
+                        "thu",
+                        "fri",
+                        "sat",
+                        "sun"
+                      ]
+                    }
+                  }
+                ],
+                "examples": [
+                  "[mon, tue, wed, thu, fri]"
+                ],
+                "description": "Only on these days."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "power_source"
+              }
+            }
+          },
+          "then": {
+            "title": "Power source",
+            "description": "True when the computer runs on the given power source.",
+            "properties": {
+              "type": {
+                "const": "power_source",
+                "description": "True when the computer runs on the given power source."
+              },
+              "is": {
+                "enum": [
+                  "ac",
+                  "battery"
+                ],
+                "description": "ac (plugged in) or battery."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "is"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "battery"
+              }
+            }
+          },
+          "then": {
+            "title": "Battery level",
+            "description": "True when the battery charge is within the given range.",
+            "properties": {
+              "type": {
+                "const": "battery",
+                "description": "True when the battery charge is within the given range."
+              },
+              "above": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "True when the charge is above this percentage."
+              },
+              "below": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "True when the charge is below this percentage."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "app_running"
+              }
+            }
+          },
+          "then": {
+            "title": "App is running",
+            "description": "True when one of the apps is running (or, with running: false, when none is).",
+            "properties": {
+              "type": {
+                "const": "app_running",
+                "description": "True when one of the apps is running (or, with running: false, when none is)."
+              },
+              "app": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "obs64.exe"
+                ],
+                "description": "App patterns (exe name, path or wildcards)."
+              },
+              "running": {
+                "type": "boolean",
+                "default": true,
+                "description": "Set to false to require that none of the apps is running."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "app"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "app_focused"
+              }
+            }
+          },
+          "then": {
+            "title": "App is focused",
+            "description": "True when one of the apps currently has the active window.",
+            "properties": {
+              "type": {
+                "const": "app_focused",
+                "description": "True when one of the apps currently has the active window."
+              },
+              "app": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "code.exe"
+                ],
+                "description": "App patterns."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "app"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "fullscreen"
+              }
+            }
+          },
+          "then": {
+            "title": "Full-screen app active",
+            "description": "True when a full-screen app, game or presentation is in the foreground.",
+            "properties": {
+              "type": {
+                "const": "fullscreen",
+                "description": "True when a full-screen app, game or presentation is in the foreground."
+              },
+              "active": {
+                "type": "boolean",
+                "default": true,
+                "description": "Set to false to require that no full-screen app is active."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "wifi"
+              }
+            }
+          },
+          "then": {
+            "title": "Wi-Fi network",
+            "description": "True when connected to one of the Wi-Fi networks (or, with connected: false, when connected to none of them).",
+            "properties": {
+              "type": {
+                "const": "wifi",
+                "description": "True when connected to one of the Wi-Fi networks (or, with connected: false, when connected to none of them)."
+              },
+              "ssid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "HomeWiFi"
+                ],
+                "description": "Network names (wildcards allowed)."
+              },
+              "connected": {
+                "type": "boolean",
+                "default": true,
+                "description": "Set to false to require that you are not on any of these networks."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "ssid"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "monitor_count"
+              }
+            }
+          },
+          "then": {
+            "title": "Number of monitors",
+            "description": "True when the number of connected monitors is within the range. Handy for docked/undocked laptops.",
+            "properties": {
+              "type": {
+                "const": "monitor_count",
+                "description": "True when the number of connected monitors is within the range. Handy for docked/undocked laptops."
+              },
+              "min": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "At least this many monitors."
+              },
+              "max": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "At most this many monitors."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "profile_active"
+              }
+            }
+          },
+          "then": {
+            "title": "Profile is active",
+            "description": "True when the profile is currently applied (or, with active: false, when it is not).",
+            "properties": {
+              "type": {
+                "const": "profile_active",
+                "description": "True when the profile is currently applied (or, with active: false, when it is not)."
+              },
+              "profile": {
+                "type": "string",
+                "examples": [
+                  "gaming"
+                ],
+                "description": "Profile id."
+              },
+              "active": {
+                "type": "boolean",
+                "default": true,
+                "description": "Set to false to require that the profile is not applied."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "profile"
+            ]
+          }
+        }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "description": "The action type.",
+          "enum": [
+            "profile.apply",
+            "profile.revert",
+            "delay",
+            "theme.mode",
+            "theme.transparency",
+            "wallpaper.set",
+            "taskbar.autohide",
+            "display.brightness",
+            "display.resolution",
+            "power.plan",
+            "power.screen_timeout",
+            "power.sleep_timeout",
+            "audio.volume",
+            "audio.mute",
+            "audio.default_device",
+            "radio.set",
+            "mouse.speed",
+            "app.launch",
+            "app.close",
+            "command.run",
+            "notify",
+            "open",
+            "registry.set",
+            "service.control"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "profile.apply"
+              }
+            }
+          },
+          "then": {
+            "title": "Apply profile",
+            "description": "Applies a profile. The settings it changes are remembered and restored when the profile is reverted, automatically or with profile.revert.",
+            "properties": {
+              "type": {
+                "const": "profile.apply",
+                "description": "Applies a profile. The settings it changes are remembered and restored when the profile is reverted, automatically or with profile.revert."
+              },
+              "profile": {
+                "type": "string",
+                "examples": [
+                  "gaming"
+                ],
+                "description": "Id of the profile to apply."
+              },
+              "revert_on": {
+                "enum": [
+                  "auto",
+                  "app_unfocused",
+                  "app_closed",
+                  "logoff",
+                  "lock",
+                  "never"
+                ],
+                "default": "auto",
+                "description": "When to undo the profile automatically. 'auto' pairs it with the trigger: app_focused → app_unfocused, app_started → app_closed, logon → logoff, unlock → lock; other triggers never revert automatically."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "profile"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "profile.revert"
+              }
+            }
+          },
+          "then": {
+            "title": "Revert profile",
+            "description": "Undoes an active profile, restoring the settings it changed. Does nothing if the profile is not active.",
+            "properties": {
+              "type": {
+                "const": "profile.revert",
+                "description": "Undoes an active profile, restoring the settings it changed. Does nothing if the profile is not active."
+              },
+              "profile": {
+                "type": "string",
+                "examples": [
+                  "gaming"
+                ],
+                "description": "Id of the profile to revert."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "profile"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "delay"
+              }
+            }
+          },
+          "then": {
+            "title": "Wait",
+            "description": "Waits before running the next action.",
+            "properties": {
+              "type": {
+                "const": "delay",
+                "description": "Waits before running the next action."
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\s*(\\d+(\\.\\d+)?\\s*(ms|s|m|h|d)\\s*)+$|^\\d+:\\d{2}(:\\d{2})?$|^\\d+(\\.\\d+)?$"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ],
+                "examples": [
+                  "30s"
+                ],
+                "description": "How long to wait, e.g. 10s, 5m, 1h."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "duration"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "theme.mode"
+              }
+            }
+          },
+          "then": {
+            "title": "Light / dark mode",
+            "description": "Switches Windows and/or apps between light and dark mode.",
+            "properties": {
+              "type": {
+                "const": "theme.mode",
+                "description": "Switches Windows and/or apps between light and dark mode."
+              },
+              "mode": {
+                "enum": [
+                  "light",
+                  "dark",
+                  "toggle"
+                ],
+                "description": "light, dark, or toggle."
+              },
+              "target": {
+                "enum": [
+                  "both",
+                  "apps",
+                  "system"
+                ],
+                "default": "both",
+                "description": "What to change: both, apps only, or system (taskbar, Start) only."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "mode"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "theme.transparency"
+              }
+            }
+          },
+          "then": {
+            "title": "Transparency effects",
+            "description": "Turns transparency effects on or off.",
+            "properties": {
+              "type": {
+                "const": "theme.transparency",
+                "description": "Turns transparency effects on or off."
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "true to enable transparency effects."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "wallpaper.set"
+              }
+            }
+          },
+          "then": {
+            "title": "Set wallpaper",
+            "description": "Sets the desktop background image.",
+            "properties": {
+              "type": {
+                "const": "wallpaper.set",
+                "description": "Sets the desktop background image."
+              },
+              "path": {
+                "type": "string",
+                "examples": [
+                  "C:\\Users\\samet\\Pictures\\night.jpg"
+                ],
+                "description": "Image file (jpg, png, bmp)."
+              },
+              "style": {
+                "enum": [
+                  "fill",
+                  "fit",
+                  "stretch",
+                  "tile",
+                  "center",
+                  "span"
+                ],
+                "default": "fill",
+                "description": "How the image fits the screen."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "path"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "taskbar.autohide"
+              }
+            }
+          },
+          "then": {
+            "title": "Auto-hide taskbar",
+            "description": "Turns taskbar auto-hide on or off.",
+            "properties": {
+              "type": {
+                "const": "taskbar.autohide",
+                "description": "Turns taskbar auto-hide on or off."
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "true to hide the taskbar automatically."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "display.brightness"
+              }
+            }
+          },
+          "then": {
+            "title": "Screen brightness",
+            "description": "Sets screen brightness. Works for laptop screens and for external monitors that support DDC/CI.",
+            "properties": {
+              "type": {
+                "const": "display.brightness",
+                "description": "Sets screen brightness. Works for laptop screens and for external monitors that support DDC/CI."
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "examples": [
+                  "40"
+                ],
+                "description": "Brightness in percent."
+              },
+              "monitor": {
+                "enum": [
+                  "all",
+                  "internal",
+                  "external"
+                ],
+                "default": "all",
+                "description": "Which screens: all, internal (laptop panel) or external."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "level"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "display.resolution"
+              }
+            }
+          },
+          "then": {
+            "title": "Resolution / refresh rate",
+            "description": "Changes a monitor's resolution and/or refresh rate.",
+            "properties": {
+              "type": {
+                "const": "display.resolution",
+                "description": "Changes a monitor's resolution and/or refresh rate."
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 320,
+                "examples": [
+                  "1920"
+                ],
+                "description": "Width in pixels."
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 200,
+                "examples": [
+                  "1080"
+                ],
+                "description": "Height in pixels."
+              },
+              "refresh_rate": {
+                "type": "integer",
+                "minimum": 1,
+                "examples": [
+                  "144"
+                ],
+                "description": "Refresh rate in Hz."
+              },
+              "monitor": {
+                "type": "string",
+                "default": "primary",
+                "description": "primary, or a device name such as \\\\.\\DISPLAY2."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "power.plan"
+              }
+            }
+          },
+          "then": {
+            "title": "Power plan",
+            "description": "Activates a power plan.",
+            "properties": {
+              "type": {
+                "const": "power.plan",
+                "description": "Activates a power plan."
+              },
+              "plan": {
+                "type": "string",
+                "examples": [
+                  "high_performance"
+                ],
+                "description": "balanced, high_performance, power_saver, ultimate_performance, a plan name as shown in Control Panel, or a plan GUID."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "plan"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "power.screen_timeout"
+              }
+            }
+          },
+          "then": {
+            "title": "Screen turn-off time",
+            "description": "Sets how long before the screen turns off when idle, on the active power plan.",
+            "properties": {
+              "type": {
+                "const": "power.screen_timeout",
+                "description": "Sets how long before the screen turns off when idle, on the active power plan."
+              },
+              "minutes": {
+                "type": "integer",
+                "minimum": 0,
+                "examples": [
+                  "10"
+                ],
+                "description": "Minutes of inactivity; 0 means never."
+              },
+              "power_source": {
+                "enum": [
+                  "both",
+                  "ac",
+                  "battery"
+                ],
+                "default": "both",
+                "description": "Change the setting for ac (plugged in), battery, or both."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "minutes"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "power.sleep_timeout"
+              }
+            }
+          },
+          "then": {
+            "title": "Sleep time",
+            "description": "Sets how long before the computer sleeps when idle, on the active power plan.",
+            "properties": {
+              "type": {
+                "const": "power.sleep_timeout",
+                "description": "Sets how long before the computer sleeps when idle, on the active power plan."
+              },
+              "minutes": {
+                "type": "integer",
+                "minimum": 0,
+                "examples": [
+                  "30"
+                ],
+                "description": "Minutes of inactivity; 0 means never."
+              },
+              "power_source": {
+                "enum": [
+                  "both",
+                  "ac",
+                  "battery"
+                ],
+                "default": "both",
+                "description": "Change the setting for ac (plugged in), battery, or both."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "minutes"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "audio.volume"
+              }
+            }
+          },
+          "then": {
+            "title": "Set volume",
+            "description": "Sets the master volume of an output device.",
+            "properties": {
+              "type": {
+                "const": "audio.volume",
+                "description": "Sets the master volume of an output device."
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "examples": [
+                  "30"
+                ],
+                "description": "Volume in percent."
+              },
+              "device": {
+                "type": "string",
+                "examples": [
+                  "Headphones"
+                ],
+                "description": "Part of the device name as shown in Sound settings (e.g. Headphones, Speakers, USB). Leave empty for the current default device."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "level"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "audio.mute"
+              }
+            }
+          },
+          "then": {
+            "title": "Mute / unmute",
+            "description": "Mutes, unmutes or toggles an output device.",
+            "properties": {
+              "type": {
+                "const": "audio.mute",
+                "description": "Mutes, unmutes or toggles an output device."
+              },
+              "state": {
+                "enum": [
+                  "mute",
+                  "unmute",
+                  "toggle"
+                ],
+                "description": "mute, unmute, or toggle."
+              },
+              "device": {
+                "type": "string",
+                "examples": [
+                  "Headphones"
+                ],
+                "description": "Part of the device name as shown in Sound settings (e.g. Headphones, Speakers, USB). Leave empty for the current default device."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "state"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "audio.default_device"
+              }
+            }
+          },
+          "then": {
+            "title": "Default audio device",
+            "description": "Makes a device the default speaker/headphones or microphone.",
+            "properties": {
+              "type": {
+                "const": "audio.default_device",
+                "description": "Makes a device the default speaker/headphones or microphone."
+              },
+              "device": {
+                "type": "string",
+                "examples": [
+                  "Headphones"
+                ],
+                "description": "Part of the device name as shown in Sound settings."
+              },
+              "flow": {
+                "enum": [
+                  "output",
+                  "input"
+                ],
+                "default": "output",
+                "description": "output (playback) or input (recording)."
+              },
+              "role": {
+                "enum": [
+                  "all",
+                  "multimedia",
+                  "communications"
+                ],
+                "default": "all",
+                "description": "Which default to change: all, multimedia (default device) or communications (default communication device)."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "device"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "radio.set"
+              }
+            }
+          },
+          "then": {
+            "title": "Wi-Fi / Bluetooth on or off",
+            "description": "Turns a wireless radio on, off, or toggles it.",
+            "properties": {
+              "type": {
+                "const": "radio.set",
+                "description": "Turns a wireless radio on, off, or toggles it."
+              },
+              "radio": {
+                "enum": [
+                  "wifi",
+                  "bluetooth",
+                  "mobile_broadband"
+                ],
+                "description": "Which radio."
+              },
+              "state": {
+                "enum": [
+                  "on",
+                  "off",
+                  "toggle"
+                ],
+                "description": "on, off, or toggle."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "radio",
+              "state"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "mouse.speed"
+              }
+            }
+          },
+          "then": {
+            "title": "Mouse pointer speed",
+            "description": "Sets the mouse pointer speed.",
+            "properties": {
+              "type": {
+                "const": "mouse.speed",
+                "description": "Sets the mouse pointer speed."
+              },
+              "speed": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20,
+                "examples": [
+                  "10"
+                ],
+                "description": "1 (slowest) to 20 (fastest); Windows' default is 10."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "speed"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "app.launch"
+              }
+            }
+          },
+          "then": {
+            "title": "Launch app",
+            "description": "Starts a program or opens a file.",
+            "properties": {
+              "type": {
+                "const": "app.launch",
+                "description": "Starts a program or opens a file."
+              },
+              "path": {
+                "type": "string",
+                "examples": [
+                  "C:\\Program Files\\OBS Studio\\bin\\64bit\\obs64.exe"
+                ],
+                "description": "Program or file to open."
+              },
+              "arguments": {
+                "type": "string",
+                "examples": [
+                  "--startreplaybuffer"
+                ],
+                "description": "Command-line arguments."
+              },
+              "working_directory": {
+                "type": "string",
+                "description": "Folder to start in. Defaults to the program's folder."
+              },
+              "window": {
+                "enum": [
+                  "normal",
+                  "minimized",
+                  "maximized",
+                  "hidden"
+                ],
+                "default": "normal",
+                "description": "Initial window state."
+              },
+              "skip_if_running": {
+                "type": "boolean",
+                "default": true,
+                "description": "Do nothing if the program is already running."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "path"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "app.close"
+              }
+            }
+          },
+          "then": {
+            "title": "Close app",
+            "description": "Asks an app to close, like clicking its X button. With force: true it is ended if it does not close in time.",
+            "properties": {
+              "type": {
+                "const": "app.close",
+                "description": "Asks an app to close, like clicking its X button. With force: true it is ended if it does not close in time."
+              },
+              "app": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "examples": [
+                  "Discord.exe"
+                ],
+                "description": "App patterns to close."
+              },
+              "force": {
+                "type": "boolean",
+                "default": false,
+                "description": "End the app if it has not closed after the timeout. Unsaved work is lost."
+              },
+              "timeout": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\s*(\\d+(\\.\\d+)?\\s*(ms|s|m|h|d)\\s*)+$|^\\d+:\\d{2}(:\\d{2})?$|^\\d+(\\.\\d+)?$"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ],
+                "default": "10s",
+                "description": "How long to wait for the app to close before forcing it."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "app"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "command.run"
+              }
+            }
+          },
+          "then": {
+            "title": "Run command / script",
+            "description": "Runs a PowerShell script or a command line.",
+            "properties": {
+              "type": {
+                "const": "command.run",
+                "description": "Runs a PowerShell script or a command line."
+              },
+              "command": {
+                "type": "string",
+                "examples": [
+                  "Write-Output \"Hello $env:AUTOSETTINGS_USER\""
+                ],
+                "description": "The script or command line. Details of the event are available as environment variables, e.g. $env:AUTOSETTINGS_USER and $env:AUTOSETTINGS_APP_PATH in PowerShell or %AUTOSETTINGS_USER% in cmd ({{ placeholders }} are deliberately not replaced in scripts)."
+              },
+              "shell": {
+                "enum": [
+                  "powershell",
+                  "pwsh",
+                  "cmd",
+                  "none"
+                ],
+                "default": "powershell",
+                "description": "powershell (Windows PowerShell 5.1), pwsh (PowerShell 7), cmd, or none (run the command line directly)."
+              },
+              "run_as": {
+                "enum": [
+                  "user",
+                  "system"
+                ],
+                "default": "user",
+                "description": "user runs as the signed-in user; system runs as the local SYSTEM account (machine automations only)."
+              },
+              "wait": {
+                "type": "boolean",
+                "default": false,
+                "description": "Wait for the command to finish before the next action. A non-zero exit code then counts as a failure."
+              },
+              "timeout": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\s*(\\d+(\\.\\d+)?\\s*(ms|s|m|h|d)\\s*)+$|^\\d+:\\d{2}(:\\d{2})?$|^\\d+(\\.\\d+)?$"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ],
+                "default": "1m",
+                "description": "When waiting, stop the command after this long."
+              },
+              "hidden": {
+                "type": "boolean",
+                "default": true,
+                "description": "Run without showing a console window."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "command"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "notify"
+              }
+            }
+          },
+          "then": {
+            "title": "Show notification",
+            "description": "Shows a Windows notification.",
+            "properties": {
+              "type": {
+                "const": "notify",
+                "description": "Shows a Windows notification."
+              },
+              "title": {
+                "type": "string",
+                "default": "AutoSettings",
+                "description": "Notification title."
+              },
+              "message": {
+                "type": "string",
+                "examples": [
+                  "Welcome back, {{ user }}!"
+                ],
+                "description": "Notification text. Placeholders such as {{ user }} are replaced."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "message"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "open"
+              }
+            }
+          },
+          "then": {
+            "title": "Open URL / settings page",
+            "description": "Opens a website, a file, a folder, or a Windows Settings page (ms-settings: links).",
+            "properties": {
+              "type": {
+                "const": "open",
+                "description": "Opens a website, a file, a folder, or a Windows Settings page (ms-settings: links)."
+              },
+              "target": {
+                "type": "string",
+                "examples": [
+                  "ms-settings:display"
+                ],
+                "description": "What to open."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "registry.set"
+              }
+            }
+          },
+          "then": {
+            "title": "Set registry value",
+            "description": "Writes a registry value. Use this for any Windows setting that has no dedicated action.",
+            "properties": {
+              "type": {
+                "const": "registry.set",
+                "description": "Writes a registry value. Use this for any Windows setting that has no dedicated action."
+              },
+              "key": {
+                "type": "string",
+                "examples": [
+                  "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+                ],
+                "description": "Registry key starting with HKCU\\ (your settings) or HKLM\\ (machine settings, machine automations only)."
+              },
+              "name": {
+                "type": "string",
+                "examples": [
+                  "HideFileExt"
+                ],
+                "description": "Value name. Leave empty for the key's default value."
+              },
+              "value": {
+                "type": "string",
+                "examples": [
+                  "0"
+                ],
+                "description": "The data. Numbers for dword/qword; separate multi_string items with |."
+              },
+              "kind": {
+                "enum": [
+                  "string",
+                  "expand_string",
+                  "dword",
+                  "qword",
+                  "multi_string"
+                ],
+                "default": "string",
+                "description": "Value type."
+              },
+              "broadcast": {
+                "type": "boolean",
+                "default": false,
+                "description": "Tell running apps that settings changed (WM_SETTINGCHANGE). Some settings need this to apply without signing out."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "value"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "service.control"
+              }
+            }
+          },
+          "then": {
+            "title": "Start / stop a service",
+            "description": "Starts or stops a Windows service.",
+            "properties": {
+              "type": {
+                "const": "service.control",
+                "description": "Starts or stops a Windows service."
+              },
+              "name": {
+                "type": "string",
+                "examples": [
+                  "wuauserv"
+                ],
+                "description": "Service name (as in services.msc > Properties > Service name)."
+              },
+              "state": {
+                "enum": [
+                  "running",
+                  "stopped"
+                ],
+                "description": "running or stopped."
+              },
+              "timeout": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\s*(\\d+(\\.\\d+)?\\s*(ms|s|m|h|d)\\s*)+$|^\\d+:\\d{2}(:\\d{2})?$|^\\d+(\\.\\d+)?$"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ],
+                "default": "30s",
+                "description": "How long to wait for the service to reach the state."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "state"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
