@@ -1,0 +1,33 @@
+# Gaming mode
+# When Steam or the Epic launcher starts: high-performance power plan, no sleep,
+# headphones as the default device and chat apps closed.
+# Everything the profile changed is restored when the last launcher window closes.
+version: 1
+
+automations:
+  - id: gaming-mode
+    name: Gaming mode while a game launcher runs
+    triggers:
+      - type: app_started
+        app: [steam.exe, EpicGamesLauncher.exe]
+    actions:
+      - type: profile.apply
+        profile: gaming
+      - type: app.close
+        app: Discord.exe
+        continue_on_error: true
+      - type: notify
+        message: "Gaming mode on ({{ app }})"
+
+profiles:
+  - id: gaming
+    name: Gaming
+    priority: 10
+    actions:
+      - type: power.plan
+        plan: high_performance
+      - type: power.sleep_timeout
+        minutes: 0
+        power_source: ac
+      - type: audio.default_device
+        device: Headphones

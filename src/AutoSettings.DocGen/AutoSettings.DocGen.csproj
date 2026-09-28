@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Generates docs/reference (one page per trigger, condition and action) and the JSON Schema
+    from the component catalog, so the documentation always matches the code.
+    See docs/dev/building.md for the command line (write, or check mode used by CI).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AutoSettings.DocGen</RootNamespace>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoSettings.Core\AutoSettings.Core.csproj" />
+  </ItemGroup>
+
+</Project>

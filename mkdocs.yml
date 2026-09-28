@@ -1,0 +1,66 @@
+# Documentation site. Preview locally:
+#   pip install mkdocs-material
+#   mkdocs serve
+site_name: AutoSettings
+site_description: Windows settings that change themselves.
+repo_url: https://github.com/Samet1771/AutoSettings
+edit_uri: edit/main/docs/
+docs_dir: docs
+
+theme:
+  name: material
+  logo: assets/icon.png
+  favicon: assets/icon.png
+  palette:
+    - scheme: default
+      primary: blue
+      toggle:
+        icon: material/brightness-7
+        name: Dark mode
+    - scheme: slate
+      primary: blue
+      toggle:
+        icon: material/brightness-4
+        name: Light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - Guide:
+      - Installation: guide/installation.md
+      - Getting started: guide/getting-started.md
+      - Writing automations: guide/automations.md
+      - Profiles: guide/profiles.md
+      - Personal and machine automations: guide/personal-and-machine.md
+      - The app: guide/the-app.md
+      - The editor: guide/editor.md
+      - Updates: guide/updates.md
+      - Troubleshooting and FAQ: guide/troubleshooting.md
+      - Examples: examples/README.md
+  - Reference:
+      - Overview: reference/index.md
+      - Placeholders: reference/placeholders.md
+  - Developers:
+      - Architecture: dev/architecture.md
+      - Rule engine: dev/engine.md
+      - Service and agent protocol: dev/ipc.md
+      - Security model: dev/security.md
+      - Building and testing: dev/building.md
+      - Adding actions, conditions, triggers: dev/adding-an-action.md
+  - Roadmap: roadmap.md

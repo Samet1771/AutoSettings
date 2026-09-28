@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build, test & publish (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore AutoSettings.slnx
+
+      - name: Build
+        run: dotnet build AutoSettings.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test AutoSettings.slnx --configuration Release --no-build --logger "console;verbosity=minimal"
+
+      - name: Publish service and agent
+        shell: pwsh
+        run: |
+          $out = "artifacts/AutoSettings"
+          dotnet publish src/AutoSettings.Service -c Release -r win-x64 --self-contained -o $out
+          dotnet publish src/AutoSettings.Agent -c Release -r win-x64 --self-contained -o $out
+          Copy-Item scripts/install.ps1, scripts/uninstall.ps1 $out
+
+      - name: Build MSI installer
+        shell: pwsh
+        run: dotnet build installer/AutoSettings.Installer/AutoSettings.Installer.wixproj -c Release -p:PublishDir="$PWD\artifacts\AutoSettings" -o artifacts/msi
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: AutoSettings-win-x64
+          path: artifacts/AutoSettings
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: AutoSettings-msi
+          path: artifacts/msi/*.msi
+          retention-days: 14
+
+  docs:
+    name: Reference docs up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Check generated reference docs
+        run: dotnet run --project src/AutoSettings.DocGen -- --check
+
+  site:
+    name: Documentation site builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Build site
+        run: |
+          pip install --quiet mkdocs-material
+          mkdocs build

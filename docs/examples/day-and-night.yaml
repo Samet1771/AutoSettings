@@ -1,0 +1,54 @@
+# Day and night
+# Dark mode and a dimmer screen in the evening, light mode in the morning.
+# Runs whenever you sign in or unlock, so the theme is right when you sit down.
+version: 1
+
+automations:
+  - id: evening
+    name: Evening look
+    triggers:
+      - type: logon
+      - type: unlock
+    conditions:
+      - type: time
+        after: "20:00"
+        before: "07:00"
+    actions:
+      - type: theme.mode
+        mode: dark
+      - type: display.brightness
+        level: 40
+        monitor: internal
+
+  - id: morning
+    name: Daytime look
+    triggers:
+      - type: logon
+      - type: unlock
+    conditions:
+      - type: time
+        after: "07:00"
+        before: "20:00"
+    actions:
+      - type: theme.mode
+        mode: light
+      - type: display.brightness
+        level: 80
+        monitor: internal
+
+  - id: battery-saver
+    name: Save battery when it runs low
+    cooldown: 15m
+    triggers:
+      - type: unlock
+    conditions:
+      - type: power_source
+        is: battery
+      - type: battery
+        below: 30
+    actions:
+      - type: power.plan
+        plan: power_saver
+      - type: radio.set
+        radio: bluetooth
+        state: "off"

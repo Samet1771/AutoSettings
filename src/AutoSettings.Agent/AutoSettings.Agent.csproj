@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The per-user agent: tray icon, focus monitoring, personal automations and the UI. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <!-- Only for the tray icon (System.Windows.Forms.NotifyIcon). -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\AutoSettings.ico</ApplicationIcon>
+    <RootNamespace>AutoSettings.Agent</RootNamespace>
+    <AssemblyName>AutoSettings.Agent</AssemblyName>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Avoid WPF/WinForms name clashes (Application, MessageBox, ...). WinForms types are fully qualified. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StreamJsonRpc" Version="2.*" />
+    <PackageReference Include="WPF-UI" Version="4.*" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    <PackageReference Include="AvalonEdit" Version="6.*" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\AutoSettings.ico" />
+    <EmbeddedResource Include="Editor\Yaml.xshd" LogicalName="AutoSettings.Agent.Yaml.xshd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoSettings.Core\AutoSettings.Core.csproj" />
+    <ProjectReference Include="..\AutoSettings.Platform\AutoSettings.Platform.csproj" />
+  </ItemGroup>
+
+</Project>

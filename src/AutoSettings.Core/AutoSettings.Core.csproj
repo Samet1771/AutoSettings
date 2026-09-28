@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Platform-neutral core: configuration model, YAML loading/validation, component catalog,
+    rule engine and IPC contracts. It deliberately has no Windows dependencies so it can be
+    unit-tested and used by DocGen on any OS.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AutoSettings.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" Version="16.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="AutoSettings.Core.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Template gallery: one YAML file per template, validated by the unit tests. -->
+    <EmbeddedResource Include="Templates\*.yaml" LogicalName="AutoSettings.Templates.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+
+  <!--
+    MSI installer. Build after publishing the service and agent into one folder:
+      dotnet build installer/AutoSettings.Installer -c Release -p:PublishDir=<folder>
+    The default PublishDir is artifacts/AutoSettings (what scripts/publish.ps1 and CI produce).
+  -->
+  <PropertyGroup>
+    <OutputName>AutoSettings-$(Version)-x64</OutputName>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)..\..\artifacts\AutoSettings</PublishDir>
+    <!-- Windows Installer versions are numeric: 0.3.0-beta.1 installs as 0.3.0. -->
+    <MsiVersion>$([System.Text.RegularExpressions.Regex]::Replace('$(Version)', '[-+].*$', ''))</MsiVersion>
+    <DefineConstants>PublishDir=$(PublishDir);ProductVersion=$(MsiVersion);IconPath=$(MSBuildThisFileDirectory)..\..\src\AutoSettings.Agent\Assets\AutoSettings.ico</DefineConstants>
+    <!-- Directory.Build.props targets C# projects; these do not apply here. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+  </ItemGroup>
+
+</Project>

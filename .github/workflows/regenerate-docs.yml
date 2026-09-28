@@ -1,0 +1,46 @@
+# Regenerates docs/reference from the component catalog and commits the result to the branch.
+# Runs automatically on feature branches when the catalog or DocGen changes, and on demand.
+name: Regenerate reference docs
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "src/AutoSettings.Core/Catalog/**"
+      - "src/AutoSettings.Core/Engine/Placeholders.cs"
+      - "src/AutoSettings.Core/Schema/**"
+      - "src/AutoSettings.DocGen/**"
+      - ".github/workflows/regenerate-docs.yml"
+
+concurrency:
+  group: regenerate-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Generate
+        run: dotnet run --project src/AutoSettings.DocGen
+
+      - name: Commit changes
+        run: |
+          if [ -z "$(git status --porcelain docs/reference)" ]; then
+            echo "Reference docs are already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/reference
+          git commit -m "docs: regenerate reference docs"
+          git push

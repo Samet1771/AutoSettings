@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AutoSettings.Core/AutoSettings.Core.csproj" />
+    <Project Path="src/AutoSettings.Platform/AutoSettings.Platform.csproj" />
+    <Project Path="src/AutoSettings.Service/AutoSettings.Service.csproj" />
+    <Project Path="src/AutoSettings.Agent/AutoSettings.Agent.csproj" />
+    <Project Path="src/AutoSettings.DocGen/AutoSettings.DocGen.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AutoSettings.Core.Tests/AutoSettings.Core.Tests.csproj" />
+  </Folder>
+</Solution>

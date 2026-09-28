@@ -1,0 +1,39 @@
+# Meetings
+# When Teams or Zoom starts, switch calls to the headset and turn the volume up a bit.
+# When the app is fully closed again, the previous devices and volume come back.
+version: 1
+
+automations:
+  - id: meeting-audio
+    name: Headset for meetings
+    triggers:
+      - type: app_started
+        app: [ms-teams.exe, Zoom.exe]
+    conditions:
+      - type: monitor_count
+        min: 2
+    actions:
+      - type: profile.apply
+        profile: meeting
+
+  - id: meeting-reminder
+    name: Remind me to unmute
+    triggers:
+      - type: app_focused
+        app: [ms-teams.exe, Zoom.exe]
+        title: ["*Meeting*", "*Call*"]
+    actions:
+      - type: notify
+        title: Meeting
+        message: "Check your microphone before you talk."
+
+profiles:
+  - id: meeting
+    name: Meeting
+    actions:
+      - type: audio.default_device
+        device: Headset
+        role: communications
+      - type: audio.volume
+        level: 60
+        device: Headset

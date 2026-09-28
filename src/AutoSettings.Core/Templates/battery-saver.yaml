@@ -1,0 +1,32 @@
+version: 1
+automations:
+  - id: low-battery
+    name: Save battery when it runs low
+    cooldown: 15m
+    triggers:
+      - type: unlock
+      - type: logon
+    conditions:
+      - type: power_source
+        is: battery
+      - type: battery
+        below: 25
+    actions:
+      - type: profile.apply
+        profile: battery-saver
+        revert_on: lock
+profiles:
+  - id: battery-saver
+    name: Battery saver
+    actions:
+      - type: power.plan
+        plan: power_saver
+        continue_on_error: true
+      - type: display.brightness
+        level: 35
+        monitor: internal
+        continue_on_error: true
+      - type: radio.set
+        radio: bluetooth
+        state: "off"
+        continue_on_error: true

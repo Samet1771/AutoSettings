@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AutoSettings MSI: installs the self-contained service and agent to Program Files, registers the
+  Windows Service (automatic start, restart on failure), adds a Start menu shortcut, and supports
+  upgrades. Machine and personal automations in ProgramData/AppData are never removed.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package Name="AutoSettings"
+           Manufacturer="AutoSettings contributors"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="5AD85E75-98E3-4059-9B12-7B2BE351CCD6"
+           Scope="perMachine"
+           InstallerVersion="500">
+
+    <!-- Same-version upgrades let a final release replace its beta (both are x.y.z for Windows Installer). -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of AutoSettings is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Samet1771/AutoSettings" />
+
+    <!-- Close running agents so their files can be replaced; the service is stopped by ServiceControl. -->
+    <util:CloseApplication Id="CloseAgent" Target="AutoSettings.Agent.exe" CloseMessage="yes" RebootPrompt="no" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="AutoSettings" />
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="AutoSettings" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="ServiceComponent" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <!-- The service executable, with its service registration. -->
+    <Component Id="ServiceComponent" Directory="INSTALLFOLDER">
+      <File Id="ServiceExe" Source="$(var.PublishDir)\AutoSettings.Service.exe" KeyPath="yes" />
+      <ServiceInstall Id="AutoSettingsService"
+                      Name="AutoSettings"
+                      DisplayName="AutoSettings"
+                      Description="Changes Windows settings automatically when the computer starts, users sign in, and apps start, close or get focus."
+                      Type="ownProcess"
+                      Start="auto"
+                      ErrorControl="normal"
+                      Account="LocalSystem"
+                      Vital="yes">
+        <util:ServiceConfig FirstFailureActionType="restart"
+                            SecondFailureActionType="restart"
+                            ThirdFailureActionType="restart"
+                            RestartServiceDelayInSeconds="5"
+                            ResetPeriodInDays="1" />
+      </ServiceInstall>
+      <!-- Tells the service that it was installed with the MSI, so it can update itself. -->
+      <RegistryValue Root="HKLM" Key="Software\AutoSettings" Name="InstallMethod" Type="string" Value="msi" />
+      <ServiceControl Id="AutoSettingsServiceControl" Name="AutoSettings" Start="install" Stop="both" Remove="uninstall" Wait="yes" />
+    </Component>
+
+    <!-- Everything else in the publish folder. -->
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**">
+        <Exclude Files="$(var.PublishDir)\AutoSettings.Service.exe" />
+        <Exclude Files="$(var.PublishDir)\*.pdb" />
+        <Exclude Files="$(var.PublishDir)\install.ps1" />
+        <Exclude Files="$(var.PublishDir)\uninstall.ps1" />
+      </Files>
+    </ComponentGroup>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="StartMenuShortcut">
+        <Shortcut Id="AgentShortcut"
+                  Name="AutoSettings"
+                  Description="Automatic Windows settings"
+                  Target="[INSTALLFOLDER]AutoSettings.Agent.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon" />
+        <!-- Windows Installer rules (ICE38/43/57) want the key path of a Start menu component under HKCU. -->
+        <RegistryValue Root="HKCU" Key="Software\AutoSettings" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+  </Fragment>
+</Wix>
