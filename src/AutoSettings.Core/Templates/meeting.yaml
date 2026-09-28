@@ -1,0 +1,20 @@
+version: 1
+automations:
+  - id: meeting-audio
+    name: Headset for meetings
+    triggers:
+      - type: app_started
+        app: [ms-teams.exe, Zoom.exe, Webex.exe]
+    actions:
+      - type: profile.apply
+        profile: meeting
+profiles:
+  - id: meeting
+    name: Meeting
+    actions:
+      - type: audio.default_device
+        device: Headset
+        role: communications
+      - type: audio.volume
+        level: 60
+        device: Headset

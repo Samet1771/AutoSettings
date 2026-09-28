@@ -86,6 +86,50 @@ public static class YamlConfigReader
     }
 
     /// <summary>
+    /// Reads a single automation written as a YAML map (the editor's per-automation YAML view).
+    /// Line numbers in issues refer to the snippet.
+    /// </summary>
+    public static (Automation? Automation, List<ConfigIssue> Issues) ReadAutomationSnippet(string yaml)
+    {
+        var issues = new List<ConfigIssue>();
+        var map = ReadRootMap(yaml, issues, "An automation must be a map with 'triggers' and 'actions'.");
+        return (map is null ? null : ReadAutomation(map, 0, issues), issues);
+    }
+
+    /// <summary>Reads a single profile written as a YAML map.</summary>
+    public static (Profile? Profile, List<ConfigIssue> Issues) ReadProfileSnippet(string yaml)
+    {
+        var issues = new List<ConfigIssue>();
+        var map = ReadRootMap(yaml, issues, "A profile must be a map with 'id' and 'actions'.");
+        return (map is null ? null : ReadProfile(map, 0, issues), issues);
+    }
+
+    private static RawMap? ReadRootMap(string yaml, List<ConfigIssue> issues, string notAMapMessage)
+    {
+        YamlNode? root;
+        try
+        {
+            var stream = new YamlStream();
+            stream.Load(new StringReader(yaml));
+            root = stream.Documents.Count > 0 ? stream.Documents[0].RootNode : null;
+        }
+        catch (YamlException ex)
+        {
+            issues.Add(new ConfigIssue(IssueSeverity.Error, "YAML syntax error: " + CleanMessage(ex.Message), ToLocation(ex.Start)));
+            return null;
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+        {
+            issues.Add(new ConfigIssue(IssueSeverity.Error, "YAML error: " + ex.Message));
+            return null;
+        }
+        if (root is not null && ToRaw(root) is RawMap map)
+            return map;
+        issues.Add(new ConfigIssue(IssueSeverity.Error, notAMapMessage, root is null ? null : ToLocation(root.Start)));
+        return null;
+    }
+
+    /// <summary>
     /// Reads a list of triggers, conditions or actions from a raw value (a list of maps, a single map,
     /// or plain type names such as <c>- lock</c>).
     /// </summary>

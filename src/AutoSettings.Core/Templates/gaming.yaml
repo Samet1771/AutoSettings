@@ -1,0 +1,26 @@
+version: 1
+automations:
+  - id: gaming-mode
+    name: Gaming mode while a game launcher runs
+    triggers:
+      - type: app_started
+        app: [steam.exe, EpicGamesLauncher.exe, Battle.net.exe, RiotClientServices.exe]
+    actions:
+      - type: profile.apply
+        profile: gaming
+      - type: notify
+        message: "Gaming mode on ({{ app }})"
+profiles:
+  - id: gaming
+    name: Gaming
+    priority: 10
+    actions:
+      - type: power.plan
+        plan: high_performance
+        continue_on_error: true
+      - type: power.sleep_timeout
+        minutes: 0
+        power_source: ac
+      - type: power.screen_timeout
+        minutes: 0
+        power_source: ac

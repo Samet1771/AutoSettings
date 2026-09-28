@@ -19,4 +19,9 @@
     <InternalsVisibleTo Include="AutoSettings.Core.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Template gallery: one YAML file per template, validated by the unit tests. -->
+    <EmbeddedResource Include="Templates\*.yaml" LogicalName="AutoSettings.Templates.%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

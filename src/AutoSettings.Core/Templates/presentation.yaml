@@ -1,0 +1,21 @@
+version: 1
+automations:
+  - id: presentation-mode
+    name: Presentation mode while PowerPoint is focused
+    triggers:
+      - type: app_focused
+        app: POWERPNT.EXE
+    actions:
+      - type: profile.apply
+        profile: presentation
+profiles:
+  - id: presentation
+    name: Presentation
+    priority: 20
+    actions:
+      - type: audio.mute
+        state: mute
+      - type: power.screen_timeout
+        minutes: 0
+      - type: power.sleep_timeout
+        minutes: 0

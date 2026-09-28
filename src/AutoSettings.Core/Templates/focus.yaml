@@ -1,0 +1,24 @@
+version: 1
+automations:
+  - id: focus-time
+    name: Focus time while coding
+    triggers:
+      - type: app_focused
+        app: [Code.exe, devenv.exe, rider64.exe, idea64.exe]
+    conditions:
+      - type: time
+        after: "09:00"
+        before: "18:00"
+        weekdays: [mon, tue, wed, thu, fri]
+    actions:
+      - type: profile.apply
+        profile: focus
+      - type: app.close
+        app: [Discord.exe, Slack.exe]
+        continue_on_error: true
+profiles:
+  - id: focus
+    name: Focus
+    actions:
+      - type: audio.mute
+        state: mute

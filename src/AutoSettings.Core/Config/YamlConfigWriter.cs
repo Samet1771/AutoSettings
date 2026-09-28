@@ -37,16 +37,29 @@ public static partial class YamlConfigWriter
             sb.Append('\n');
         }
 
-        using var writer = new StringWriter(sb) { NewLine = "\n" };
-        var stream = new YamlStream(new YamlDocument(root));
-        var settings = EmitterSettings.Default.WithIndentedSequences();
-        stream.Save(new Emitter(writer, settings), assignAnchors: false);
-        writer.Flush();
+        sb.Append(Emit(root));
 
         // Separate top-level list items with a blank line for readability.
         var text = sb.ToString().Replace("\r\n", "\n");
         text = TopLevelItem().Replace(text, "\n$1");
         return text.TrimEnd() + "\n";
+    }
+
+    /// <summary>Writes one automation as a YAML map (the editor's per-automation YAML view).</summary>
+    public static string WriteAutomation(Automation automation) => Emit(ToNode(automation)).TrimEnd() + "\n";
+
+    /// <summary>Writes one profile as a YAML map.</summary>
+    public static string WriteProfile(Profile profile) => Emit(ToNode(profile)).TrimEnd() + "\n";
+
+    private static string Emit(YamlNode root)
+    {
+        var sb = new StringBuilder();
+        using var writer = new StringWriter(sb) { NewLine = "\n" };
+        var stream = new YamlStream(new YamlDocument(root));
+        var settings = EmitterSettings.Default.WithIndentedSequences();
+        stream.Save(new Emitter(writer, settings), assignAnchors: false);
+        writer.Flush();
+        return sb.ToString().Replace("\r\n", "\n");
     }
 
     private static YamlMappingNode ToNode(Automation automation)
