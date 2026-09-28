@@ -211,6 +211,7 @@ public static class BuiltInConditions
             Category = DeviceCategory,
             Title = "Number of monitors",
             Description = "True when the number of connected monitors is within the range. Handy for docked/undocked laptops.",
+            AvailableIn = ScopeSupport.User,
             Fields =
             [
                 Fields.Integer("min", "At least this many monitors.", min: 0),

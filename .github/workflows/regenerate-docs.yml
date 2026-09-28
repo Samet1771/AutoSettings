@@ -1,0 +1,34 @@
+# Regenerates docs/reference from the component catalog and commits the result to the chosen branch.
+# Handy when you change triggers, conditions or actions without a local .NET SDK.
+name: Regenerate reference docs
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Generate
+        run: dotnet run --project src/AutoSettings.DocGen
+
+      - name: Commit changes
+        run: |
+          if [ -z "$(git status --porcelain docs/reference)" ]; then
+            echo "Reference docs are already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/reference
+          git commit -m "docs: regenerate reference docs"
+          git push

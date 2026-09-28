@@ -1,0 +1,149 @@
+<Window x:Class="AutoSettings.Agent.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AutoSettings"
+        Width="1040" Height="700" MinWidth="760" MinHeight="480"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Assets/AutoSettings.ico"
+        FontFamily="Segoe UI" FontSize="13">
+    <DockPanel>
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource AccentBrush}" Padding="18,12">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="PauseButton" Content="Pause" Click="OnPauseClick" Margin="0" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="AutoSettings" FontSize="20" FontWeight="SemiBold" Foreground="White" />
+                    <TextBlock x:Name="HeaderStatus" Foreground="#DBEAFE" TextWrapping="Wrap" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <TabControl x:Name="Tabs" Margin="10" SelectionChanged="OnTabChanged">
+            <!-- Automations -->
+            <TabItem Header="Automations">
+                <DockPanel Margin="8">
+                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Hint}"
+                               Text="WHEN a trigger happens, IF all conditions are true, THEN the actions run in order. Select an automation to test it." />
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Run now" Style="{StaticResource PrimaryButton}" Click="OnRunClick" ToolTip="Run the actions now if the conditions are true" />
+                        <Button Content="Run, ignoring conditions" Click="OnRunForcedClick" />
+                        <Button Content="Edit YAML" Click="OnEditClick" />
+                        <CheckBox x:Name="DryRunCheck" Content="Dry run (log actions instead of running them)" VerticalAlignment="Center" Margin="12,0,0,0"
+                                  Checked="OnDryRunChanged" Unchecked="OnDryRunChanged" />
+                    </StackPanel>
+                    <ListView x:Name="AutomationList" MouseDoubleClick="OnRunClick">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="On" Width="45" DisplayMemberBinding="{Binding Enabled}" />
+                                <GridViewColumn Header="Name" Width="220" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="When" Width="230" DisplayMemberBinding="{Binding When}" />
+                                <GridViewColumn Header="If" Width="190" DisplayMemberBinding="{Binding If}" />
+                                <GridViewColumn Header="Then" Width="300" DisplayMemberBinding="{Binding Then}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+            </TabItem>
+
+            <!-- Profiles -->
+            <TabItem Header="Profiles">
+                <DockPanel Margin="8">
+                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Hint}"
+                               Text="A profile is a set of settings that is applied together and undone together. Automations apply profiles and revert them automatically (for example when an app loses focus)." />
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Apply" Style="{StaticResource PrimaryButton}" Click="OnApplyProfileClick" />
+                        <Button Content="Revert" Click="OnRevertProfileClick" />
+                    </StackPanel>
+                    <ListView x:Name="ProfileList">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Status" Width="200" DisplayMemberBinding="{Binding Status}" />
+                                <GridViewColumn Header="Name" Width="180" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="Priority" Width="70" DisplayMemberBinding="{Binding Priority}" />
+                                <GridViewColumn Header="Settings" Width="520" DisplayMemberBinding="{Binding Actions}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+            </TabItem>
+
+            <!-- Activity -->
+            <TabItem Header="Activity">
+                <DockPanel Margin="8">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <RadioButton x:Name="PersonalActivity" Content="My activity" IsChecked="True" Checked="OnActivitySourceChanged" Margin="0,0,16,0" />
+                        <RadioButton x:Name="MachineActivity" Content="Machine (service) activity" Checked="OnActivitySourceChanged" />
+                        <Button Content="Clear" Click="OnClearActivityClick" Margin="24,0,0,0" MinWidth="60" />
+                    </StackPanel>
+                    <ListView x:Name="ActivityList">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="" Width="32">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Icon}" Foreground="{Binding Brush}" FontWeight="Bold" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Time" Width="80" DisplayMemberBinding="{Binding Time}" />
+                                <GridViewColumn Header="What happened" Width="820">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+            </TabItem>
+
+            <!-- YAML editor -->
+            <TabItem Header="YAML editor">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="110" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Style="{StaticResource Hint}">
+                        Edit your automations and profiles. Save checks the file first and never saves a file with errors.
+                        The reference for every trigger, condition and action is in the documentation.
+                    </TextBlock>
+                    <TextBox x:Name="YamlEditor" Grid.Row="1"
+                             FontFamily="Cascadia Mono, Consolas, Courier New" FontSize="13"
+                             AcceptsReturn="True" AcceptsTab="True" TextWrapping="NoWrap"
+                             HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                             TextChanged="OnYamlChanged" />
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8">
+                        <Button Content="Save" Style="{StaticResource PrimaryButton}" Click="OnSaveYamlClick" />
+                        <Button Content="Check" Click="OnValidateYamlClick" />
+                        <Button Content="Discard changes" Click="OnReloadYamlClick" />
+                        <Button Content="Open in another editor" Click="OnExternalEditorClick" />
+                        <TextBlock x:Name="YamlStatus" VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" />
+                    </StackPanel>
+                    <ListBox x:Name="IssueList" Grid.Row="3" MouseDoubleClick="OnIssueDoubleClick" />
+                </Grid>
+            </TabItem>
+
+            <!-- Status -->
+            <TabItem Header="Status">
+                <ScrollViewer Margin="8" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Status" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <TextBlock x:Name="StatusDetails" TextWrapping="Wrap" LineHeight="22" />
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <Button Content="Open automations folder" Click="OnOpenConfigFolderClick" />
+                            <Button Content="Open log folder" Click="OnOpenLogFolderClick" />
+                            <Button Content="Documentation" Click="OnDocsClick" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
