@@ -1,0 +1,15 @@
+# Build output
+bin/
+obj/
+artifacts/
+publish/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+TestResults/
+*.binlog
+
+# Docs site build
+site/

@@ -1,0 +1,32 @@
+# Machine automations example (C:\ProgramData\AutoSettings\automations.yaml).
+# Only administrators can edit this file. It applies to every user of the computer.
+version: 1
+
+automations:
+  - id: boot-log
+    name: Log every start
+    triggers:
+      - type: boot
+    actions:
+      - type: command.run
+        run_as: system
+        command: Add-Content -Path "$env:ProgramData\AutoSettings\boot.log" -Value "{{ now }} {{ boot_type }}"
+
+  - id: guest-welcome
+    name: Welcome guests
+    triggers:
+      - type: logon
+        user: guest*
+    actions:
+      - type: notify
+        message: "Hi {{ user }}! Files saved on this account are deleted every night."
+
+  - id: kiosk-updates
+    name: No Windows Update while the kiosk app runs
+    triggers:
+      - type: app_started
+        app: C:\Kiosk\kiosk.exe
+    actions:
+      - type: service.control
+        name: wuauserv
+        state: stopped

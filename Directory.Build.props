@@ -1,0 +1,17 @@
+<Project>
+  <!-- Shared settings for every project in the repository. -->
+  <PropertyGroup>
+    <Product>AutoSettings</Product>
+    <Company>AutoSettings contributors</Company>
+    <Copyright>Copyright (c) 2026 Samet</Copyright>
+    <Version>0.1.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <!-- Lets Windows-only projects build (not run) on Linux/macOS, e.g. for DocGen in CI. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>
