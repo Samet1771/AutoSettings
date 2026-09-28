@@ -115,18 +115,30 @@ Unit tests cover the engine; the Windows integration needs a real machine or VM.
 
 ## Releasing
 
-1. Update `CHANGELOG.md` and `<Version>` in `Directory.Build.props`.
-2. Tag `vX.Y.Z` and push the tag. `.github/workflows/release.yml` then:
+1. Update `CHANGELOG.md` and `<Version>` in `Directory.Build.props`, and merge to `main`.
+2. Create the release, in either way:
+   - **On the website**: *Releases → Draft a new release → Choose a tag*, type a **new** tag such as `v0.2.0`
+     (target `main`), write a title and notes, tick *Set as a pre-release* for betas, and **Publish**.
+   - **From the command line**: `git tag v0.2.0` and `git push origin v0.2.0`. The release is then created with a
+     generated title and notes.
+
+   The tag must be `v` followed by a version (`v0.2.0`, `v0.3.0-beta.1`), higher than the previous release. Other
+   tags (for example `beta`) stop the workflow with an error: delete that release **and** its tag (*Tags → the tag →
+   Delete*), then create it again. Do not attach files yourself.
+3. `.github/workflows/release.yml` runs (Actions tab, about 5 minutes) and:
    - runs the tests, publishes, and signs the executables and the MSI when the `SIGNING_CERT` (base64 .pfx) and
      `SIGNING_PASSWORD` secrets exist;
    - builds `AutoSettings-X.Y.Z-x64.msi` and the portable `AutoSettings-X.Y.Z-win-x64.zip`;
    - fills the winget manifests from `packaging/winget` with the version, URL and SHA256;
    - writes `SHA256SUMS.txt`, which the app's updater requires;
-   - marks tags with a label (`v0.3.0-beta.1`) as pre-releases, which are only offered to users who opted in;
-   - creates the GitHub Release with all of these.
-3. Installed copies find the release within about 12 hours (see [updates](../guide/updates.md)). Keep the asset
-   names: the updater looks for `AutoSettings-<version>-x64.msi` and `SHA256SUMS.txt`.
-4. Submit the winget manifests to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs)
+   - attaches all of these to the release. A release made on the website keeps its title, notes and pre-release
+     box; for a pushed tag, labels (`v0.3.0-beta.1`) make it a pre-release.
+
+   If it failed, fix the cause and start it again from *Actions → Release → Run workflow* with the same tag.
+4. Installed copies find the release within about 12 hours (see [updates](../guide/updates.md)). Pre-releases are
+   only offered to users who opted in to beta versions. Keep the asset names: the updater looks for
+   `AutoSettings-<version>-x64.msi` and `SHA256SUMS.txt`.
+5. Submit the winget manifests to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs)
    (for example with `wingetcreate submit`).
 
 ### Documentation site

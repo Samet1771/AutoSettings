@@ -1,13 +1,29 @@
-# Builds a release when a tag like v0.2.0 is pushed:
-# MSI installer + portable zip, optional code signing, winget manifests, GitHub Release.
+# Builds the release files (MSI installer + portable zip, optional code signing, winget manifests,
+# SHA256SUMS.txt) and attaches them to a GitHub Release. Runs when:
+#   - a release is published on the website with a tag like v0.2.0 (Releases -> Draft a new release),
+#   - a tag like v0.2.0 is pushed (git tag v0.2.0 && git push origin v0.2.0), or
+#   - it is started by hand from the Actions tab for an existing tag.
 name: Release
 
 on:
   push:
     tags: ["v*"]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build, for example v0.2.0"
+        required: true
 
 permissions:
   contents: write
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
+
+concurrency:
+  group: release-${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
 
 jobs:
   release:
@@ -17,7 +33,17 @@ jobs:
       SIGNING_CERT: ${{ secrets.SIGNING_CERT }}
       SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
     steps:
+      - name: Check the tag
+        shell: pwsh
+        run: |
+          if ($env:TAG -notmatch '^v\d+\.\d+(\.\d+)?(-[0-9A-Za-z.]+)?$') {
+            Write-Output "::error::Release tags must look like v0.2.0 or v0.3.0-beta.1 (got '$env:TAG'). Delete this release and its tag, then create it again with a version tag."
+            exit 1
+          }
+
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
 
       - uses: actions/setup-dotnet@v5
         with:
@@ -27,7 +53,7 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $version = "${{ github.ref_name }}".TrimStart('v')
+          $version = $env:TAG.Substring(1)
           "value=$version" >> $env:GITHUB_OUTPUT
 
       - name: Test
@@ -70,7 +96,7 @@ jobs:
           $zip = "artifacts/AutoSettings-$version-win-x64.zip"
           Compress-Archive -Path artifacts/AutoSettings/* -DestinationPath $zip
           $sha = (Get-FileHash $msi -Algorithm SHA256).Hash
-          $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$(Split-Path $msi -Leaf)"
+          $url = "https://github.com/${{ github.repository }}/releases/download/$($env:TAG)/$(Split-Path $msi -Leaf)"
           New-Item -ItemType Directory artifacts/winget -Force | Out-Null
           foreach ($template in Get-ChildItem packaging/winget/*.yaml) {
             (Get-Content $template -Raw).Replace('{{VERSION}}', $version).Replace('{{URL}}', $url).Replace('{{SHA256}}', $sha) |
@@ -85,12 +111,37 @@ jobs:
           "msi=$msi" >> $env:GITHUB_OUTPUT
           "zip=$zip" >> $env:GITHUB_OUTPUT
 
-      - uses: softprops/action-gh-release@v2
+      - name: Find an existing release
+        id: existing
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view $env:TAG --repo ${{ github.repository }} --json tagName *> $null
+          "exists=$($LASTEXITCODE -eq 0)".ToLowerInvariant() >> $env:GITHUB_OUTPUT
+          exit 0
+
+      # A release made on the website keeps its title, notes and pre-release box; only the files are added.
+      - name: Attach files to the existing release
+        if: steps.existing.outputs.exists == 'true'
+        uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.TAG }}
+          files: |
+            ${{ steps.package.outputs.msi }}
+            ${{ steps.package.outputs.zip }}
+            artifacts/SHA256SUMS.txt
+            artifacts/winget-manifests-${{ steps.version.outputs.value }}.zip
+
+      - name: Create the release
+        if: steps.existing.outputs.exists != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
           name: AutoSettings ${{ steps.version.outputs.value }}
           generate_release_notes: true
           # Tags like v0.3.0-beta.1 are pre-releases: only offered to users who opted in to beta versions.
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(env.TAG, '-') }}
           files: |
             ${{ steps.package.outputs.msi }}
             ${{ steps.package.outputs.zip }}
