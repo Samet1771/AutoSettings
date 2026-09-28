@@ -1,4 +1,5 @@
 using AutoSettings.Core.Catalog;
+using AutoSettings.Core.Config;
 using AutoSettings.Core.Model;
 
 namespace AutoSettings.Core.Editing;
@@ -50,7 +51,7 @@ public static class FieldText
     /// <summary>Validates one component on its own and returns its error messages.</summary>
     public static IReadOnlyList<string> Validate(ComponentKind kind, ComponentConfig component, ExecutionScope scope, ComponentCatalog? catalog = null) =>
         new ConfigValidator(catalog).NormalizeComponent(kind, ConfigCloner.Clone(component), scope)
-            .Where(i => i.Severity == Config.IssueSeverity.Error)
+            .Where(i => i.Severity == IssueSeverity.Error)
             .Select(i => StripLabel(i.Message, component.Type))
             .ToList();
 
