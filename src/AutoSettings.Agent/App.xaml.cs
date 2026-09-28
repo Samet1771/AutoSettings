@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Threading;
 using AutoSettings.Agent.Localization;
 using AutoSettings.Core;
+using AutoSettings.Core.Updates;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui.Appearance;
 using Serilog;
@@ -107,8 +108,77 @@ public partial class App : Application
             return;
         }
 
+        _host.UpdateStatusChanged += (_, status) => Dispatcher.InvokeAsync(() => OnUpdateStatus(status));
+        AnnounceCompletedUpdate();
+
         if (!e.Args.Contains("--background", StringComparer.OrdinalIgnoreCase))
             ShowMainWindow();
+    }
+
+    /// <summary>Says "AutoSettings was updated" the first time a new version runs.</summary>
+    private void AnnounceCompletedUpdate()
+    {
+        var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+        var previous = _settings.LastRunVersion;
+        if (previous == version)
+            return;
+        _settings.LastRunVersion = version;
+        TrySaveSettings();
+        if (previous is not null)
+            _tray?.Notify(Strings.Get("UpdatedTitle"), Strings.Format("UpdatedMessage", version), ShowUpdateSettings);
+    }
+
+    private void OnUpdateStatus(UpdateStatus status)
+    {
+        if (status.State == UpdateState.Installing)
+        {
+            // The installer replaces this program's files; the new version is started afterwards.
+            _ = ExitForUpdateAsync();
+            return;
+        }
+
+        // Announce each new version once, unless it is installed automatically anyway.
+        if (status.Latest is not { } release
+            || status.State is not (UpdateState.Available or UpdateState.Ready)
+            || status.Settings.Mode is UpdateMode.Off
+            || status.Settings.Mode is UpdateMode.Automatic && status.CanInstall
+            || _settings.LastNotifiedUpdate == release.Version)
+            return;
+
+        _settings.LastNotifiedUpdate = release.Version;
+        TrySaveSettings();
+        var message = status.CanInstall ? Strings.Get("UpdateAvailableAsk") : Strings.Get("UpdateAvailableNotify");
+        _tray?.Notify(Strings.Format("UpdateAvailableTitle", release.Version), message, ShowUpdateSettings);
+    }
+
+    private void ShowUpdateSettings()
+    {
+        ShowMainWindow();
+        _window?.ShowSettings();
+    }
+
+    private void TrySaveSettings()
+    {
+        try
+        {
+            _settings.Save();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+        }
+    }
+
+    private async Task ExitForUpdateAsync()
+    {
+        if (_exiting)
+            return;
+        _exiting = true;
+        _window?.Close();
+        if (_host is not null)
+            await _host.StopAsync(userInitiated: false);
+        _tray?.Dispose();
+        // Exit code 0: the service does not restart the agent; the updated service starts the new one.
+        Shutdown(0);
     }
 
     private void ShowMainWindow()

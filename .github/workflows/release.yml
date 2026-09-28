@@ -77,6 +77,11 @@ jobs:
               Set-Content (Join-Path artifacts/winget $template.Name) -NoNewline
           }
           Compress-Archive -Path artifacts/winget/* -DestinationPath "artifacts/winget-manifests-$version.zip"
+          # The app's updater verifies the MSI against this file.
+          $sums = foreach ($file in @($msi, $zip)) {
+            "{0}  {1}" -f (Get-FileHash $file -Algorithm SHA256).Hash.ToLowerInvariant(), (Split-Path $file -Leaf)
+          }
+          [IO.File]::WriteAllText("$PWD/artifacts/SHA256SUMS.txt", ($sums -join "`n") + "`n")
           "msi=$msi" >> $env:GITHUB_OUTPUT
           "zip=$zip" >> $env:GITHUB_OUTPUT
 
@@ -84,7 +89,10 @@ jobs:
         with:
           name: AutoSettings ${{ steps.version.outputs.value }}
           generate_release_notes: true
+          # Tags like v0.3.0-beta.1 are pre-releases: only offered to users who opted in to beta versions.
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             ${{ steps.package.outputs.msi }}
             ${{ steps.package.outputs.zip }}
+            artifacts/SHA256SUMS.txt
             artifacts/winget-manifests-${{ steps.version.outputs.value }}.zip

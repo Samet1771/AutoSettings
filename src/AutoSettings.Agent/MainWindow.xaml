@@ -191,6 +191,25 @@
                         </Grid>
                         <TextBlock x:Name="RestartHint" Style="{StaticResource Hint}" Text="{loc:T RestartForLanguage}" Visibility="Collapsed" Margin="0,8,0,0" />
 
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:T Updates}" />
+                        <TextBlock x:Name="UpdateStatusText" TextWrapping="Wrap" FontWeight="SemiBold" />
+                        <TextBlock x:Name="UpdateDetails" Style="{StaticResource Hint}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button x:Name="CheckUpdatesButton" Style="{StaticResource ToolbarButton}" Content="{loc:T CheckNow}" Click="OnCheckUpdatesClick" />
+                            <ui:Button x:Name="InstallUpdateButton" Appearance="Primary" Margin="0,0,8,0" Visibility="Collapsed" Click="OnInstallUpdateClick" />
+                            <Button x:Name="WhatsNewButton" Style="{StaticResource ToolbarButton}" Content="{loc:T WhatsNew}" Visibility="Collapsed" Click="OnWhatsNewClick" />
+                        </WrapPanel>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{loc:T UpdateModeLabel}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <ComboBox x:Name="UpdateModeBox" Grid.Column="1" Width="320" HorizontalAlignment="Left" Margin="0,4" SelectionChanged="OnUpdateSettingsChanged" />
+                        </Grid>
+                        <ui:ToggleSwitch x:Name="BetaSwitch" Content="{loc:T IncludeBetas}" Margin="0,4,0,0" Checked="OnUpdateSettingsChanged" Unchecked="OnUpdateSettingsChanged" />
+                        <TextBlock x:Name="UpdateLockedHint" Style="{StaticResource Hint}" Text="{loc:T UpdateSettingsLocked}" Visibility="Collapsed" Margin="0,4,0,0" />
+
                         <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:T Testing}" />
                         <ui:ToggleSwitch x:Name="DryRunSwitch" Content="{loc:T DryRun}" Checked="OnDryRunChanged" Unchecked="OnDryRunChanged" />
 

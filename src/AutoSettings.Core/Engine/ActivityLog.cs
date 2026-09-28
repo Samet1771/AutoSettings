@@ -33,6 +33,8 @@ public static class ActivitySources
     public const string Engine = "engine";
     /// <summary>Connection to the service / agents.</summary>
     public const string Connection = "connection";
+    /// <summary>Update checks, downloads and installs.</summary>
+    public const string Update = "update";
 }
 
 /// <summary>One line in the activity timeline.</summary>

@@ -12,6 +12,7 @@ using AutoSettings.Core.Catalog;
 using AutoSettings.Core.Config;
 using AutoSettings.Core.Editing;
 using AutoSettings.Core.Engine;
+using AutoSettings.Core.Updates;
 using Microsoft.Win32;
 
 namespace AutoSettings.Agent;
@@ -53,16 +54,22 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         host.Activity.EntryAdded += OnActivityAdded;
         host.StatusChanged += OnStatusChanged;
         host.Store.Loaded += OnConfigLoaded;
+        host.UpdateStatusChanged += OnUpdateStatusChanged;
         Closed += (_, _) =>
         {
             host.Activity.EntryAdded -= OnActivityAdded;
             host.StatusChanged -= OnStatusChanged;
             host.Store.Loaded -= OnConfigLoaded;
+            host.UpdateStatusChanged -= OnUpdateStatusChanged;
         };
 
         LoadPersonalActivity();
         Refresh();
+        RefreshUpdates();
     }
+
+    /// <summary>Opens the Settings page (for example from the update notification).</summary>
+    public void ShowSettings() => ShowPage("settings");
 
     // ------------------------------------------------------------------ navigation and refresh
 
@@ -461,6 +468,102 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             return;
         _host.Engine.DryRun = DryRunSwitch.IsChecked == true;
         Refresh();
+    }
+
+    // ------------------------------------------------------------------ updates
+
+    private static readonly UpdateMode[] UpdateModes = [UpdateMode.AskFirst, UpdateMode.Automatic, UpdateMode.Notify, UpdateMode.Off];
+
+    private void OnUpdateStatusChanged(object? sender, UpdateStatus status) => Dispatcher.InvokeAsync(RefreshUpdates);
+
+    private void RefreshUpdates()
+    {
+        var status = _host.Updates;
+        var wasLoading = _loadingSettings;
+        _loadingSettings = true;
+        if (UpdateModeBox.ItemsSource is null)
+        {
+            UpdateModeBox.ItemsSource = UpdateModes.Select(m => new ComboBoxItem { Content = Strings.Get("UpdateMode" + m), Tag = m }).ToList();
+        }
+
+        if (status is null)
+        {
+            UpdateStatusText.Text = Strings.Get("UpdatesNeedService");
+            UpdateDetails.Text = "";
+            UpdateModeBox.IsEnabled = BetaSwitch.IsEnabled = CheckUpdatesButton.IsEnabled = false;
+            InstallUpdateButton.Visibility = WhatsNewButton.Visibility = Visibility.Collapsed;
+            _loadingSettings = wasLoading;
+            return;
+        }
+
+        var latest = status.Latest?.Version ?? "";
+        UpdateStatusText.Text = status.State switch
+        {
+            UpdateState.Disabled => Strings.Get("UpdateStateDisabled"),
+            UpdateState.Checking => Strings.Get("UpdateStateChecking"),
+            UpdateState.UpToDate => Strings.Get("UpdateStateUpToDate"),
+            UpdateState.Available => Strings.Format("UpdateStateAvailable", latest),
+            UpdateState.Downloading => Strings.Format("UpdateStateDownloading", latest),
+            UpdateState.Ready => Strings.Format("UpdateStateReady", latest),
+            UpdateState.Installing => Strings.Format("UpdateStateInstalling", latest),
+            UpdateState.Failed => Strings.Get("UpdateStateFailed"),
+            _ => Strings.Get("UpdateStateUnknown"),
+        };
+
+        var details = new List<string> { Strings.Format("InstalledVersion", status.CurrentVersion) };
+        if (status.LastChecked is { } checkedAt)
+            details.Add(Strings.Format("LastChecked", checkedAt.ToLocalTime().ToString("g", Strings.Culture)));
+        if (!string.IsNullOrWhiteSpace(status.Message))
+            details.Add(status.Message);
+        UpdateDetails.Text = string.Join("\n", details);
+
+        InstallUpdateButton.Content = Strings.Format("InstallUpdate", latest);
+        InstallUpdateButton.Visibility = status.CanInstall ? Visibility.Visible : Visibility.Collapsed;
+        WhatsNewButton.Visibility = status.Latest is not null ? Visibility.Visible : Visibility.Collapsed;
+        CheckUpdatesButton.IsEnabled = status.State is not (UpdateState.Checking or UpdateState.Downloading or UpdateState.Installing);
+
+        UpdateModeBox.SelectedItem = UpdateModeBox.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (UpdateMode)i.Tag == status.Settings.Mode);
+        BetaSwitch.IsChecked = status.Settings.IncludePrereleases;
+        UpdateModeBox.IsEnabled = BetaSwitch.IsEnabled = status.CanChangeSettings;
+        UpdateLockedHint.Visibility = status.CanChangeSettings ? Visibility.Collapsed : Visibility.Visible;
+        _loadingSettings = wasLoading;
+    }
+
+    private async void OnCheckUpdatesClick(object sender, RoutedEventArgs e)
+    {
+        CheckUpdatesButton.IsEnabled = false;
+        UpdateStatusText.Text = Strings.Get("UpdateStateChecking");
+        await _host.CheckForUpdatesAsync();
+        RefreshUpdates();
+    }
+
+    private async void OnInstallUpdateClick(object sender, RoutedEventArgs e)
+    {
+        InstallUpdateButton.IsEnabled = false;
+        var error = await _host.InstallUpdateAsync();
+        // While installing, this app is closed by the installer; the connection drop is not an error.
+        if (!IsLoaded || _host.Updates?.State == UpdateState.Installing)
+            return;
+        InstallUpdateButton.IsEnabled = true;
+        if (error is not null)
+            ShowError(Strings.Format("UpdateError", error));
+        RefreshUpdates();
+    }
+
+    private void OnWhatsNewClick(object sender, RoutedEventArgs e)
+    {
+        if (_host.Updates?.Latest?.PageUrl is { Length: > 0 } url && url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
+    }
+
+    private async void OnUpdateSettingsChanged(object sender, RoutedEventArgs e)
+    {
+        if (_loadingSettings || UpdateModeBox.SelectedItem is not ComboBoxItem { Tag: UpdateMode mode })
+            return;
+        var error = await _host.SetUpdateSettingsAsync(new UpdateSettings(mode, BetaSwitch.IsChecked == true));
+        if (error is not null)
+            ShowError(error);
+        RefreshUpdates();
     }
 
     private void OnOpenConfigFolderClick(object sender, RoutedEventArgs e) => TrayIcon.OpenFolder(Product.UserDataDirectory);

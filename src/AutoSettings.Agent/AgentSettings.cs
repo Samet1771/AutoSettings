@@ -18,6 +18,12 @@ public sealed class AgentSettings
     /// <summary>The user acknowledged that the visual editor rewrites the file (comments are not kept).</summary>
     public bool RewriteNoticeAccepted { get; set; }
 
+    /// <summary>The newest version the user was told about, so each update is announced once.</summary>
+    public string? LastNotifiedUpdate { get; set; }
+
+    /// <summary>The version that ran last time, to say "AutoSettings was updated" after an update.</summary>
+    public string? LastRunVersion { get; set; }
+
     /// <summary>Where the settings are stored.</summary>
     public static string FilePath => Path.Combine(Product.UserDataDirectory, "settings.json");
 

@@ -39,6 +39,9 @@ builder.Services.AddSingleton<AgentHub>();
 builder.Services.AddSingleton<AgentSupervisor>();
 builder.Services.AddSingleton<MachineHost>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<MachineHost>());
+builder.Services.Configure<UpdateOptions>(builder.Configuration.GetSection("Updates"));
+builder.Services.AddSingleton<UpdateService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<UpdateService>());
 builder.Services.AddHostedService<PipeServer>();
 
 var host = builder.Build();

@@ -14,7 +14,8 @@
            Scope="perMachine"
            InstallerVersion="500">
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of AutoSettings is already installed." />
+    <!-- Same-version upgrades let a final release replace its beta (both are x.y.z for Windows Installer). -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of AutoSettings is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
     <Icon Id="AppIcon" SourceFile="$(var.IconPath)" />
@@ -54,6 +55,8 @@
                             RestartServiceDelayInSeconds="5"
                             ResetPeriodInDays="1" />
       </ServiceInstall>
+      <!-- Tells the service that it was installed with the MSI, so it can update itself. -->
+      <RegistryValue Root="HKLM" Key="Software\AutoSettings" Name="InstallMethod" Type="string" Value="msi" />
       <ServiceControl Id="AutoSettingsServiceControl" Name="AutoSettings" Start="install" Stop="both" Remove="uninstall" Wait="yes" />
     </Component>
 

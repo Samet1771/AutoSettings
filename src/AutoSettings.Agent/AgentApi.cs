@@ -4,6 +4,8 @@ using AutoSettings.Core.Engine;
 using AutoSettings.Core.Events;
 using AutoSettings.Core.Ipc;
 using AutoSettings.Core.Model;
+using AutoSettings.Core.Updates;
+using AutoSettings.Platform.Monitoring;
 
 namespace AutoSettings.Agent;
 
@@ -45,6 +47,15 @@ internal sealed class AgentApi : IAgentApi
             return;
         await handler.RestoreAsync(WithDefaults(component), snapshot, Context(action), cancellationToken).ConfigureAwait(false);
     }
+
+    public Task OnUpdateStatusChangedAsync(UpdateStatus status, CancellationToken cancellationToken)
+    {
+        _host.SetUpdateStatus(status);
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> IsBusyAsync(CancellationToken cancellationToken) =>
+        Task.FromResult(ForegroundMonitor.IsFullScreenAppActive());
 
     private ComponentConfig? ToComponent(RemoteAction action)
     {

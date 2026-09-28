@@ -95,6 +95,31 @@ public sealed class AgentHub
 
     public void ForgetSession(int sessionId) => _pendingLogons.TryRemove(sessionId, out _);
 
+    /// <summary>The APIs of all connected agents.</summary>
+    public IReadOnlyList<IAgentApi> All() =>
+        _agents.Values.Select(c => c.Api).OfType<IAgentApi>().ToList();
+
+    /// <summary>Calls every connected agent in the background, ignoring agents that fail (for example older versions).</summary>
+    public void Broadcast(Func<IAgentApi, Task> call, string what)
+    {
+        foreach (var connection in _agents.Values)
+        {
+            if (connection.Api is not { } api)
+                continue;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await call(api).WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Could not deliver {What} to session {Session}", what, connection.SessionId);
+                }
+            });
+        }
+    }
+
     private void Send(AgentConnection connection, SystemEvent e)
     {
         if (connection.Api is not { } api)

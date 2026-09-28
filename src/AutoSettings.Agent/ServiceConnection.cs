@@ -2,6 +2,7 @@ using System.IO.Pipes;
 using AutoSettings.Core;
 using AutoSettings.Core.Engine;
 using AutoSettings.Core.Ipc;
+using AutoSettings.Core.Updates;
 using AutoSettings.Platform.Monitoring;
 using Microsoft.Extensions.Logging;
 using StreamJsonRpc;
@@ -65,6 +66,40 @@ public sealed class ServiceConnection : IAsyncDisposable
             _logger.LogDebug(ex, "Could not read the machine activity");
         }
         return [];
+    }
+
+    /// <summary>The update status, or null when not connected.</summary>
+    public Task<UpdateStatus?> GetUpdateStatusAsync() =>
+        CallAsync<UpdateStatus?>(async s => await s.GetUpdateStatusAsync(CancellationToken.None).ConfigureAwait(false), null, TimeSpan.FromSeconds(5));
+
+    /// <summary>Checks for updates now; null when not connected.</summary>
+    public Task<UpdateStatus?> CheckForUpdatesAsync() =>
+        CallAsync<UpdateStatus?>(async s => await s.CheckForUpdatesAsync(CancellationToken.None).ConfigureAwait(false), null, TimeSpan.FromMinutes(1));
+
+    /// <summary>Starts installing the update. Returns an error message, or null when the install started.</summary>
+    public Task<string?> InstallUpdateAsync() =>
+        CallAsync(s => s.InstallUpdateAsync(CancellationToken.None), NotConnected, TimeSpan.FromMinutes(20));
+
+    /// <summary>Changes the update settings. Returns an error message or null.</summary>
+    public Task<string?> SetUpdateSettingsAsync(UpdateSettings settings) =>
+        CallAsync(s => s.SetUpdateSettingsAsync(settings, CancellationToken.None), NotConnected, TimeSpan.FromSeconds(10));
+
+    private static string NotConnected => $"The {Product.Name} service is not running.";
+
+    private async Task<T> CallAsync<T>(Func<IServiceApi, Task<T>> call, T fallback, TimeSpan timeout)
+    {
+        try
+        {
+            if (_service is { } service)
+                return await call(service).WaitAsync(timeout).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Service call failed");
+            if (fallback is string)
+                return (T)(object)ex.Message;
+        }
+        return fallback;
     }
 
     private async Task RunAsync(CancellationToken cancellationToken)

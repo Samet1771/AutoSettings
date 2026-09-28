@@ -16,6 +16,7 @@ public sealed class TrayIcon : INotifier, IDisposable
     private AgentHost? _host;
     private Action? _open;
     private Action? _exit;
+    private Action? _balloonClick;
 
     public TrayIcon(Dispatcher dispatcher)
     {
@@ -36,7 +37,13 @@ public sealed class TrayIcon : INotifier, IDisposable
         _open = open;
         _exit = exit;
         _icon.DoubleClick += (_, _) => open();
-        _icon.BalloonTipClicked += (_, _) => open();
+        _icon.BalloonTipClicked += (_, _) =>
+        {
+            var action = _balloonClick ?? open;
+            _balloonClick = null;
+            action();
+        };
+        _icon.BalloonTipClosed += (_, _) => _balloonClick = null;
         _icon.ContextMenuStrip!.Opening += (_, _) => BuildMenu();
         host.StatusChanged += (_, _) => _dispatcher.InvokeAsync(UpdateTooltip);
         BuildMenu();
@@ -44,7 +51,19 @@ public sealed class TrayIcon : INotifier, IDisposable
 
     /// <inheritdoc />
     public void Notify(string title, string message) =>
-        _dispatcher.InvokeAsync(() => _icon.ShowBalloonTip(5000, title, message, Forms.ToolTipIcon.None));
+        _dispatcher.InvokeAsync(() =>
+        {
+            _balloonClick = null;
+            _icon.ShowBalloonTip(5000, title, message, Forms.ToolTipIcon.None);
+        });
+
+    /// <summary>Shows a notification that runs <paramref name="onClick"/> when clicked.</summary>
+    public void Notify(string title, string message, Action onClick) =>
+        _dispatcher.InvokeAsync(() =>
+        {
+            _balloonClick = onClick;
+            _icon.ShowBalloonTip(10000, title, message, Forms.ToolTipIcon.Info);
+        });
 
     private void UpdateTooltip()
     {
@@ -91,6 +110,16 @@ public sealed class TrayIcon : INotifier, IDisposable
         if (profiles.DropDownItems.Count == 0)
             profiles.DropDownItems.Add(new Forms.ToolStripMenuItem(Strings.Get("NoProfilesYet")) { Enabled = false });
         menu.Items.Add(profiles);
+
+        if (host.Updates is { CanInstall: true, Latest: { } update })
+        {
+            menu.Items.Add(new Forms.ToolStripSeparator());
+            menu.Items.Add(Strings.Format("InstallUpdateMenu", update.Version), null, async (_, _) =>
+            {
+                if (await host.InstallUpdateAsync() is { } error && host.Updates?.State != Core.Updates.UpdateState.Installing)
+                    Notify(Product.Name, Strings.Format("UpdateError", error));
+            });
+        }
 
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add(Strings.Get("EditAutomationsFile"), null, (_, _) => OpenInEditor(host.Store.FilePath));

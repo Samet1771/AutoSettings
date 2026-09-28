@@ -3,6 +3,7 @@ using AutoSettings.Core.Catalog;
 using AutoSettings.Core.Config;
 using AutoSettings.Core.Engine;
 using AutoSettings.Core.Events;
+using AutoSettings.Core.Updates;
 using AutoSettings.Platform;
 using AutoSettings.Platform.Actions;
 using AutoSettings.Platform.Monitoring;
@@ -74,6 +75,37 @@ public sealed class AgentHost
     /// <summary>Raised when the connection, configuration or engine state changes. May be raised on any thread.</summary>
     public event EventHandler? StatusChanged;
 
+    /// <summary>The last update status from the service, or null when not known.</summary>
+    public UpdateStatus? Updates { get; private set; }
+
+    /// <summary>Raised when the update status changes. May be raised on any thread.</summary>
+    public event EventHandler<UpdateStatus>? UpdateStatusChanged;
+
+    internal void SetUpdateStatus(UpdateStatus status)
+    {
+        Updates = status;
+        UpdateStatusChanged?.Invoke(this, status);
+    }
+
+    /// <summary>Checks for updates now.</summary>
+    public async Task CheckForUpdatesAsync()
+    {
+        if (await Service.CheckForUpdatesAsync().ConfigureAwait(false) is { } status)
+            SetUpdateStatus(status);
+    }
+
+    /// <summary>Installs the available update. Returns an error message, or null when the install started.</summary>
+    public Task<string?> InstallUpdateAsync() => Service.InstallUpdateAsync();
+
+    /// <summary>Changes the update settings. Returns an error message or null.</summary>
+    public async Task<string?> SetUpdateSettingsAsync(UpdateSettings settings)
+    {
+        var error = await Service.SetUpdateSettingsAsync(settings).ConfigureAwait(false);
+        if (await Service.GetUpdateStatusAsync().ConfigureAwait(false) is { } status)
+            SetUpdateStatus(status);
+        return error;
+    }
+
     /// <summary>Starts everything. Must be called on the UI thread (the focus hook needs its message loop).</summary>
     public async Task StartAsync()
     {
@@ -95,7 +127,14 @@ public sealed class AgentHost
         Service.ConnectionChanged += connected =>
         {
             if (connected)
+            {
                 StopFallback();
+                _ = Task.Run(async () =>
+                {
+                    if (await Service.GetUpdateStatusAsync().ConfigureAwait(false) is { } status)
+                        SetUpdateStatus(status);
+                });
+            }
             else
                 StartFallback();
             RaiseStatusChanged();

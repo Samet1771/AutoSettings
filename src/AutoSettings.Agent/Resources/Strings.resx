@@ -25,6 +25,7 @@
   <data name="AutomationsOn" xml:space="preserve"><value>{0} of {1} automations on</value></data>
   <data name="Browse" xml:space="preserve"><value>Browse…</value></data>
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="CheckNow" xml:space="preserve"><value>Check now</value></data>
   <data name="Clear" xml:space="preserve"><value>Clear</value></data>
   <data name="Connected" xml:space="preserve"><value>connected</value></data>
   <data name="Cooldown" xml:space="preserve"><value>Cooldown</value></data>
@@ -68,7 +69,12 @@
   <data name="Import" xml:space="preserve"><value>Import</value></data>
   <data name="ImportInvalid" xml:space="preserve"><value>The file cannot be imported:</value></data>
   <data name="Imported" xml:space="preserve"><value>Imported {0} automation(s) and {1} profile(s).</value></data>
+  <data name="IncludeBetas" xml:space="preserve"><value>Include beta versions</value></data>
+  <data name="InstallUpdate" xml:space="preserve"><value>Install {0}</value></data>
+  <data name="InstallUpdateMenu" xml:space="preserve"><value>Install update {0}</value></data>
+  <data name="InstalledVersion" xml:space="preserve"><value>Installed version: {0}</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="LastChecked" xml:space="preserve"><value>Last checked: {0}</value></data>
   <data name="Light" xml:space="preserve"><value>Light</value></data>
   <data name="LocalAccount" xml:space="preserve"><value>Local account</value></data>
   <data name="MachineActivity" xml:space="preserve"><value>Machine (service) activity</value></data>
@@ -151,11 +157,35 @@ Continue?</value></data>
   <data name="UnknownType" xml:space="preserve"><value>Unknown type '{0}'. Edit it in the YAML view.</value></data>
   <data name="UnsavedChanges" xml:space="preserve"><value>Unsaved changes</value></data>
   <data name="UntilIResume" xml:space="preserve"><value>Until I resume</value></data>
+  <data name="UpdateAvailableAsk" xml:space="preserve"><value>Click to see what's new and install it.</value></data>
+  <data name="UpdateAvailableNotify" xml:space="preserve"><value>Click to see what's new.</value></data>
+  <data name="UpdateAvailableTitle" xml:space="preserve"><value>AutoSettings {0} is available</value></data>
+  <data name="UpdateError" xml:space="preserve"><value>The update could not be installed: {0}</value></data>
+  <data name="UpdateModeAskFirst" xml:space="preserve"><value>Download it and ask me before installing</value></data>
+  <data name="UpdateModeAutomatic" xml:space="preserve"><value>Install it automatically</value></data>
+  <data name="UpdateModeLabel" xml:space="preserve"><value>When a new version is released</value></data>
+  <data name="UpdateModeNotify" xml:space="preserve"><value>Only tell me</value></data>
+  <data name="UpdateModeOff" xml:space="preserve"><value>Do nothing (updates off)</value></data>
+  <data name="UpdateSettingsLocked" xml:space="preserve"><value>These settings were set by your administrator.</value></data>
+  <data name="UpdateStateAvailable" xml:space="preserve"><value>Version {0} is available.</value></data>
+  <data name="UpdateStateChecking" xml:space="preserve"><value>Checking for updates…</value></data>
+  <data name="UpdateStateDisabled" xml:space="preserve"><value>Updates are off.</value></data>
+  <data name="UpdateStateDownloading" xml:space="preserve"><value>Downloading version {0}…</value></data>
+  <data name="UpdateStateFailed" xml:space="preserve"><value>The last update attempt failed.</value></data>
+  <data name="UpdateStateInstalling" xml:space="preserve"><value>Installing version {0}. AutoSettings restarts in a moment.</value></data>
+  <data name="UpdateStateReady" xml:space="preserve"><value>Version {0} is downloaded, verified and ready to install.</value></data>
+  <data name="UpdateStateUnknown" xml:space="preserve"><value>Not checked yet.</value></data>
+  <data name="UpdateStateUpToDate" xml:space="preserve"><value>You have the newest version.</value></data>
+  <data name="UpdatedMessage" xml:space="preserve"><value>You now have version {0}.</value></data>
+  <data name="UpdatedTitle" xml:space="preserve"><value>AutoSettings was updated</value></data>
+  <data name="Updates" xml:space="preserve"><value>Updates</value></data>
+  <data name="UpdatesNeedService" xml:space="preserve"><value>The AutoSettings service is not connected, so updates cannot be checked.</value></data>
   <data name="UseDomainName" xml:space="preserve"><value>Use DOMAIN\name</value></data>
   <data name="UseFullPath" xml:space="preserve"><value>Use the full path instead of the file name</value></data>
   <data name="User" xml:space="preserve"><value>User</value></data>
   <data name="Visual" xml:space="preserve"><value>Visual</value></data>
   <data name="WhatHappened" xml:space="preserve"><value>What happened</value></data>
+  <data name="WhatsNew" xml:space="preserve"><value>What's new</value></data>
   <data name="When" xml:space="preserve"><value>When</value></data>
   <data name="WhenHint" xml:space="preserve"><value>Any of these starts the automation.</value></data>
   <data name="WhenSection" xml:space="preserve"><value>When</value></data>

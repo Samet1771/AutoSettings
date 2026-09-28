@@ -5,6 +5,7 @@ using AutoSettings.Core;
 using AutoSettings.Core.Engine;
 using AutoSettings.Core.Events;
 using AutoSettings.Core.Ipc;
+using AutoSettings.Core.Updates;
 using AutoSettings.Platform.Monitoring;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -19,14 +20,16 @@ public sealed class PipeServer : BackgroundService
     private readonly AgentSupervisor _supervisor;
     private readonly ActivityLog _activity;
     private readonly MachineHost _machine;
+    private readonly UpdateService _updates;
     private readonly ILogger<PipeServer> _logger;
 
-    public PipeServer(AgentHub hub, AgentSupervisor supervisor, ActivityLog activity, MachineHost machine, ILogger<PipeServer> logger)
+    public PipeServer(AgentHub hub, AgentSupervisor supervisor, ActivityLog activity, MachineHost machine, UpdateService updates, ILogger<PipeServer> logger)
     {
         _hub = hub;
         _supervisor = supervisor;
         _activity = activity;
         _machine = machine;
+        _updates = updates;
         _logger = logger;
     }
 
@@ -97,7 +100,7 @@ public sealed class PipeServer : BackgroundService
 
             using var rpc = new JsonRpc(new HeaderDelimitedMessageHandler(pipe, new SystemTextJsonFormatter()));
             var connection = new AgentConnection(sessionId, processId, rpc);
-            rpc.AddLocalRpcTarget(new ServiceApi(connection, _hub, _supervisor, _activity, _machine));
+            rpc.AddLocalRpcTarget(new ServiceApi(connection, _hub, _supervisor, _activity, _machine, _updates));
             connection.Api = rpc.Attach<IAgentApi>();
             rpc.StartListening();
 
@@ -128,9 +131,11 @@ internal sealed class ServiceApi : IServiceApi
     private readonly AgentSupervisor _supervisor;
     private readonly ActivityLog _activity;
     private readonly MachineHost _machine;
+    private readonly UpdateService _updates;
 
-    public ServiceApi(AgentConnection connection, AgentHub hub, AgentSupervisor supervisor, ActivityLog activity, MachineHost machine)
+    public ServiceApi(AgentConnection connection, AgentHub hub, AgentSupervisor supervisor, ActivityLog activity, MachineHost machine, UpdateService updates)
     {
+        _updates = updates;
         _connection = connection;
         _hub = hub;
         _supervisor = supervisor;
@@ -157,4 +162,20 @@ internal sealed class ServiceApi : IServiceApi
         _supervisor.OnUserExit(_connection.SessionId);
         return Task.CompletedTask;
     }
+
+    public Task<UpdateStatus> GetUpdateStatusAsync(CancellationToken cancellationToken) =>
+        Task.FromResult(_updates.Status());
+
+    public Task<UpdateStatus> CheckForUpdatesAsync(CancellationToken cancellationToken) =>
+        _updates.CheckNowAsync(cancellationToken);
+
+    public Task<string?> InstallUpdateAsync(CancellationToken cancellationToken)
+    {
+        var who = Sessions.GetUser(_connection.SessionId)?.QualifiedName ?? "session " + _connection.SessionId;
+        _activity.Info(ActivitySources.Update, $"Install requested by {who}.");
+        return _updates.InstallNowAsync(cancellationToken);
+    }
+
+    public Task<string?> SetUpdateSettingsAsync(UpdateSettings settings, CancellationToken cancellationToken) =>
+        _updates.ChangeSettingsAsync(settings, cancellationToken);
 }

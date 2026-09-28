@@ -25,6 +25,7 @@
   <data name="AutomationsOn" xml:space="preserve"><value>{1} otomasyondan {0} açık</value></data>
   <data name="Browse" xml:space="preserve"><value>Gözat…</value></data>
   <data name="Cancel" xml:space="preserve"><value>İptal</value></data>
+  <data name="CheckNow" xml:space="preserve"><value>Şimdi denetle</value></data>
   <data name="Clear" xml:space="preserve"><value>Temizle</value></data>
   <data name="Connected" xml:space="preserve"><value>bağlı</value></data>
   <data name="Cooldown" xml:space="preserve"><value>Bekleme süresi</value></data>
@@ -68,7 +69,12 @@
   <data name="Import" xml:space="preserve"><value>İçe aktar</value></data>
   <data name="ImportInvalid" xml:space="preserve"><value>Dosya içe aktarılamıyor:</value></data>
   <data name="Imported" xml:space="preserve"><value>{0} otomasyon ve {1} profil içe aktarıldı.</value></data>
+  <data name="IncludeBetas" xml:space="preserve"><value>Beta sürümlerini de dahil et</value></data>
+  <data name="InstallUpdate" xml:space="preserve"><value>{0} sürümünü yükle</value></data>
+  <data name="InstallUpdateMenu" xml:space="preserve"><value>{0} güncellemesini yükle</value></data>
+  <data name="InstalledVersion" xml:space="preserve"><value>Yüklü sürüm: {0}</value></data>
   <data name="Language" xml:space="preserve"><value>Dil</value></data>
+  <data name="LastChecked" xml:space="preserve"><value>Son denetim: {0}</value></data>
   <data name="Light" xml:space="preserve"><value>Açık</value></data>
   <data name="LocalAccount" xml:space="preserve"><value>Yerel hesap</value></data>
   <data name="MachineActivity" xml:space="preserve"><value>Makine (hizmet) etkinliği</value></data>
@@ -151,11 +157,35 @@ Devam edilsin mi?</value></data>
   <data name="UnknownType" xml:space="preserve"><value>Bilinmeyen tür '{0}'. YAML görünümünde düzenleyin.</value></data>
   <data name="UnsavedChanges" xml:space="preserve"><value>Kaydedilmemiş değişiklikler</value></data>
   <data name="UntilIResume" xml:space="preserve"><value>Ben devam ettirene kadar</value></data>
+  <data name="UpdateAvailableAsk" xml:space="preserve"><value>Yenilikleri görmek ve yüklemek için tıklayın.</value></data>
+  <data name="UpdateAvailableNotify" xml:space="preserve"><value>Yenilikleri görmek için tıklayın.</value></data>
+  <data name="UpdateAvailableTitle" xml:space="preserve"><value>AutoSettings {0} kullanılabilir</value></data>
+  <data name="UpdateError" xml:space="preserve"><value>Güncelleme yüklenemedi: {0}</value></data>
+  <data name="UpdateModeAskFirst" xml:space="preserve"><value>İndir ve yüklemeden önce bana sor</value></data>
+  <data name="UpdateModeAutomatic" xml:space="preserve"><value>Otomatik olarak yükle</value></data>
+  <data name="UpdateModeLabel" xml:space="preserve"><value>Yeni sürüm çıktığında</value></data>
+  <data name="UpdateModeNotify" xml:space="preserve"><value>Yalnızca bana haber ver</value></data>
+  <data name="UpdateModeOff" xml:space="preserve"><value>Hiçbir şey yapma (güncellemeler kapalı)</value></data>
+  <data name="UpdateSettingsLocked" xml:space="preserve"><value>Bu ayarlar yöneticiniz tarafından belirlendi.</value></data>
+  <data name="UpdateStateAvailable" xml:space="preserve"><value>{0} sürümü kullanılabilir.</value></data>
+  <data name="UpdateStateChecking" xml:space="preserve"><value>Güncellemeler denetleniyor…</value></data>
+  <data name="UpdateStateDisabled" xml:space="preserve"><value>Güncellemeler kapalı.</value></data>
+  <data name="UpdateStateDownloading" xml:space="preserve"><value>{0} sürümü indiriliyor…</value></data>
+  <data name="UpdateStateFailed" xml:space="preserve"><value>Son güncelleme denemesi başarısız oldu.</value></data>
+  <data name="UpdateStateInstalling" xml:space="preserve"><value>{0} sürümü yükleniyor. AutoSettings birazdan yeniden başlayacak.</value></data>
+  <data name="UpdateStateReady" xml:space="preserve"><value>{0} sürümü indirildi, doğrulandı ve yüklenmeye hazır.</value></data>
+  <data name="UpdateStateUnknown" xml:space="preserve"><value>Henüz denetlenmedi.</value></data>
+  <data name="UpdateStateUpToDate" xml:space="preserve"><value>En yeni sürüm yüklü.</value></data>
+  <data name="UpdatedMessage" xml:space="preserve"><value>Artık {0} sürümü yüklü.</value></data>
+  <data name="UpdatedTitle" xml:space="preserve"><value>AutoSettings güncellendi</value></data>
+  <data name="Updates" xml:space="preserve"><value>Güncellemeler</value></data>
+  <data name="UpdatesNeedService" xml:space="preserve"><value>AutoSettings hizmeti bağlı değil; güncellemeler denetlenemiyor.</value></data>
   <data name="UseDomainName" xml:space="preserve"><value>ETKİ ALANI\ad kullan</value></data>
   <data name="UseFullPath" xml:space="preserve"><value>Dosya adı yerine tam yolu kullan</value></data>
   <data name="User" xml:space="preserve"><value>Kullanıcı</value></data>
   <data name="Visual" xml:space="preserve"><value>Görsel</value></data>
   <data name="WhatHappened" xml:space="preserve"><value>Ne oldu</value></data>
+  <data name="WhatsNew" xml:space="preserve"><value>Yenilikler</value></data>
   <data name="When" xml:space="preserve"><value>Ne zaman</value></data>
   <data name="WhenHint" xml:space="preserve"><value>Bunlardan herhangi biri otomasyonu başlatır.</value></data>
   <data name="WhenSection" xml:space="preserve"><value>Ne zaman</value></data>

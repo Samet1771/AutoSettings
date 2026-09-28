@@ -1,5 +1,6 @@
 using AutoSettings.Core.Engine;
 using AutoSettings.Core.Events;
+using AutoSettings.Core.Updates;
 
 namespace AutoSettings.Core.Ipc;
 
@@ -34,6 +35,18 @@ public interface IServiceApi
 
     /// <summary>Tells the service that the user closed the agent on purpose, so it is not restarted until the next sign-in.</summary>
     Task AgentExitingAsync(CancellationToken cancellationToken);
+
+    /// <summary>Returns the current update status.</summary>
+    Task<UpdateStatus> GetUpdateStatusAsync(CancellationToken cancellationToken);
+
+    /// <summary>Checks GitHub for a new version now and returns the resulting status.</summary>
+    Task<UpdateStatus> CheckForUpdatesAsync(CancellationToken cancellationToken);
+
+    /// <summary>Downloads (if needed), verifies and installs the available update. Returns an error message, or null when the install started.</summary>
+    Task<string?> InstallUpdateAsync(CancellationToken cancellationToken);
+
+    /// <summary>Changes the update settings. Returns an error message (for example when an administrator locked them), or null.</summary>
+    Task<string?> SetUpdateSettingsAsync(UpdateSettings settings, CancellationToken cancellationToken);
 }
 
 /// <summary>Methods agents expose to the service (service → agent).</summary>
@@ -50,4 +63,10 @@ public interface IAgentApi
 
     /// <summary>Restores a captured value (machine profiles).</summary>
     Task RestoreActionAsync(RemoteAction action, string? snapshot, CancellationToken cancellationToken);
+
+    /// <summary>Tells the agent that the update status changed (new version found, downloaded, installing, updated).</summary>
+    Task OnUpdateStatusChangedAsync(UpdateStatus status, CancellationToken cancellationToken);
+
+    /// <summary>True while the user runs a full-screen app (game, presentation); automatic updates wait for it to end.</summary>
+    Task<bool> IsBusyAsync(CancellationToken cancellationToken);
 }

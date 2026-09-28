@@ -9,7 +9,9 @@
     <OutputName>AutoSettings-$(Version)-x64</OutputName>
     <InstallerPlatform>x64</InstallerPlatform>
     <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)..\..\artifacts\AutoSettings</PublishDir>
-    <DefineConstants>PublishDir=$(PublishDir);ProductVersion=$(Version);IconPath=$(MSBuildThisFileDirectory)..\..\src\AutoSettings.Agent\Assets\AutoSettings.ico</DefineConstants>
+    <!-- Windows Installer versions are numeric: 0.3.0-beta.1 installs as 0.3.0. -->
+    <MsiVersion>$([System.Text.RegularExpressions.Regex]::Replace('$(Version)', '[-+].*$', ''))</MsiVersion>
+    <DefineConstants>PublishDir=$(PublishDir);ProductVersion=$(MsiVersion);IconPath=$(MSBuildThisFileDirectory)..\..\src\AutoSettings.Agent\Assets\AutoSettings.ico</DefineConstants>
     <!-- Directory.Build.props targets C# projects; these do not apply here. -->
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
