@@ -59,3 +59,18 @@ jobs:
 
       - name: Check generated reference docs
         run: dotnet run --project src/AutoSettings.DocGen -- --check
+
+  site:
+    name: Documentation site builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Build site
+        run: |
+          pip install --quiet mkdocs-material
+          mkdocs build
