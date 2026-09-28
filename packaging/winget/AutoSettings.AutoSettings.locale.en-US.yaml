@@ -6,7 +6,7 @@ Publisher: AutoSettings contributors
 PublisherUrl: https://github.com/Samet1771/WindowsSettingAutomation
 PackageName: AutoSettings
 PackageUrl: https://github.com/Samet1771/WindowsSettingAutomation
-License: MIT
+License: Proprietary (source-available; use only)
 LicenseUrl: https://github.com/Samet1771/WindowsSettingAutomation/blob/main/LICENSE
 ShortDescription: Windows settings that change themselves when the computer starts, users sign in, and apps start, close or get focus.
 Tags:

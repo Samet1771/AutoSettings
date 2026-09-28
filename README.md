@@ -96,4 +96,5 @@ Windows 10 1809 or later, or Windows 11 (x64). Administrator rights to install (
 
 ## License
 
-[MIT](LICENSE)
+Source-available, all rights reserved: you may read the code and download, install and use the official
+releases, but not modify, redistribute or sell it. See [LICENSE](LICENSE).

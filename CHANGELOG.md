@@ -14,6 +14,7 @@
 - Security: placeholders are no longer expanded inside `command.run` scripts; their values are passed as
   `AUTOSETTINGS_*` environment variables instead.
 - MSI installer, release workflow, winget manifests, documentation site.
+- License changed from MIT to a source-available license: use only; no modification, redistribution or sale.
 
 ## 0.1.0 (unreleased)
 

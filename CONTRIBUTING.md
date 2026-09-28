@@ -5,6 +5,8 @@ Thanks for helping improve AutoSettings!
 - **Bugs and ideas**: open an issue. For bugs, include the relevant lines of the Activity tab and the logs
   (`%LocalAppData%\AutoSettings\logs`, `%ProgramData%\AutoSettings\logs`) and your Windows version.
 - **Security issues**: please use a private security advisory, not a public issue.
+- **License**: AutoSettings is source-available, not open source (see [LICENSE](LICENSE)). By sending a pull request,
+  patch or translation you grant the copyright holder the rights described in section 3 of the license.
 
 ## Development
 
