@@ -217,11 +217,17 @@ public static class BuiltInActions
             Title = "Auto-hide taskbar",
             Description = "Turns taskbar auto-hide on or off.",
             Revertible = true,
-            Fields = [Fields.Boolean("enabled", "true to hide the taskbar automatically.")],
+            Fields =
+            [
+                Fields.Boolean("enabled", "true to hide the taskbar automatically."),
+                Fields.Boolean("restart_explorer", "Restart Windows Explorer when Windows does not apply the change right away (it happens on Windows 11). Open File Explorer windows close.", false),
+            ],
             Validate = c => ValidationRules.Require(c.Has("enabled"), "'enabled' is required"),
+            Notes = "The change is checked after it is made. When Windows 11 does not apply it right away, the setting is saved and the action fails with an explanation: it takes effect when Explorer restarts or you sign in again. Add `restart_explorer: true` to restart Explorer automatically.",
             Example = """
                 type: taskbar.autohide
                 enabled: true
+                restart_explorer: true
                 """,
         },
 

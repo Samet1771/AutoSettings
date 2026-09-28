@@ -71,6 +71,12 @@ Many modern laptops only have *Balanced*. The error lists the available plans. U
   please open an issue.
 - Night light must have been turned on once in Settings before AutoSettings can switch it.
 
+### "Auto-hide taskbar did not change" (Windows 11)
+
+The Windows 11 taskbar sometimes ignores the change until Explorer restarts. AutoSettings then saves the setting and
+reports *"Windows saved the setting but did not apply it to the taskbar yet"*. Sign out and in, or add
+`restart_explorer: true` to the action so AutoSettings restarts Explorer for you (open File Explorer windows close).
+
 ### "The editor says the file has errors"
 
 The visual editor works on the last valid version of the file, so it refuses to open while `automations.yaml` has
