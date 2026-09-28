@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+PackageIdentifier: AutoSettings.AutoSettings
+PackageVersion: {{VERSION}}
+PackageLocale: en-US
+Publisher: AutoSettings contributors
+PublisherUrl: https://github.com/Samet1771/WindowsSettingAutomation
+PackageName: AutoSettings
+PackageUrl: https://github.com/Samet1771/WindowsSettingAutomation
+License: MIT
+LicenseUrl: https://github.com/Samet1771/WindowsSettingAutomation/blob/main/LICENSE
+ShortDescription: Windows settings that change themselves when the computer starts, users sign in, and apps start, close or get focus.
+Tags:
+  - automation
+  - settings
+  - profiles
+  - dark-mode
+  - power-plan
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

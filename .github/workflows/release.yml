@@ -1,0 +1,90 @@
+# Builds a release when a tag like v0.2.0 is pushed:
+# MSI installer + portable zip, optional code signing, winget manifests, GitHub Release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      # Optional code signing: add these repository secrets (base64 .pfx and its password).
+      SIGNING_CERT: ${{ secrets.SIGNING_CERT }}
+      SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          "value=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Test
+        run: dotnet test AutoSettings.slnx -c Release -p:Version=${{ steps.version.outputs.value }}
+
+      - name: Publish
+        shell: pwsh
+        run: |
+          $out = "artifacts/AutoSettings"
+          dotnet publish src/AutoSettings.Service -c Release -r win-x64 --self-contained -o $out -p:Version=${{ steps.version.outputs.value }}
+          dotnet publish src/AutoSettings.Agent -c Release -r win-x64 --self-contained -o $out -p:Version=${{ steps.version.outputs.value }}
+          Copy-Item scripts/install.ps1, scripts/uninstall.ps1 $out
+
+      - name: Sign executables (optional)
+        if: ${{ env.SIGNING_CERT != '' }}
+        shell: pwsh
+        run: |
+          [IO.File]::WriteAllBytes("cert.pfx", [Convert]::FromBase64String($env:SIGNING_CERT))
+          $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
+          & $signtool sign /f cert.pfx /p $env:SIGNING_PASSWORD /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 artifacts/AutoSettings/AutoSettings.Service.exe artifacts/AutoSettings/AutoSettings.Agent.exe
+
+      - name: Build MSI
+        shell: pwsh
+        run: dotnet build installer/AutoSettings.Installer/AutoSettings.Installer.wixproj -c Release -p:Version=${{ steps.version.outputs.value }} -p:PublishDir="$PWD\artifacts\AutoSettings" -o artifacts/msi
+
+      - name: Sign MSI (optional)
+        if: ${{ env.SIGNING_CERT != '' }}
+        shell: pwsh
+        run: |
+          $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -Last 1
+          & $signtool sign /f cert.pfx /p $env:SIGNING_PASSWORD /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 (Get-ChildItem artifacts/msi/*.msi).FullName
+          Remove-Item cert.pfx
+
+      - name: Package
+        id: package
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.value }}"
+          $msi = (Get-ChildItem artifacts/msi/*.msi).FullName
+          $zip = "artifacts/AutoSettings-$version-win-x64.zip"
+          Compress-Archive -Path artifacts/AutoSettings/* -DestinationPath $zip
+          $sha = (Get-FileHash $msi -Algorithm SHA256).Hash
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$(Split-Path $msi -Leaf)"
+          New-Item -ItemType Directory artifacts/winget -Force | Out-Null
+          foreach ($template in Get-ChildItem packaging/winget/*.yaml) {
+            (Get-Content $template -Raw).Replace('{{VERSION}}', $version).Replace('{{URL}}', $url).Replace('{{SHA256}}', $sha) |
+              Set-Content (Join-Path artifacts/winget $template.Name) -NoNewline
+          }
+          Compress-Archive -Path artifacts/winget/* -DestinationPath "artifacts/winget-manifests-$version.zip"
+          "msi=$msi" >> $env:GITHUB_OUTPUT
+          "zip=$zip" >> $env:GITHUB_OUTPUT
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: AutoSettings ${{ steps.version.outputs.value }}
+          generate_release_notes: true
+          files: |
+            ${{ steps.package.outputs.msi }}
+            ${{ steps.package.outputs.zip }}
+            artifacts/winget-manifests-${{ steps.version.outputs.value }}.zip

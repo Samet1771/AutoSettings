@@ -41,10 +41,20 @@ jobs:
           dotnet publish src/AutoSettings.Agent -c Release -r win-x64 --self-contained -o $out
           Copy-Item scripts/install.ps1, scripts/uninstall.ps1 $out
 
+      - name: Build MSI installer
+        shell: pwsh
+        run: dotnet build installer/AutoSettings.Installer/AutoSettings.Installer.wixproj -c Release -p:PublishDir="$PWD\artifacts\AutoSettings" -o artifacts/msi
+
       - uses: actions/upload-artifact@v5
         with:
           name: AutoSettings-win-x64
           path: artifacts/AutoSettings
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: AutoSettings-msi
+          path: artifacts/msi/*.msi
           retention-days: 14
 
   docs:
