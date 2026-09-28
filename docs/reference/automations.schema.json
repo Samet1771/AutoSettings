@@ -1180,6 +1180,17 @@
             "command.run",
             "notify",
             "open",
+            "theme.accent_color",
+            "display.hdr",
+            "display.primary",
+            "display.scaling",
+            "display.night_light",
+            "power.mode",
+            "notifications.banners",
+            "notifications.do_not_disturb",
+            "keyboard.layout",
+            "radio.airplane_mode",
+            "settings.open",
             "registry.set",
             "service.control"
           ]
@@ -2248,6 +2259,471 @@
             "additionalProperties": false,
             "required": [
               "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "theme.accent_color"
+              }
+            }
+          },
+          "then": {
+            "title": "Accent color",
+            "description": "Sets the Windows accent color, and optionally shows it on Start/taskbar and title bars.",
+            "properties": {
+              "type": {
+                "const": "theme.accent_color",
+                "description": "Sets the Windows accent color, and optionally shows it on Start/taskbar and title bars."
+              },
+              "color": {
+                "type": "string",
+                "examples": [
+                  "#2563EB"
+                ],
+                "description": "Color as #RRGGBB."
+              },
+              "show_on_taskbar": {
+                "type": "boolean",
+                "description": "Show the accent color on Start and the taskbar."
+              },
+              "show_on_title_bars": {
+                "type": "boolean",
+                "description": "Show the accent color on title bars and window borders."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "color"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "display.hdr"
+              }
+            }
+          },
+          "then": {
+            "title": "HDR",
+            "description": "Turns HDR (Windows HD Color) on or off for HDR-capable displays.",
+            "properties": {
+              "type": {
+                "const": "display.hdr",
+                "description": "Turns HDR (Windows HD Color) on or off for HDR-capable displays."
+              },
+              "state": {
+                "enum": [
+                  "on",
+                  "off",
+                  "toggle"
+                ],
+                "description": "on, off, or toggle."
+              },
+              "monitor": {
+                "type": "string",
+                "default": "all",
+                "description": "Which display: all, primary, a monitor number (2) or a device name such as \\\\.\\DISPLAY2."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "state"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "display.primary"
+              }
+            }
+          },
+          "then": {
+            "title": "Main display",
+            "description": "Makes a monitor the main display (the one with the taskbar clock and where new windows open).",
+            "properties": {
+              "type": {
+                "const": "display.primary",
+                "description": "Makes a monitor the main display (the one with the taskbar clock and where new windows open)."
+              },
+              "monitor": {
+                "type": "string",
+                "examples": [
+                  "2"
+                ],
+                "description": "A monitor number (2) or a device name such as \\\\.\\DISPLAY2."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "monitor"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "display.scaling"
+              }
+            }
+          },
+          "then": {
+            "title": "Display scaling",
+            "description": "Changes the scale (text, apps and other items size) of a display.",
+            "properties": {
+              "type": {
+                "const": "display.scaling",
+                "description": "Changes the scale (text, apps and other items size) of a display."
+              },
+              "percent": {
+                "type": "integer",
+                "minimum": 100,
+                "maximum": 500,
+                "examples": [
+                  "125"
+                ],
+                "description": "Scale in percent: 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 450 or 500."
+              },
+              "monitor": {
+                "type": "string",
+                "default": "primary",
+                "description": "Which display: all, primary, a monitor number (2) or a device name such as \\\\.\\DISPLAY2."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "percent"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "display.night_light"
+              }
+            }
+          },
+          "then": {
+            "title": "Night light",
+            "description": "Turns Night light (warmer screen colors) on or off.",
+            "properties": {
+              "type": {
+                "const": "display.night_light",
+                "description": "Turns Night light (warmer screen colors) on or off."
+              },
+              "state": {
+                "enum": [
+                  "on",
+                  "off",
+                  "toggle"
+                ],
+                "description": "on, off, or toggle."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "state"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "power.mode"
+              }
+            }
+          },
+          "then": {
+            "title": "Power mode",
+            "description": "Sets the Windows power mode (the Settings > Power slider): best power efficiency, balanced or best performance.",
+            "properties": {
+              "type": {
+                "const": "power.mode",
+                "description": "Sets the Windows power mode (the Settings > Power slider): best power efficiency, balanced or best performance."
+              },
+              "mode": {
+                "enum": [
+                  "best_efficiency",
+                  "balanced",
+                  "best_performance"
+                ],
+                "description": "The power mode."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "mode"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "notifications.banners"
+              }
+            }
+          },
+          "then": {
+            "title": "Notification banners",
+            "description": "Turns app notification banners on or off (Settings > System > Notifications).",
+            "properties": {
+              "type": {
+                "const": "notifications.banners",
+                "description": "Turns app notification banners on or off (Settings > System > Notifications)."
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "true to show notifications."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "notifications.do_not_disturb"
+              }
+            }
+          },
+          "then": {
+            "title": "Do Not Disturb",
+            "description": "Turns Do Not Disturb (Focus assist) on or off.",
+            "properties": {
+              "type": {
+                "const": "notifications.do_not_disturb",
+                "description": "Turns Do Not Disturb (Focus assist) on or off."
+              },
+              "state": {
+                "enum": [
+                  "on",
+                  "off"
+                ],
+                "description": "on or off."
+              },
+              "level": {
+                "enum": [
+                  "priority",
+                  "alarms"
+                ],
+                "default": "priority",
+                "description": "When on: priority (priority notifications still show) or alarms (only alarms)."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "state"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "keyboard.layout"
+              }
+            }
+          },
+          "then": {
+            "title": "Keyboard layout",
+            "description": "Switches the keyboard layout (input language) of the active app and the default for new apps.",
+            "properties": {
+              "type": {
+                "const": "keyboard.layout",
+                "description": "Switches the keyboard layout (input language) of the active app and the default for new apps."
+              },
+              "layout": {
+                "type": "string",
+                "examples": [
+                  "tr-TR"
+                ],
+                "description": "A language tag (tr-TR, en-US, de-DE) or a keyboard layout id (0000041F)."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "layout"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "radio.airplane_mode"
+              }
+            }
+          },
+          "then": {
+            "title": "Airplane mode",
+            "description": "Turns all wireless radios (Wi-Fi, Bluetooth, mobile broadband) off (on) or back on (off).",
+            "properties": {
+              "type": {
+                "const": "radio.airplane_mode",
+                "description": "Turns all wireless radios (Wi-Fi, Bluetooth, mobile broadband) off (on) or back on (off)."
+              },
+              "state": {
+                "enum": [
+                  "on",
+                  "off"
+                ],
+                "description": "on turns every radio off; off turns them on."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "state"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "settings.open"
+              }
+            }
+          },
+          "then": {
+            "title": "Open a Settings page",
+            "description": "Opens a Windows Settings page, for settings that should be changed by hand.",
+            "properties": {
+              "type": {
+                "const": "settings.open",
+                "description": "Opens a Windows Settings page, for settings that should be changed by hand."
+              },
+              "page": {
+                "enum": [
+                  "display",
+                  "night_light",
+                  "sound",
+                  "notifications",
+                  "focus",
+                  "power",
+                  "battery",
+                  "bluetooth",
+                  "wifi",
+                  "network",
+                  "personalization",
+                  "background",
+                  "colors",
+                  "taskbar",
+                  "mouse",
+                  "keyboard",
+                  "language",
+                  "date_time",
+                  "apps",
+                  "default_apps",
+                  "storage",
+                  "privacy",
+                  "windows_update",
+                  "about"
+                ],
+                "description": "Which page."
+              },
+              "continue_on_error": {
+                "type": "boolean",
+                "default": false,
+                "description": "Keep running the next actions even if this one fails."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "page"
             ]
           }
         },

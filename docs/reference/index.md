@@ -89,6 +89,7 @@ Actions run in order. Actions marked *revertible* can be used in profiles and ar
 | [`theme.transparency`](actions/theme.transparency.md) | Turns transparency effects on or off. | yes | the signed-in user |
 | [`wallpaper.set`](actions/wallpaper.set.md) | Sets the desktop background image. | yes | the signed-in user |
 | [`taskbar.autohide`](actions/taskbar.autohide.md) | Turns taskbar auto-hide on or off. | yes | the signed-in user |
+| [`theme.accent_color`](actions/theme.accent_color.md) | Sets the Windows accent color, and optionally shows it on Start/taskbar and title bars. | yes | the signed-in user |
 
 ### Display
 
@@ -96,6 +97,10 @@ Actions run in order. Actions marked *revertible* can be used in profiles and ar
 |---|---|---|---|
 | [`display.brightness`](actions/display.brightness.md) | Sets screen brightness. Works for laptop screens and for external monitors that support DDC/CI. | yes | the signed-in user |
 | [`display.resolution`](actions/display.resolution.md) | Changes a monitor's resolution and/or refresh rate. | yes | the signed-in user |
+| [`display.hdr`](actions/display.hdr.md) | Turns HDR (Windows HD Color) on or off for HDR-capable displays. | yes | the signed-in user |
+| [`display.primary`](actions/display.primary.md) | Makes a monitor the main display (the one with the taskbar clock and where new windows open). | yes | the signed-in user |
+| [`display.scaling`](actions/display.scaling.md) | Changes the scale (text, apps and other items size) of a display. | yes | the signed-in user |
+| [`display.night_light`](actions/display.night_light.md) | Turns Night light (warmer screen colors) on or off. | yes | the signed-in user |
 
 ### Power
 
@@ -104,6 +109,7 @@ Actions run in order. Actions marked *revertible* can be used in profiles and ar
 | [`power.plan`](actions/power.plan.md) | Activates a power plan. | yes | the signed-in user |
 | [`power.screen_timeout`](actions/power.screen_timeout.md) | Sets how long before the screen turns off when idle, on the active power plan. | yes | the signed-in user |
 | [`power.sleep_timeout`](actions/power.sleep_timeout.md) | Sets how long before the computer sleeps when idle, on the active power plan. | yes | the signed-in user |
+| [`power.mode`](actions/power.mode.md) | Sets the Windows power mode (the Settings > Power slider): best power efficiency, balanced or best performance. | yes | the signed-in user |
 
 ### Audio
 
@@ -119,6 +125,8 @@ Actions run in order. Actions marked *revertible* can be used in profiles and ar
 |---|---|---|---|
 | [`radio.set`](actions/radio.set.md) | Turns a wireless radio on, off, or toggles it. | yes | the signed-in user |
 | [`mouse.speed`](actions/mouse.speed.md) | Sets the mouse pointer speed. | yes | the signed-in user |
+| [`keyboard.layout`](actions/keyboard.layout.md) | Switches the keyboard layout (input language) of the active app and the default for new apps. | yes | the signed-in user |
+| [`radio.airplane_mode`](actions/radio.airplane_mode.md) | Turns all wireless radios (Wi-Fi, Bluetooth, mobile broadband) off (on) or back on (off). | yes | the signed-in user |
 
 ### Apps & scripts
 
@@ -129,6 +137,14 @@ Actions run in order. Actions marked *revertible* can be used in profiles and ar
 | [`command.run`](actions/command.run.md) | Runs a PowerShell script or a command line. | no | depends on the fields (see below) |
 | [`notify`](actions/notify.md) | Shows a Windows notification. | no | the signed-in user |
 | [`open`](actions/open.md) | Opens a website, a file, a folder, or a Windows Settings page (ms-settings: links). | no | the signed-in user |
+| [`settings.open`](actions/settings.open.md) | Opens a Windows Settings page, for settings that should be changed by hand. | no | the signed-in user |
+
+### Notifications
+
+| Type | What it does | Revertible | Runs as |
+|---|---|---|---|
+| [`notifications.banners`](actions/notifications.banners.md) | Turns app notification banners on or off (Settings > System > Notifications). | yes | the signed-in user |
+| [`notifications.do_not_disturb`](actions/notifications.do_not_disturb.md) | Turns Do Not Disturb (Focus assist) on or off. | yes | the signed-in user |
 
 ### Advanced
 
