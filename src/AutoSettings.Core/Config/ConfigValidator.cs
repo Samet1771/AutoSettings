@@ -14,7 +14,7 @@ public sealed class ConfigValidator
     private readonly ComponentCatalog _catalog;
 
     /// <summary>Creates a validator for <paramref name="catalog"/> (the built-in catalog by default).</summary>
-    public ConfigValidator(ComponentCatalog? catalog = null) => _catalog = catalog ?? ComponentCatalog.Default;
+    public ConfigValidator(ComponentCatalog? catalog = null) => _catalog = catalog ?? ComponentCatalog.BuiltIn;
 
     /// <summary>
     /// Validates <paramref name="config"/> for use in a personal (<see cref="ExecutionScope.User"/>) or

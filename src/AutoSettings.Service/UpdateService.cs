@@ -1,14 +1,13 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Security.AccessControl;
 using System.Security.Cryptography;
-using System.Security.Principal;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoSettings.Core;
 using AutoSettings.Core.Engine;
 using AutoSettings.Core.Updates;
+using AutoSettings.Platform.Security;
 using AutoSettings.Platform.Updates;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -303,8 +302,9 @@ public sealed class UpdateService : BackgroundService
             if (!IsGitHubDownload(release.MsiUrl) || release.ChecksumsUrl is { } sums && !IsGitHubDownload(sums))
                 throw new UpdateException("The download address is not on github.com.");
 
-            CreateSecureDirectory(UpdatesDirectory);
-            CreateSecureDirectory(directory);
+            // Only SYSTEM and administrators may write here, so nobody can swap a verified installer before it runs.
+            SecureDirectory.Create(UpdatesDirectory);
+            SecureDirectory.Create(directory);
 
             string actual;
             await using (var file = new FileStream(partial, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
@@ -539,23 +539,6 @@ public sealed class UpdateService : BackgroundService
         catch (OperationCanceledException)
         {
         }
-    }
-
-    /// <summary>Only SYSTEM and administrators may write here, so nobody can swap a verified installer before it runs.</summary>
-    private static void CreateSecureDirectory(string path)
-    {
-        var inherit = InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit;
-        var security = new DirectorySecurity();
-        security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
-        security.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null), FileSystemRights.FullControl, inherit, PropagationFlags.None, AccessControlType.Allow));
-        security.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null), FileSystemRights.FullControl, inherit, PropagationFlags.None, AccessControlType.Allow));
-        security.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null), FileSystemRights.ReadAndExecute, inherit, PropagationFlags.None, AccessControlType.Allow));
-
-        var directory = new DirectoryInfo(path);
-        if (directory.Exists)
-            directory.SetAccessControl(security);
-        else
-            directory.Create(security);
     }
 
     private static SemVersion CurrentVersion()

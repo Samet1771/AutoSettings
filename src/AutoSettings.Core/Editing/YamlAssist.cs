@@ -91,7 +91,7 @@ public static partial class YamlAssist
         IEnumerable<string>? knownProfiles = null,
         ComponentCatalog? catalog = null)
     {
-        catalog ??= ComponentCatalog.Default;
+        catalog ??= ComponentCatalog.BuiltIn;
         offset = Math.Clamp(offset, 0, text.Length);
         var lines = Parse(text);
         var current = lines.Last(l => l.Start <= offset);
@@ -104,7 +104,7 @@ public static partial class YamlAssist
             var key = valueMatch.Groups["key"].Value;
             var typed = valueMatch.Groups["value"].Value;
             var context = ResolveMap(lines, current, documentKind, catalog, keyColumnOverride: null);
-            var items = ValuesFor(key, context, scope, catalog, ProfileIds(lines, documentKind).Concat(knownProfiles ?? []));
+            var items = ValuesFor(key, context, scope, catalog, ProfileIds(lines, documentKind, catalog).Concat(knownProfiles ?? []));
             return new CompletionResult(offset - typed.Length, Filter(items, typed));
         }
 
@@ -125,7 +125,7 @@ public static partial class YamlAssist
     /// <summary>Help for the key or type under <paramref name="offset"/>, or null.</summary>
     public static HoverInfo? Hover(string text, int offset, YamlDocumentKind documentKind = YamlDocumentKind.File, ComponentCatalog? catalog = null)
     {
-        catalog ??= ComponentCatalog.Default;
+        catalog ??= ComponentCatalog.BuiltIn;
         if (text.Length == 0)
             return null;
         offset = Math.Clamp(offset, 0, text.Length - 1);
@@ -235,11 +235,11 @@ public static partial class YamlAssist
             .OrderBy(i => i.Label.StartsWith(typed, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
             .ToList();
 
-    private static IEnumerable<string> ProfileIds(List<Line> lines, YamlDocumentKind documentKind)
+    private static IEnumerable<string> ProfileIds(List<Line> lines, YamlDocumentKind documentKind, ComponentCatalog catalog)
     {
         foreach (var line in lines.Where(l => l.Key == "id"))
         {
-            var context = ResolveMap(lines, line, documentKind, ComponentCatalog.Default, keyColumnOverride: null);
+            var context = ResolveMap(lines, line, documentKind, catalog, keyColumnOverride: null);
             if (context.Kind == MapKind.Profile && line.Value.Trim().Length > 0)
                 yield return line.Value.Trim().Trim('"', '\'');
         }

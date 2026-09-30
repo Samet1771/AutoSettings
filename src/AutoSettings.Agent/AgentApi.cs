@@ -13,8 +13,7 @@ namespace AutoSettings.Agent;
 internal sealed class AgentApi : IAgentApi
 {
     private readonly AgentHost _host;
-    private readonly ConfigValidator _validator = new();
-
+    
     public AgentApi(AgentHost host) => _host = host;
 
     public Task OnSystemEventAsync(SystemEvent systemEvent, CancellationToken cancellationToken)
@@ -61,7 +60,7 @@ internal sealed class AgentApi : IAgentApi
     {
         var component = new ComponentConfig(action.Type, PlainJson.Deserialize(action.ParametersJson));
         // Validate as a personal action: the service can never make the agent do what the user could not.
-        var errors = _validator.NormalizeComponent(ComponentKind.Action, component, ExecutionScope.User)
+        var errors = new ConfigValidator(AgentCatalog.Current).NormalizeComponent(ComponentKind.Action, component, ExecutionScope.User)
             .Where(i => i.Severity == IssueSeverity.Error)
             .ToList();
         if (errors.Count == 0)
@@ -71,7 +70,7 @@ internal sealed class AgentApi : IAgentApi
     }
 
     private static ComponentConfig WithDefaults(ComponentConfig component) =>
-        ComponentCatalog.Default.WithDefaults(ComponentKind.Action, component);
+        AgentCatalog.Current.WithDefaults(ComponentKind.Action, component);
 
     private ActionContext Context(RemoteAction action) =>
         new(action.Event, action.AutomationId, $"machine automation '{action.AutomationName}'", _host.Activity) { CurrentUser = _host.User };

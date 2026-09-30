@@ -34,11 +34,11 @@ public sealed class AgentHost
         Activity = new ActivityLog(1000, loggerFactory.CreateLogger("Activity"));
         Foreground = new ForegroundMonitor();
         Handlers = PlatformHandlers.CreateUserRegistry(notifier, Foreground);
-        Engine = new RuleEngine(ExecutionScope.User, Handlers, Activity, logger: loggerFactory.CreateLogger<RuleEngine>())
+        Engine = new RuleEngine(ExecutionScope.User, Handlers, Activity, catalog: AgentCatalog.Current, logger: loggerFactory.CreateLogger<RuleEngine>())
         {
             CurrentUser = User,
         };
-        Store = new ConfigFileStore(Product.UserConfigPath, ExecutionScope.User, ComponentCatalog.Default, loggerFactory.CreateLogger<ConfigFileStore>());
+        Store = new ConfigFileStore(Product.UserConfigPath, ExecutionScope.User, AgentCatalog.Current, loggerFactory.CreateLogger<ConfigFileStore>());
         Service = new ServiceConnection(new AgentApi(this), Activity, SessionId, loggerFactory.CreateLogger<ServiceConnection>());
     }
 
@@ -200,7 +200,7 @@ public sealed class AgentHost
     {
         if (Store.LastResult?.HasErrors == true)
             throw new InvalidOperationException(Localization.Strings.Get("FixFileFirst"));
-        var document = new Core.Editing.ConfigDocument(Store.Current, ExecutionScope.User);
+        var document = new Core.Editing.ConfigDocument(Store.Current, ExecutionScope.User, AgentCatalog.Current);
         change(document);
         return Store.Save(document.ToYaml());
     }
@@ -210,7 +210,7 @@ public sealed class AgentHost
     {
         if (Store.LastResult?.HasErrors == true)
             throw new InvalidOperationException(Localization.Strings.Get("FixFileFirst"));
-        return new Core.Editing.ConfigDocument(Store.Current, ExecutionScope.User);
+        return new Core.Editing.ConfigDocument(Store.Current, ExecutionScope.User, AgentCatalog.Current);
     }
 
     private async Task RunSafely(Func<Task> action)

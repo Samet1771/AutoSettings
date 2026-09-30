@@ -145,8 +145,8 @@ public sealed partial class ComponentViewModel : ObservableObject
         Kind = kind;
         _scope = scope;
         _changed = changed;
-        TypeOptions = ComponentCatalog.Default.OfKind(kind).Where(d => EditorCatalog.IsUsable(d, scope)).Select(d => new TypeOption(d)).ToList();
-        var descriptor = ComponentCatalog.Default.Find(kind, component.Type);
+        TypeOptions = AgentCatalog.Current.OfKind(kind).Where(d => EditorCatalog.IsUsable(d, scope)).Select(d => new TypeOption(d)).ToList();
+        var descriptor = AgentCatalog.Current.Find(kind, component.Type);
         _selectedType = TypeOptions.FirstOrDefault(t => t.Descriptor == descriptor);
         UnknownType = descriptor is null ? component.Type : null;
         BuildFields(component);
@@ -244,7 +244,7 @@ public sealed partial class ComponentViewModel : ObservableObject
             Errors = Strings.Format("UnknownType", UnknownType);
             return;
         }
-        Errors = string.Join(Environment.NewLine, FieldText.Validate(Kind, ToComponent(), _scope));
+        Errors = string.Join(Environment.NewLine, FieldText.Validate(Kind, ToComponent(), _scope, AgentCatalog.Current));
     }
 }
 
@@ -270,7 +270,7 @@ public sealed class ComponentListViewModel
 
     /// <summary>Catalog entries grouped by category, for the "Add" menu.</summary>
     public IEnumerable<IGrouping<string, ComponentDescriptor>> AddMenu =>
-        ComponentCatalog.Default.OfKind(Kind).Where(d => EditorCatalog.IsUsable(d, _scope)).GroupBy(d => d.Category);
+        AgentCatalog.Current.OfKind(Kind).Where(d => EditorCatalog.IsUsable(d, _scope)).GroupBy(d => d.Category);
 
     /// <summary>Adds a new, empty card of the given type.</summary>
     public ComponentViewModel AddNew(ComponentDescriptor descriptor)

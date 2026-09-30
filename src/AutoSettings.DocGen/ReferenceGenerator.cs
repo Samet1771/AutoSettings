@@ -16,7 +16,7 @@ public static class ReferenceGenerator
     /// <summary>Returns relative path → content (LF line endings) for every generated file.</summary>
     public static SortedDictionary<string, string> Generate()
     {
-        var catalog = ComponentCatalog.Default;
+        var catalog = ComponentCatalog.BuiltIn;
         var files = new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
             ["index.md"] = Index(catalog),

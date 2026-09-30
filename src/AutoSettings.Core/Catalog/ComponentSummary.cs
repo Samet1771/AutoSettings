@@ -8,7 +8,7 @@ public static class ComponentSummary
     /// <summary>Describes a component, e.g. "App focused: POWERPNT.EXE" or "Set volume: 30".</summary>
     public static string Describe(ComponentKind kind, ComponentConfig component, ComponentCatalog? catalog = null)
     {
-        var descriptor = (catalog ?? ComponentCatalog.Default).Find(kind, component.Type);
+        var descriptor = (catalog ?? ComponentCatalog.BuiltIn).Find(kind, component.Type);
         if (descriptor is null)
             return component.Type;
 

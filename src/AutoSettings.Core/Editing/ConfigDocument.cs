@@ -23,7 +23,7 @@ public sealed class ConfigDocument
     {
         Config = ConfigCloner.Clone(config);
         Scope = scope;
-        _catalog = catalog ?? ComponentCatalog.Default;
+        _catalog = catalog ?? ComponentCatalog.BuiltIn;
     }
 
     /// <summary>The configuration being edited.</summary>

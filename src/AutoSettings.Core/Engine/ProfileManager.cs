@@ -34,7 +34,7 @@ internal sealed class ProfileManager
 
     private sealed record Baseline(ComponentConfig Action, IRevertibleActionHandler Handler, string? Snapshot, bool Captured);
 
-    private readonly ComponentCatalog _catalog;
+    private readonly Func<ComponentCatalog> _catalog;
     private readonly HandlerRegistry _handlers;
     private readonly ActivityLog _log;
     private readonly TimeProvider _time;
@@ -46,7 +46,7 @@ internal sealed class ProfileManager
     private long _sequence;
 
     public ProfileManager(
-        ComponentCatalog catalog,
+        Func<ComponentCatalog> catalog,
         HandlerRegistry handlers,
         ActivityLog log,
         TimeProvider time,
@@ -117,8 +117,9 @@ internal sealed class ProfileManager
                     continue;
                 }
 
-                var descriptor = _catalog.Find(ComponentKind.Action, action.Type);
-                var effective = _catalog.WithDefaults(ComponentKind.Action, action);
+                var catalog = _catalog();
+                var descriptor = catalog.Find(ComponentKind.Action, action.Type);
+                var effective = catalog.WithDefaults(ComponentKind.Action, action);
 
                 if (descriptor is { Revertible: true } && _handlers.FindAction(action.Type) is IRevertibleActionHandler handler)
                 {

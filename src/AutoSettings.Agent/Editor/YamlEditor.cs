@@ -166,7 +166,7 @@ public sealed class YamlEditor : UserControl
 
     private void ShowCompletion(bool automatic)
     {
-        var result = YamlAssist.Complete(_editor.Text, _editor.CaretOffset, Scope, DocumentKind, KnownProfiles?.Invoke());
+        var result = YamlAssist.Complete(_editor.Text, _editor.CaretOffset, Scope, DocumentKind, KnownProfiles?.Invoke(), AgentCatalog.Current);
         if (result.Items.Count == 0)
             return;
         // While typing a value, only pop up automatically right after "key: ".
@@ -194,7 +194,7 @@ public sealed class YamlEditor : UserControl
         var line = position.Value.Line;
 
         var messages = _issues.Issues.Where(i => i.Location!.Value.Line == line).Select(i => i.Message).ToList();
-        var hover = YamlAssist.Hover(_editor.Text, offset, DocumentKind);
+        var hover = YamlAssist.Hover(_editor.Text, offset, DocumentKind, AgentCatalog.Current);
         if (messages.Count == 0 && hover is null)
             return;
 

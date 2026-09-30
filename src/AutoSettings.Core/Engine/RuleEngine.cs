@@ -49,6 +49,7 @@ public sealed class RuleEngine
     private readonly Dictionary<string, Queue<DateTimeOffset>> _recentRuns = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<Task> _inFlight = [];
     private volatile State _state;
+    private volatile ComponentCatalog _catalog;
     private DateTimeOffset? _pausedUntil;
     private bool _pausedIndefinitely;
 
@@ -57,7 +58,7 @@ public sealed class RuleEngine
     /// <param name="handlers">Action and condition handlers available where the engine runs.</param>
     /// <param name="log">Activity log to write to.</param>
     /// <param name="options">Tunables.</param>
-    /// <param name="catalog">Component catalog (built-in by default).</param>
+    /// <param name="catalog">Component catalog (the built-in one by default).</param>
     /// <param name="time">Clock (for tests).</param>
     /// <param name="logger">Diagnostic logger.</param>
     public RuleEngine(
@@ -73,10 +74,10 @@ public sealed class RuleEngine
         _handlers = handlers;
         Log = log;
         _options = options ?? new EngineOptions();
-        Catalog = catalog ?? ComponentCatalog.Default;
+        _catalog = catalog ?? ComponentCatalog.BuiltIn;
         _time = time ?? TimeProvider.System;
         _logger = logger ?? NullLogger.Instance;
-        _profiles = new ProfileManager(Catalog, handlers, log, _time, ExecuteActionAsync);
+        _profiles = new ProfileManager(() => Catalog, handlers, log, _time, ExecuteActionAsync);
         _profiles.Changed += (_, _) => StateChanged?.Invoke(this, EventArgs.Empty);
         _state = new State(new AutomationConfig(), []);
     }
@@ -87,8 +88,8 @@ public sealed class RuleEngine
     /// <summary>The activity log.</summary>
     public ActivityLog Log { get; }
 
-    /// <summary>The component catalog.</summary>
-    public ComponentCatalog Catalog { get; }
+    /// <summary>The component catalog (replaced with <see cref="UseCatalog"/> when plugins change).</summary>
+    public ComponentCatalog Catalog => _catalog;
 
     /// <summary>Known running processes (seed it at startup).</summary>
     public ProcessTracker Processes { get; } = new();
@@ -145,6 +146,25 @@ public sealed class RuleEngine
     /// <summary>Replaces the running configuration. Clears loop-guard suspensions.</summary>
     public void UpdateConfig(AutomationConfig config)
     {
+        _state = Compile(config);
+        lock (_runGate)
+            _suspended.Clear();
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Switches to another catalog, for example after a plugin was installed or removed, and prepares the
+    /// running configuration again with it. The handlers of new components must already be registered.
+    /// </summary>
+    public void UseCatalog(ComponentCatalog catalog)
+    {
+        _catalog = catalog;
+        _state = Compile(_state.Config);
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private State Compile(AutomationConfig config)
+    {
         var compiled = new List<CompiledAutomation>();
         foreach (var automation in config.Automations)
         {
@@ -158,10 +178,7 @@ public sealed class RuleEngine
             }
             compiled.Add(new CompiledAutomation(automation, triggers));
         }
-        _state = new State(config, compiled);
-        lock (_runGate)
-            _suspended.Clear();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        return new State(config, compiled);
     }
 
     /// <summary>Pauses automations for <paramref name="duration"/>, or until <see cref="Resume"/> when null.</summary>

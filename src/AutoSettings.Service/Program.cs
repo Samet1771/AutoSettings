@@ -1,4 +1,5 @@
 using AutoSettings.Core;
+using AutoSettings.Core.Catalog;
 using AutoSettings.Core.Engine;
 using AutoSettings.Service;
 using Microsoft.Extensions.Configuration;
@@ -40,6 +41,9 @@ builder.Services.Configure<ServiceOptions>(builder.Configuration.GetSection("Aut
 builder.Services.AddSingleton<SystemSignals>();
 builder.Services.AddSingleton(provider =>
     new ActivityLog(1000, provider.GetRequiredService<ILoggerFactory>().CreateLogger("Activity")));
+// Built-in components for now; plugins will replace the catalog through the provider.
+builder.Services.AddSingleton<ComponentCatalogProvider>();
+builder.Services.AddSingleton<IComponentCatalogProvider>(provider => provider.GetRequiredService<ComponentCatalogProvider>());
 builder.Services.AddSingleton<AgentHub>();
 builder.Services.AddSingleton<AgentSupervisor>();
 builder.Services.AddSingleton<MachineHost>();

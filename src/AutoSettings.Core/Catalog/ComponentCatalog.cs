@@ -29,8 +29,37 @@ public sealed class ComponentCatalog
         All = all;
     }
 
-    /// <summary>The built-in catalog.</summary>
-    public static ComponentCatalog Default { get; } = new(BuiltInComponents.All);
+    /// <summary>The catalog of built-in components only (no plugins).</summary>
+    public static ComponentCatalog BuiltIn { get; } = new(BuiltInComponents.All);
+
+    /// <summary>
+    /// Builds a catalog from the built-in components and the components of plugins. A plugin is added
+    /// whole or not at all: when one of its types is already taken (by a built-in component or by a plugin
+    /// added before it), or appears twice in the plugin, the plugin is left out and listed in
+    /// <see cref="CatalogComposition.Rejected"/>. The built-in components are always kept.
+    /// </summary>
+    public static CatalogComposition Compose(IEnumerable<ComponentDescriptor> builtIn, IEnumerable<PluginContribution> plugins)
+    {
+        var accepted = builtIn.ToList();
+        var taken = accepted.Select(d => (d.Kind, d.Type)).ToHashSet(KindTypeComparer.Instance);
+        var rejected = new List<PluginConflict>();
+        foreach (var plugin in plugins)
+        {
+            var own = new HashSet<(ComponentKind, string)>(KindTypeComparer.Instance);
+            var clash = plugin.Components.FirstOrDefault(d => taken.Contains((d.Kind, d.Type)) || !own.Add((d.Kind, d.Type)));
+            if (clash is not null)
+            {
+                rejected.Add(new PluginConflict(plugin.Source.PluginId ?? "", $"{clash.Kind} type '{clash.Type}' already exists."));
+                continue;
+            }
+            foreach (var d in plugin.Components)
+            {
+                accepted.Add(d with { Source = plugin.Source });
+                taken.Add((d.Kind, d.Type));
+            }
+        }
+        return new CatalogComposition(new ComponentCatalog(accepted), rejected);
+    }
 
     /// <summary>All descriptors in registration order.</summary>
     public IReadOnlyList<ComponentDescriptor> All { get; }
@@ -61,4 +90,31 @@ public sealed class ComponentCatalog
         }
         return copy;
     }
+
+    /// <summary>Compares (kind, type) pairs ignoring case, like handler lookup does, so plugins cannot shadow a type by case.</summary>
+    private sealed class KindTypeComparer : IEqualityComparer<(ComponentKind Kind, string Type)>
+    {
+        public static readonly KindTypeComparer Instance = new();
+
+        public bool Equals((ComponentKind Kind, string Type) x, (ComponentKind Kind, string Type) y) =>
+            x.Kind == y.Kind && StringComparer.OrdinalIgnoreCase.Equals(x.Type, y.Type);
+
+        public int GetHashCode((ComponentKind Kind, string Type) obj) =>
+            HashCode.Combine(obj.Kind, StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Type));
+    }
 }
+
+/// <summary>The components one plugin adds to the catalog.</summary>
+/// <param name="Source">The plugin (its <see cref="ComponentSource.PluginId"/> must be set).</param>
+/// <param name="Components">Its triggers, conditions and actions.</param>
+public sealed record PluginContribution(ComponentSource Source, IReadOnlyList<ComponentDescriptor> Components);
+
+/// <summary>A plugin that was left out of the catalog.</summary>
+/// <param name="PluginId">The plugin.</param>
+/// <param name="Reason">Why, in plain language.</param>
+public sealed record PluginConflict(string PluginId, string Reason);
+
+/// <summary>The result of <see cref="ComponentCatalog.Compose"/>.</summary>
+/// <param name="Catalog">The catalog with the built-in components and every accepted plugin.</param>
+/// <param name="Rejected">Plugins that were left out.</param>
+public sealed record CatalogComposition(ComponentCatalog Catalog, IReadOnlyList<PluginConflict> Rejected);

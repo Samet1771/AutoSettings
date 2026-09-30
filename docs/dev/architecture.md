@@ -96,6 +96,14 @@ where it may be used, whether it is revertible, an example and notes. The same m
 
 Handlers (Platform) only implement behavior.
 
+`ComponentCatalog.BuiltIn` holds the built-in components. The service and the agent do not use it directly: they
+read the current catalog from an `IComponentCatalogProvider` (the service's comes from dependency injection, the
+agent's is `AgentCatalog`). This prepares for plugins. `ComponentCatalog.Compose` adds plugin components to the
+built-in ones, and leaves out a whole plugin when one of its types is already taken. Every descriptor has a
+`Source` that says whether it is built in or which plugin it comes from. When the catalog changes, the service
+routes the new actions and removes the old ones in its `HandlerRegistry`. It then calls `RuleEngine.UseCatalog`
+and `ConfigFileStore.UseCatalog`, so automations are validated and prepared again.
+
 ## Technology
 
 - .NET 10 (LTS), C# latest, nullable enabled.
