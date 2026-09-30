@@ -19,7 +19,8 @@ unknown names are left unchanged.
 | `{{ app.pid }}` | Process id of the app. |
 | `{{ window_title }}` | Title of the focused window (focus triggers). |
 | `{{ session }}` | Windows session number. |
-| `{{ event }}` | The trigger type that fired, e.g. app_focused. |
+| `{{ event }}` | The trigger type that fired, e.g. app_focused, or the plugin event name. |
+| `{{ event.data.<name> }}` | A value a plugin trigger sent with its event, e.g. {{ event.data.drive }}. |
 | `{{ boot_type }}` | cold or fast_startup (boot trigger). |
 | `{{ automation }}` | Name of the running automation. |
 | `{{ date }}` | Current date, yyyy-MM-dd. |
@@ -55,6 +56,7 @@ as an environment variable named `AUTOSETTINGS_` + the placeholder name in capit
 | `{{ window_title }}` | `$env:AUTOSETTINGS_WINDOW_TITLE` | `%AUTOSETTINGS_WINDOW_TITLE%` |
 | `{{ session }}` | `$env:AUTOSETTINGS_SESSION` | `%AUTOSETTINGS_SESSION%` |
 | `{{ event }}` | `$env:AUTOSETTINGS_EVENT` | `%AUTOSETTINGS_EVENT%` |
+| `{{ event.data.<name> }}` | `$env:AUTOSETTINGS_EVENT_DATA_<NAME>` | `%AUTOSETTINGS_EVENT_DATA_<NAME>%` |
 | `{{ boot_type }}` | `$env:AUTOSETTINGS_BOOT_TYPE` | `%AUTOSETTINGS_BOOT_TYPE%` |
 | `{{ automation }}` | `$env:AUTOSETTINGS_AUTOMATION` | `%AUTOSETTINGS_AUTOMATION%` |
 | `{{ date }}` | `$env:AUTOSETTINGS_DATE` | `%AUTOSETTINGS_DATE%` |
