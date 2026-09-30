@@ -24,6 +24,7 @@ public static class ConfigCloner
         Triggers = automation.Triggers.Select(Clone).ToList(),
         Conditions = automation.Conditions.Select(Clone).ToList(),
         Actions = automation.Actions.Select(Clone).ToList(),
+        MissingPlugins = [.. automation.MissingPlugins],
     };
 
     /// <summary>Copies a profile.</summary>

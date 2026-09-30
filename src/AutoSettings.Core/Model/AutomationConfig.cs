@@ -55,6 +55,15 @@ public sealed class Automation
     /// <summary>Where the automation starts in its YAML file, if loaded from one.</summary>
     public SourceLocation? Location { get; set; }
 
+    /// <summary>
+    /// Plugins this automation uses that are not installed or are turned off (set by validation, not saved).
+    /// Such an automation stays in the file but does not run until the plugins are available.
+    /// </summary>
+    public List<string> MissingPlugins { get; set; } = [];
+
+    /// <summary>Whether the automation cannot run because a plugin it uses is missing.</summary>
+    public bool IsBlocked => MissingPlugins.Count > 0;
+
     /// <summary><see cref="Name"/> if set, otherwise <see cref="Id"/>.</summary>
     public string DisplayName => string.IsNullOrWhiteSpace(Name) ? Id : Name!;
 }

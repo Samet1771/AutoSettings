@@ -72,7 +72,7 @@ public class PluginCatalogTests
     }
 
     [Fact]
-    public void Plugin_components_validate_only_with_a_catalog_that_has_them()
+    public void Plugin_components_only_work_with_a_catalog_that_has_them()
     {
         const string yaml = """
             version: 1
@@ -85,8 +85,13 @@ public class PluginCatalogTests
             """;
         var catalog = ComponentCatalog.Compose(BuiltInComponents.All, [new PluginContribution(Demo, [Action("acme.demo.say")])]).Catalog;
 
-        Assert.True(ConfigLoader.Load(yaml, ExecutionScope.User).HasErrors);
-        Assert.False(ConfigLoader.Load(yaml, ExecutionScope.User, catalog).HasErrors);
+        var without = ConfigLoader.Load(yaml, ExecutionScope.User);
+        Assert.False(without.HasErrors);
+        Assert.True(without.Config.Automations[0].IsBlocked);
+
+        var with = ConfigLoader.Load(yaml, ExecutionScope.User, catalog);
+        Assert.False(with.HasErrors);
+        Assert.False(with.Config.Automations[0].IsBlocked);
     }
 
     [Fact]

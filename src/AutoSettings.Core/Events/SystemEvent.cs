@@ -21,6 +21,11 @@ public enum SystemEventKind
     AppFocused,
     /// <summary>An app's window stopped being the foreground window.</summary>
     AppUnfocused,
+    /// <summary>
+    /// An event raised by a plugin. <see cref="SystemEvent.PluginEvent"/> names it and
+    /// <see cref="SystemEvent.Data"/> carries its values.
+    /// </summary>
+    Plugin,
 }
 
 /// <summary>Values for <see cref="SystemEvent.BootType"/>.</summary>
@@ -83,10 +88,16 @@ public sealed record SystemEvent
     /// <summary>For session events: whether the session is a Remote Desktop session.</summary>
     public bool IsRemote { get; init; }
 
+    /// <summary>For <see cref="SystemEventKind.Plugin"/>: the event name, e.g. <c>acme.usb.connected</c>.</summary>
+    public string? PluginEvent { get; init; }
+
+    /// <summary>For <see cref="SystemEventKind.Plugin"/>: values the plugin sent with the event, e.g. <c>drive = E:</c>.</summary>
+    public IReadOnlyDictionary<string, string>? Data { get; init; }
+
     /// <inheritdoc />
     public override string ToString()
     {
-        var parts = new List<string> { Kind.ToString() };
+        var parts = new List<string> { Kind == SystemEventKind.Plugin && PluginEvent is not null ? PluginEvent : Kind.ToString() };
         if (Process is not null) parts.Add(Process.Name);
         if (User is not null) parts.Add($"user {User.QualifiedName}");
         if (SessionId is not null) parts.Add($"session {SessionId}");

@@ -23,6 +23,7 @@ S = {
  "AutomationsHint": ("WHEN a trigger happens, IF all conditions are true, THEN the actions run in order. Double-click to edit.", "Bir tetikleyici gerçekleştiğinde, tüm koşullar doğruysa eylemler sırayla çalışır. Düzenlemek için çift tıklayın."),
  "AutomationsOn": ("{0} of {1} automations on", "{1} otomasyondan {0} açık"),
  "Browse": ("Browse…", "Gözat…"),
+ "NeedsPlugin": ("needs plugin {0}", "{0} eklentisi gerekli"),
  "Cancel": ("Cancel", "İptal"),
  "Clear": ("Clear", "Temizle"),
  "Connected": ("connected", "bağlı"),

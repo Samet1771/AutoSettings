@@ -80,6 +80,27 @@ public sealed record ComponentDescriptor
     /// <summary>For triggers: the event kind it reacts to.</summary>
     public SystemEventKind? EventKind { get; init; }
 
+    /// <summary>
+    /// For plugin triggers (<see cref="EventKind"/> is <see cref="SystemEventKind.Plugin"/>): the name of the
+    /// plugin event it reacts to. Defaults to <see cref="Type"/>.
+    /// </summary>
+    public string? PluginEvent { get; init; }
+
+    /// <summary>
+    /// For plugin triggers: the plugin event that undoes this one (e.g. "disconnected" for "connected").
+    /// Profiles applied by this trigger with <c>revert_on: auto</c> are reverted when it happens.
+    /// </summary>
+    public string? OppositeEvent { get; init; }
+
+    /// <summary>
+    /// Titles and descriptions in other languages, keyed by language code (e.g. <c>tr</c>). Plugins use this;
+    /// built-in components are translated through the app's resources.
+    /// </summary>
+    public IReadOnlyDictionary<string, LocalizedText> Localized { get; init; } = new Dictionary<string, LocalizedText>();
+
+    /// <summary>The plugin event name this trigger reacts to (<see cref="PluginEvent"/>, or the type).</summary>
+    public string PluginEventName => PluginEvent ?? Type;
+
     /// <summary>A YAML example of the entry (a list item, without the leading dash's indentation).</summary>
     public string? Example { get; init; }
 
@@ -120,3 +141,8 @@ public sealed record ComponentSource(string? PluginId, string? PluginVersion, Ex
     /// <summary>A component from a plugin.</summary>
     public static ComponentSource Plugin(string id, string version, ExecutionScope scope) => new(id, version, scope);
 }
+
+/// <summary>A title and description in one language.</summary>
+/// <param name="Title">Short title.</param>
+/// <param name="Description">Longer description, or <c>null</c> to keep the English one.</param>
+public sealed record LocalizedText(string Title, string? Description = null);

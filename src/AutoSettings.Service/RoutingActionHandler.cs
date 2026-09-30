@@ -64,7 +64,7 @@ internal sealed class RoutingActionHandler : IRevertibleActionHandler
         var sessionId = context.Event?.SessionId;
         if (sessionId is null)
         {
-            var what = context.Event is { } e ? $"the '{EventNames.TriggerType(e.Kind)}' event" : "a manual run";
+            var what = context.Event is { } e ? $"the '{EventNames.Name(e)}' event" : "a manual run";
             throw new ActionFailedException(
                 $"'{Type}' changes a user's own settings, but {what} does not belong to a signed-in user. Use a logon or app trigger, or move the automation to your personal automations.");
         }

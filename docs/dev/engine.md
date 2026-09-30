@@ -86,6 +86,33 @@ condition handlers registered by the host. A condition that throws counts as fal
 `time`: `after` is inclusive, `before` is exclusive; if `after > before` the window crosses midnight; `weekdays` is
 checked against the current day.
 
+## Plugin events and missing plugins
+
+Plugins raise `SystemEvent`s of kind `Plugin`, with a `PluginEvent` name (for example `acme.usb.connected`) and a
+`Data` dictionary of text values.
+
+- **Matching.** A plugin trigger descriptor has `EventKind = Plugin`, and optionally `PluginEvent` (defaults to its
+  type) and `OppositeEvent`. It matches events with that name. Every field set in the trigger must match the value of
+  the same name in `Data`:
+  - text is compared with wildcards;
+  - for a list, any item may match;
+  - other values are compared exactly.
+
+  A field default counts as set, so filter fields should have no default.
+- **Placeholders.** Data values are available as `{{ event.data.<name> }}`, and in `command.run` scripts as
+  `AUTOSETTINGS_EVENT_DATA_<NAME>`. `{{ event }}` is the plugin event name.
+- **Reverting.** `revert_on: auto` reverts a profile applied by a plugin event when the trigger's `OppositeEvent`
+  happens.
+- **Missing plugins.** Plugin types are named `publisher.plugin.name`: at least two dots, while built-in types have
+  at most one. When a file uses such a type and it is not in the catalog, `ConfigValidator` does not fail the file.
+  Instead it:
+  - adds a warning;
+  - records the plugin in `Automation.MissingPlugins`.
+
+  Such an automation stays in the file but never fires, and running it by hand is refused, until the plugin is
+  installed and the catalog changes (`RuleEngine.UseCatalog`). A single action sent over IPC with a missing plugin
+  type is still an error.
+
 ## Thread safety
 
 - Events: single consumer, guarded by a semaphore.

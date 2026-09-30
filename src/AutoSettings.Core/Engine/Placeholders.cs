@@ -25,7 +25,8 @@ public static partial class Placeholders
         ("app.pid", "Process id of the app."),
         ("window_title", "Title of the focused window (focus triggers)."),
         ("session", "Windows session number."),
-        ("event", "The trigger type that fired, e.g. app_focused."),
+        ("event", "The trigger type that fired, e.g. app_focused, or the plugin event name."),
+        ("event.data.<name>", "A value a plugin trigger sent with its event, e.g. {{ event.data.drive }}."),
         ("boot_type", "cold or fast_startup (boot trigger)."),
         ("automation", "Name of the running automation."),
         ("date", "Current date, yyyy-MM-dd."),
@@ -39,7 +40,7 @@ public static partial class Placeholders
         var e = context.Event;
         var user = context.User;
         var process = e?.Process;
-        return new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
         {
             ["user"] = user?.Name,
             ["user.domain"] = user?.Domain,
@@ -51,13 +52,19 @@ public static partial class Placeholders
             ["app.pid"] = process?.Id.ToString(CultureInfo.InvariantCulture),
             ["window_title"] = e?.WindowTitle,
             ["session"] = e?.SessionId?.ToString(CultureInfo.InvariantCulture),
-            ["event"] = e is null ? null : EventNames.TriggerType(e.Kind),
+            ["event"] = e is null ? null : EventNames.Name(e),
             ["boot_type"] = e?.BootType,
             ["automation"] = context.AutomationName,
             ["date"] = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             ["time"] = now.ToString("HH:mm:ss", CultureInfo.InvariantCulture),
             ["now"] = now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
         };
+        if (e?.Data is { } data)
+        {
+            foreach (var (key, value) in data)
+                values["event.data." + key] = value;
+        }
+        return values;
     }
 
     /// <summary>Replaces known placeholders in <paramref name="text"/>. Unknown placeholders are left unchanged.</summary>
@@ -106,6 +113,10 @@ public static class EventNames
         _ => kind.ToString().ToLowerInvariant(),
     };
 
+    /// <summary>The name of an event: its trigger type, or the plugin event name for plugin events.</summary>
+    public static string Name(SystemEvent e) =>
+        e.Kind == SystemEventKind.Plugin && e.PluginEvent is { } name ? name : TriggerType(e.Kind);
+
     /// <summary>Plain-language description of an event for the activity log.</summary>
     public static string Describe(SystemEvent e)
     {
@@ -121,6 +132,7 @@ public static class EventNames
             SystemEventKind.AppClosed => $"{e.Process?.Name ?? "an app"} closed",
             SystemEventKind.AppFocused => $"{e.Process?.Name ?? "an app"} focused",
             SystemEventKind.AppUnfocused => $"{e.Process?.Name ?? "an app"} lost focus",
+            SystemEventKind.Plugin => $"{e.PluginEvent ?? "plugin event"}{user}",
             _ => e.Kind.ToString(),
         };
     }

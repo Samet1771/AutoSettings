@@ -5,6 +5,10 @@
 - Work in progress: plugin support (actions, conditions and triggers from .NET or PowerShell plugins) with a documented SDK.
   - The component catalog can now change while the app runs, so installed plugins can add their components
     (no visible change yet).
+  - Plugins can add their own triggers. A trigger can filter on the event's values, and its values are available
+    as `{{ event.data.<name> }}`. A profile applied by a plugin event can be reverted by the opposite event.
+  - An automation that uses a plugin that is not installed or is turned off is kept and marked "needs plugin" in
+    the list. It does not run until the plugin is back; the rest of the file keeps working.
 
 ## 0.2.0 (2026-09-30)
 

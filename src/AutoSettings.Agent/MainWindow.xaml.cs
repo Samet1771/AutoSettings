@@ -105,7 +105,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         var automationRows = config.Automations.Select(a => new AutomationRow(
             a.Id,
             a.Enabled,
-            a.DisplayName + (engine.SuspendedAutomations.Contains(a.Id) ? " ⏸" : ""),
+            a.DisplayName + (engine.SuspendedAutomations.Contains(a.Id) ? " ⏸" : "")
+                + (a.IsBlocked ? " ⚠ " + Strings.Format("NeedsPlugin", string.Join(", ", a.MissingPlugins)) : ""),
             ComponentSummary.DescribeAll(ComponentKind.Trigger, a.Triggers, Strings.Get("OrSeparator"), AgentCatalog.Current),
             a.Conditions.Count == 0 ? Strings.Get("Always") : ComponentSummary.DescribeAll(ComponentKind.Condition, a.Conditions, Strings.Get("AndSeparator"), AgentCatalog.Current),
             ComponentSummary.DescribeAll(ComponentKind.Action, a.Actions, " → ", AgentCatalog.Current))).ToList();

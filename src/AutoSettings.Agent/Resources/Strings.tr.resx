@@ -82,6 +82,7 @@
   <data name="MoveUp" xml:space="preserve"><value>Yukarı taşı</value></data>
   <data name="MyActivity" xml:space="preserve"><value>Etkinliğim</value></data>
   <data name="Name" xml:space="preserve"><value>Ad</value></data>
+  <data name="NeedsPlugin" xml:space="preserve"><value>{0} eklentisi gerekli</value></data>
   <data name="New" xml:space="preserve"><value>Yeni</value></data>
   <data name="NewAutomationName" xml:space="preserve"><value>Yeni otomasyon</value></data>
   <data name="NewProfileName" xml:space="preserve"><value>Yeni profil</value></data>

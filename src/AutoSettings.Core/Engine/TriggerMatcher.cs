@@ -56,6 +56,37 @@ public static class TriggerMatcher
                 if (titles.Count > 0 && !titles.Any(t => Wildcard.IsMatch(t, e.WindowTitle)))
                     return false;
                 break;
+
+            case SystemEventKind.Plugin:
+                if (!MatchesPluginEvent(descriptor, trigger, e))
+                    return false;
+                break;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// A plugin trigger matches when the event has its name and every field set in the trigger matches the
+    /// value the plugin sent under the same name: text and lists with wildcards (any list item may match),
+    /// other values exactly. Fields left empty match anything.
+    /// </summary>
+    private static bool MatchesPluginEvent(ComponentDescriptor descriptor, ComponentConfig trigger, SystemEvent e)
+    {
+        if (!string.Equals(descriptor.PluginEventName, e.PluginEvent, StringComparison.OrdinalIgnoreCase))
+            return false;
+        foreach (var field in descriptor.Fields)
+        {
+            if (field.Name == "user" || !trigger.Parameters.TryGetValue(field.Name, out var expected) || expected is null)
+                continue;
+            var actual = e.Data?.GetValueOrDefault(field.Name);
+            var matches = expected switch
+            {
+                string pattern => Wildcard.IsMatch(pattern, actual),
+                IEnumerable<string> patterns => patterns.Any(p => Wildcard.IsMatch(p, actual)),
+                _ => string.Equals(ValueConverter.ToText(expected), actual, StringComparison.OrdinalIgnoreCase),
+            };
+            if (!matches)
+                return false;
         }
         return true;
     }

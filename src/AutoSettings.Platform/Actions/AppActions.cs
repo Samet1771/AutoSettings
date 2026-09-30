@@ -282,9 +282,12 @@ public sealed class CommandRunAction : IActionHandler
         }
     }
 
-    /// <summary>Environment variable that carries a placeholder's value, e.g. <c>app.path</c> → <c>AUTOSETTINGS_APP_PATH</c>.</summary>
+    /// <summary>
+    /// Environment variable that carries a placeholder's value, e.g. <c>app.path</c> → <c>AUTOSETTINGS_APP_PATH</c>.
+    /// Characters other than letters, digits and underscores (plugin event values may use any name) become underscores.
+    /// </summary>
     public static string EnvironmentVariableName(string placeholder) =>
-        "AUTOSETTINGS_" + placeholder.ToUpperInvariant().Replace('.', '_');
+        "AUTOSETTINGS_" + new string(placeholder.ToUpperInvariant().Select(c => c is (>= 'A' and <= 'Z') or (>= '0' and <= '9') ? c : '_').ToArray());
 
     /// <summary>Builds the process start info for a shell and command.</summary>
     public static ProcessStartInfo BuildStartInfo(string shell, string command)
