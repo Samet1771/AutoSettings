@@ -4,7 +4,7 @@
     <Product>AutoSettings</Product>
     <Company>AutoSettings contributors</Company>
     <Copyright>Copyright (c) 2026 Samet</Copyright>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

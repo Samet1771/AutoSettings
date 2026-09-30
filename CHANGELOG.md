@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 (unreleased)
+
+- Work in progress: plugin support (actions, conditions and triggers from .NET or PowerShell plugins) with a documented SDK.
+
 ## 0.2.0 (2026-09-30)
 
 - Fixed: `taskbar.autohide` reported success on Windows 11 although the taskbar did not change. It now checks
