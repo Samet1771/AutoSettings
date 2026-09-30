@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.2.0 (2026-09-30)
 
 - Fixed: `taskbar.autohide` reported success on Windows 11 although the taskbar did not change. It now checks
   the result, saves the setting where Explorer reads it, and can restart Explorer (`restart_explorer: true`).
