@@ -2,7 +2,8 @@
 # SHA256SUMS.txt) and attaches them to a GitHub Release. Runs when:
 #   - a release is published on the website with a tag like v0.2.0 (Releases -> Draft a new release),
 #   - a tag like v0.2.0 is pushed (git tag v0.2.0 && git push origin v0.2.0), or
-#   - it is started by hand from the Actions tab for an existing tag.
+#   - it is started by hand (Actions -> Release -> Run workflow) with a tag; a tag that does not exist yet is
+#     created on the head of the chosen branch (beta for betas, main for stable releases).
 name: Release
 
 on:
@@ -13,8 +14,12 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing tag to build, for example v0.2.0"
+        description: "Tag to release, for example v0.2.0-beta.1 or v0.2.0"
         required: true
+      branch:
+        description: "Branch to create the tag on when it does not exist yet (beta or main)"
+        required: false
+        default: beta
 
 permissions:
   contents: write
@@ -26,7 +31,48 @@ concurrency:
   group: release-${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
 
 jobs:
+  # Publishing a release on the website also pushes its tag, which starts this workflow a second time.
+  # The tag-push run is only needed when no release exists yet (git tag + git push).
+  # Started by hand, the gate also creates the tag if needed.
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - name: Create the tag (manual runs)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Release tags must look like v0.2.0 or v0.3.0-beta.1 (got '$TAG')."
+            exit 1
+          fi
+          if gh api "repos/${{ github.repository }}/git/ref/tags/$TAG" > /dev/null 2>&1; then
+            echo "Tag $TAG already exists; building it."
+            exit 0
+          fi
+          sha=$(gh api "repos/${{ github.repository }}/commits/$BRANCH" --jq .sha)
+          gh api "repos/${{ github.repository }}/git/refs" -f ref="refs/tags/$TAG" -f sha="$sha" > /dev/null
+          echo "::notice::Created tag $TAG on $BRANCH ($sha)."
+
+      - id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && gh release view "$TAG" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            echo "::notice::A release for $TAG already exists; it is built by its own release run, so this tag-push run is skipped."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
   release:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: windows-latest
     env:
       # Optional code signing: add these repository secrets (base64 .pfx and its password).

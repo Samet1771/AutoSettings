@@ -11,6 +11,7 @@ Turns taskbar auto-hide on or off.
 | Field | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `enabled` | true / false | no |  | true to hide the taskbar automatically. |
+| `restart_explorer` | true / false | no | `false` | Restart Windows Explorer when Windows does not apply the change right away (it happens on Windows 11). Open File Explorer windows close. |
 | `continue_on_error` | true / false | no | `false` | Keep running the next actions even if this one fails. |
 
 ## Example
@@ -19,11 +20,16 @@ Turns taskbar auto-hide on or off.
 actions:
   - type: taskbar.autohide
     enabled: true
+    restart_explorer: true
 ```
 
 ## In profiles
 
 When this action is part of a [profile](../../guide/profiles.md), the current value is saved before it runs and
 restored when the profile is reverted.
+
+## Notes
+
+The change is checked after it is made. When Windows 11 does not apply it right away, the setting is saved and the action fails with an explanation: it takes effect when Explorer restarts or you sign in again. Add `restart_explorer: true` to restart Explorer automatically.
 
 [All triggers, conditions and actions](../index.md)

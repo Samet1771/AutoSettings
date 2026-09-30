@@ -1485,6 +1485,11 @@
                 "type": "boolean",
                 "description": "true to hide the taskbar automatically."
               },
+              "restart_explorer": {
+                "type": "boolean",
+                "default": false,
+                "description": "Restart Windows Explorer when Windows does not apply the change right away (it happens on Windows 11). Open File Explorer windows close."
+              },
               "continue_on_error": {
                 "type": "boolean",
                 "default": false,

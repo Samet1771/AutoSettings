@@ -115,9 +115,10 @@ public sealed class ServiceConnection : IAsyncDisposable
 
                 // Only the real service (running in session 0) may drive this agent.
                 var serverPid = PipeIdentity.ServerProcessId(pipe);
-                if (serverPid is null || ProcessQuery.TryGetSessionId(serverPid.Value) != 0)
+                var serverSession = serverPid is { } pid ? ProcessQuery.TryGetSessionId(pid) : null;
+                if (serverSession != 0)
                 {
-                    _logger.LogWarning("Refusing pipe server {Pid}: it is not a Windows service", serverPid);
+                    _logger.LogWarning("Refusing pipe server {Pid} in session {Session}: it is not a Windows service", serverPid, serverSession?.ToString() ?? "unknown");
                     throw new UnauthorizedAccessException("The pipe is not owned by the AutoSettings service.");
                 }
 

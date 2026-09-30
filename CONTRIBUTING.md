@@ -13,6 +13,9 @@ Thanks for helping improve AutoSettings!
 See [docs/dev/building.md](docs/dev/building.md) for building and testing, and
 [docs/dev/adding-an-action.md](docs/dev/adding-an-action.md) for adding actions, conditions and triggers.
 
+Pull requests go to the `beta` branch (start your branch from `beta`). `main` only receives `beta` after it was
+released and tested as a beta; see [releasing](docs/dev/building.md#releasing).
+
 Before opening a pull request:
 
 1. `dotnet build` and `dotnet test` pass.

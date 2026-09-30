@@ -1,7 +1,11 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.2.0 (2026-09-30)
 
+- Fixed: `taskbar.autohide` reported success on Windows 11 although the taskbar did not change. It now checks
+  the result, saves the setting where Explorer reads it, and can restart Explorer (`restart_explorer: true`).
+- Fixed: the app did not connect to the AutoSettings service ("Refusing pipe server ...: it is not a Windows
+  service"), so sign-in automations and machine features did not work.
 - New app window (Fluent design) with pages for automations, profiles, templates, activity and settings.
 - Visual editor and YAML editor with autocomplete, hover help and error squiggles; switch between them at any
   time. Whole-file editor that keeps comments.
