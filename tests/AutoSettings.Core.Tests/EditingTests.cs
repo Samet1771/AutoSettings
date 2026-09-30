@@ -167,7 +167,7 @@ public class EditingTests
     [Fact]
     public void Field_text_parsing()
     {
-        var apps = ComponentCatalog.Default.Find(ComponentKind.Trigger, "app_started")!.Field("app")!;
+        var apps = ComponentCatalog.BuiltIn.Find(ComponentKind.Trigger, "app_started")!.Field("app")!;
         Assert.Equal(new List<string> { "a.exe", "b.exe" }, FieldText.Parse(apps, " a.exe, b.exe ,"));
         Assert.Null(FieldText.Parse(apps, "  "));
         Assert.Equal("30s", FieldText.Format(TimeSpan.FromSeconds(30)));

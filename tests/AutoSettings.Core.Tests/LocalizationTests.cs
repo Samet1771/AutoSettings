@@ -25,9 +25,9 @@ public class LocalizationTests
     public void Every_component_and_category_has_a_turkish_title()
     {
         var turkish = Keys("Catalog.tr.resx");
-        var missing = ComponentCatalog.Default.All
+        var missing = ComponentCatalog.BuiltIn.All
             .Select(d => $"{d.Kind}.{d.Type}")
-            .Concat(ComponentCatalog.Default.All.Select(d => "Category." + d.Category.Replace(' ', '_').Replace("&", "and")))
+            .Concat(ComponentCatalog.BuiltIn.All.Select(d => "Category." + d.Category.Replace(' ', '_').Replace("&", "and")))
             .Distinct()
             .Where(k => !turkish.Contains(k))
             .ToList();

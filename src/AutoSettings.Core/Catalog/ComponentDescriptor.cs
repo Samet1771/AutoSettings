@@ -89,6 +89,9 @@ public sealed record ComponentDescriptor
     /// <summary>Extra validation beyond per-field checks. Returns error messages.</summary>
     public Func<ComponentConfig, IEnumerable<string>>? Validate { get; init; }
 
+    /// <summary>Where the component comes from: built in, or a plugin.</summary>
+    public ComponentSource Source { get; init; } = ComponentSource.BuiltIn;
+
     /// <summary>Finds a field by name.</summary>
     public FieldDescriptor? Field(string name) => Fields.FirstOrDefault(f => f.Name == name);
 
@@ -100,4 +103,20 @@ public sealed record ComponentDescriptor
         KeyFields.Count == 0
             ? Type
             : Type + "|" + string.Join("|", KeyFields.Select(f => (config.GetString(f) ?? "").ToLowerInvariant()));
+}
+
+/// <summary>Where a component comes from.</summary>
+/// <param name="PluginId">The plugin id, or <c>null</c> for built-in components.</param>
+/// <param name="PluginVersion">The plugin version, or <c>null</c> for built-in components.</param>
+/// <param name="PluginScope">Whether the plugin is installed for the machine or for one user; <c>null</c> for built-in components.</param>
+public sealed record ComponentSource(string? PluginId, string? PluginVersion, ExecutionScope? PluginScope)
+{
+    /// <summary>Built into AutoSettings.</summary>
+    public static ComponentSource BuiltIn { get; } = new(null, null, null);
+
+    /// <summary>Whether the component is built in.</summary>
+    public bool IsBuiltIn => PluginId is null;
+
+    /// <summary>A component from a plugin.</summary>
+    public static ComponentSource Plugin(string id, string version, ExecutionScope scope) => new(id, version, scope);
 }

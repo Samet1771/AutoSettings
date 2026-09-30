@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using System.Security.AccessControl;
-using System.Security.Principal;
 using System.ServiceProcess;
 using AutoSettings.Core;
 using AutoSettings.Core.Catalog;
@@ -9,6 +7,7 @@ using AutoSettings.Core.Engine;
 using AutoSettings.Core.Events;
 using AutoSettings.Platform;
 using AutoSettings.Platform.Monitoring;
+using AutoSettings.Platform.Security;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.Extensions.Logging;
@@ -26,6 +25,7 @@ public sealed class MachineHost : BackgroundService
     private readonly AgentHub _hub;
     private readonly AgentSupervisor _supervisor;
     private readonly ActivityLog _activity;
+    private readonly IComponentCatalogProvider _catalogs;
     private readonly ServiceOptions _options;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<MachineHost> _logger;
@@ -38,9 +38,11 @@ public sealed class MachineHost : BackgroundService
         AgentHub hub,
         AgentSupervisor supervisor,
         ActivityLog activity,
+        IComponentCatalogProvider catalogs,
         IOptions<ServiceOptions> options,
         ILoggerFactory loggerFactory)
     {
+        _catalogs = catalogs;
         _signals = signals;
         _hub = hub;
         _supervisor = supervisor;
@@ -62,10 +64,14 @@ public sealed class MachineHost : BackgroundService
         if (runningAsService)
             SecureDataDirectory(Product.MachineDataDirectory);
 
-        var catalog = ComponentCatalog.Default;
+        var catalog = _catalogs.Current;
+        var handlers = new HandlerRegistry();
+        foreach (var condition in PlatformHandlers.CommonConditions())
+            handlers.Add(condition);
+        AddActionHandlers(handlers, catalog);
         var engine = new RuleEngine(
             ExecutionScope.Machine,
-            BuildHandlers(catalog),
+            handlers,
             _activity,
             new EngineOptions { MaxRunsPerMinute = _options.MaxRunsPerMinute, LogAllEvents = _options.LogAllEvents },
             catalog,
@@ -84,6 +90,9 @@ public sealed class MachineHost : BackgroundService
         }
         store.Load();
         store.StartWatching();
+
+        EventHandler onCatalogChanged = (_, _) => OnCatalogChanged(engine, handlers, store);
+        _catalogs.Changed += onCatalogChanged;
 
         try
         {
@@ -115,13 +124,17 @@ public sealed class MachineHost : BackgroundService
         }
         finally
         {
+            _catalogs.Changed -= onCatalogChanged;
             _processMonitor?.Dispose();
         }
     }
 
-    private HandlerRegistry BuildHandlers(ComponentCatalog catalog)
+    /// <summary>
+    /// Routes every action of <paramref name="catalog"/>: machine actions run here, user actions are sent to the
+    /// agent of the event's session. Existing routes are replaced, so this is also used when the catalog changes.
+    /// </summary>
+    private void AddActionHandlers(HandlerRegistry registry, ComponentCatalog catalog)
     {
-        var registry = new HandlerRegistry();
         var local = PlatformHandlers.MachineActions().ToDictionary(h => h.Type, StringComparer.OrdinalIgnoreCase);
         foreach (var descriptor in catalog.OfKind(ComponentKind.Action))
         {
@@ -129,9 +142,25 @@ public sealed class MachineHost : BackgroundService
                 continue;
             registry.Add(new RoutingActionHandler(descriptor, local.GetValueOrDefault(descriptor.Type), _hub));
         }
-        foreach (var condition in PlatformHandlers.CommonConditions())
-            registry.Add(condition);
-        return registry;
+    }
+
+    /// <summary>Plugins changed: route the new actions, drop the removed ones and load the automations again.</summary>
+    private void OnCatalogChanged(RuleEngine engine, HandlerRegistry handlers, ConfigFileStore store)
+    {
+        var catalog = _catalogs.Current;
+        try
+        {
+            var types = catalog.OfKind(ComponentKind.Action).Select(d => d.Type).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var removed in handlers.ActionTypes.Where(t => !types.Contains(t)).ToList())
+                handlers.RemoveAction(removed);
+            AddActionHandlers(handlers, catalog);
+            engine.UseCatalog(catalog);
+            store.UseCatalog(catalog);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not switch to the new component catalog");
+        }
     }
 
     private void OnConfigLoaded(RuleEngine engine, ConfigLoadResult result)
@@ -217,18 +246,7 @@ public sealed class MachineHost : BackgroundService
     {
         try
         {
-            var inherit = InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit;
-            var security = new DirectorySecurity();
-            security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
-            security.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null), FileSystemRights.FullControl, inherit, PropagationFlags.None, AccessControlType.Allow));
-            security.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null), FileSystemRights.FullControl, inherit, PropagationFlags.None, AccessControlType.Allow));
-            security.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null), FileSystemRights.ReadAndExecute, inherit, PropagationFlags.None, AccessControlType.Allow));
-
-            var directory = new DirectoryInfo(path);
-            if (directory.Exists)
-                directory.SetAccessControl(security);
-            else
-                directory.Create(security);
+            SecureDirectory.Create(path);
         }
         catch (Exception ex)
         {

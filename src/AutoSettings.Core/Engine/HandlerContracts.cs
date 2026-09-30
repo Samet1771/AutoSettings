@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using AutoSettings.Core.Events;
 using AutoSettings.Core.Model;
 
@@ -112,8 +113,9 @@ public sealed class ActionFailedException : Exception
 /// <summary>Maps component types to their handlers.</summary>
 public sealed class HandlerRegistry
 {
-    private readonly Dictionary<string, IActionHandler> _actions = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, IConditionHandler> _conditions = new(StringComparer.OrdinalIgnoreCase);
+    // Concurrent because plugin handlers are added and removed while the engine runs.
+    private readonly ConcurrentDictionary<string, IActionHandler> _actions = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, IConditionHandler> _conditions = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Registers (or replaces) an action handler.</summary>
     public HandlerRegistry Add(IActionHandler handler)
@@ -129,11 +131,17 @@ public sealed class HandlerRegistry
         return this;
     }
 
+    /// <summary>Removes the action handler of <paramref name="type"/>, if there is one.</summary>
+    public bool RemoveAction(string type) => _actions.TryRemove(type, out _);
+
+    /// <summary>Removes the condition handler of <paramref name="type"/>, if there is one.</summary>
+    public bool RemoveCondition(string type) => _conditions.TryRemove(type, out _);
+
     /// <summary>Finds an action handler.</summary>
-    public IActionHandler? FindAction(string type) => _actions.GetValueOrDefault(type);
+    public IActionHandler? FindAction(string type) => _actions.TryGetValue(type, out var handler) ? handler : null;
 
     /// <summary>Finds a condition handler.</summary>
-    public IConditionHandler? FindCondition(string type) => _conditions.GetValueOrDefault(type);
+    public IConditionHandler? FindCondition(string type) => _conditions.TryGetValue(type, out var handler) ? handler : null;
 
     /// <summary>Registered action types.</summary>
     public IEnumerable<string> ActionTypes => _actions.Keys;

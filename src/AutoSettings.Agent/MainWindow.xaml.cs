@@ -106,9 +106,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             a.Id,
             a.Enabled,
             a.DisplayName + (engine.SuspendedAutomations.Contains(a.Id) ? " ⏸" : ""),
-            ComponentSummary.DescribeAll(ComponentKind.Trigger, a.Triggers, Strings.Get("OrSeparator")),
-            a.Conditions.Count == 0 ? Strings.Get("Always") : ComponentSummary.DescribeAll(ComponentKind.Condition, a.Conditions, Strings.Get("AndSeparator")),
-            ComponentSummary.DescribeAll(ComponentKind.Action, a.Actions, " → "))).ToList();
+            ComponentSummary.DescribeAll(ComponentKind.Trigger, a.Triggers, Strings.Get("OrSeparator"), AgentCatalog.Current),
+            a.Conditions.Count == 0 ? Strings.Get("Always") : ComponentSummary.DescribeAll(ComponentKind.Condition, a.Conditions, Strings.Get("AndSeparator"), AgentCatalog.Current),
+            ComponentSummary.DescribeAll(ComponentKind.Action, a.Actions, " → ", AgentCatalog.Current))).ToList();
         AutomationList.ItemsSource = automationRows;
         foreach (var row in automationRows.Where(r => selectedAutomations.Contains(r.Id)))
             AutomationList.SelectedItems.Add(row);
@@ -122,7 +122,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
                 : Strings.Get("Off"),
             p.DisplayName,
             p.Priority,
-            ComponentSummary.DescribeAll(ComponentKind.Action, p.Actions, "; "))).ToList();
+            ComponentSummary.DescribeAll(ComponentKind.Action, p.Actions, "; ", AgentCatalog.Current))).ToList();
         ProfileList.ItemsSource = profileRows;
         ProfileList.SelectedItem = profileRows.FirstOrDefault(r => r.Id == selectedProfile);
 
@@ -282,7 +282,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         var dialog = new OpenFileDialog { Filter = "YAML|*.yaml;*.yml|All files|*.*" };
         if (dialog.ShowDialog(this) != true)
             return;
-        var result = ConfigLoader.Load(File.ReadAllText(dialog.FileName), ExecutionScope.User);
+        var result = ConfigLoader.Load(File.ReadAllText(dialog.FileName), ExecutionScope.User, AgentCatalog.Current);
         if (result.HasErrors)
         {
             ShowError(Strings.Get("ImportInvalid") + "\n\n" + string.Join("\n", result.Errors.Take(5).Select(i => i.ToString())));

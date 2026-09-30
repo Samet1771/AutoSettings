@@ -12,7 +12,7 @@ namespace AutoSettings.Core.Config;
 public sealed class ConfigFileStore : IDisposable
 {
     private readonly ExecutionScope _scope;
-    private readonly ComponentCatalog _catalog;
+    private volatile ComponentCatalog _catalog;
     private readonly ILogger _logger;
     private readonly object _gate = new();
     private FileSystemWatcher? _watcher;
@@ -23,7 +23,7 @@ public sealed class ConfigFileStore : IDisposable
     {
         FilePath = path;
         _scope = scope;
-        _catalog = catalog ?? ComponentCatalog.Default;
+        _catalog = catalog ?? ComponentCatalog.BuiltIn;
         _logger = logger ?? NullLogger.Instance;
     }
 
@@ -38,6 +38,19 @@ public sealed class ConfigFileStore : IDisposable
 
     /// <summary>Raised after every load attempt, valid or not. May be raised on a background thread.</summary>
     public event EventHandler<ConfigLoadResult>? Loaded;
+
+    /// <summary>The catalog the file is validated against.</summary>
+    public ComponentCatalog Catalog => _catalog;
+
+    /// <summary>
+    /// Switches to another catalog, for example after a plugin was installed or removed, and loads the file
+    /// again so that automations using the plugin's components start or stop working.
+    /// </summary>
+    public ConfigLoadResult UseCatalog(ComponentCatalog catalog)
+    {
+        _catalog = catalog;
+        return Load();
+    }
 
     /// <summary>Creates the folder and a starter file when the file does not exist yet.</summary>
     public void EnsureExists(string starterContent)

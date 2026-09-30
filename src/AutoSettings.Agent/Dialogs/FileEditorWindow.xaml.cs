@@ -47,7 +47,7 @@ public partial class FileEditorWindow : Wpf.Ui.Controls.FluentWindow
 
     private ConfigLoadResult Validate()
     {
-        var result = ConfigLoader.Load(Yaml.Text, ExecutionScope.User);
+        var result = ConfigLoader.Load(Yaml.Text, ExecutionScope.User, AgentCatalog.Current);
         Yaml.SetIssues(result.Issues);
         IssueList.ItemsSource = result.Issues.Select(i => new ListBoxItem
         {

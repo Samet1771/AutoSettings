@@ -3,6 +3,8 @@
 ## 0.3.0 (unreleased)
 
 - Work in progress: plugin support (actions, conditions and triggers from .NET or PowerShell plugins) with a documented SDK.
+  - The component catalog can now change while the app runs, so installed plugins can add their components
+    (no visible change yet).
 
 ## 0.2.0 (2026-09-30)
 
