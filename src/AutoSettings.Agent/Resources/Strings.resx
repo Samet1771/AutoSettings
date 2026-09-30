@@ -82,6 +82,7 @@
   <data name="MoveUp" xml:space="preserve"><value>Move up</value></data>
   <data name="MyActivity" xml:space="preserve"><value>My activity</value></data>
   <data name="Name" xml:space="preserve"><value>Name</value></data>
+  <data name="NeedsPlugin" xml:space="preserve"><value>needs plugin {0}</value></data>
   <data name="New" xml:space="preserve"><value>New</value></data>
   <data name="NewAutomationName" xml:space="preserve"><value>New automation</value></data>
   <data name="NewProfileName" xml:space="preserve"><value>New profile</value></data>

@@ -163,13 +163,21 @@ public sealed class RuleEngine
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>The plugin event that undoes <paramref name="pluginEvent"/>, from the plugin trigger that reacts to it.</summary>
+    private string? OppositeEventOf(string pluginEvent) =>
+        Catalog.OfKind(ComponentKind.Trigger)
+            .FirstOrDefault(d => d.EventKind == SystemEventKind.Plugin
+                && string.Equals(d.PluginEventName, pluginEvent, StringComparison.OrdinalIgnoreCase))
+            ?.OppositeEvent;
+
     private State Compile(AutomationConfig config)
     {
         var compiled = new List<CompiledAutomation>();
         foreach (var automation in config.Automations)
         {
             var triggers = new List<(ComponentDescriptor, ComponentConfig)>();
-            foreach (var trigger in automation.Triggers)
+            // An automation that needs a missing plugin never fires; it starts working when the plugin is back.
+            foreach (var trigger in automation.IsBlocked ? new List<ComponentConfig>() : automation.Triggers)
             {
                 var descriptor = Catalog.Find(ComponentKind.Trigger, trigger.Type);
                 if (descriptor?.EventKind is null)
@@ -317,6 +325,13 @@ public sealed class RuleEngine
         var automation = _state.Config.FindAutomation(automationId);
         if (automation is null)
             return false;
+        if (automation.IsBlocked)
+        {
+            Log.Warning(ActivitySources.Automation,
+                $"'{automation.DisplayName}' not run: it needs the plugin {string.Join(", ", automation.MissingPlugins)}, which is not installed or is turned off.",
+                automation.Id);
+            return false;
+        }
 
         if (checkConditions)
         {
@@ -385,7 +400,7 @@ public sealed class RuleEngine
                 {
                     var id = effective.GetString("profile") ?? "";
                     var profile = _state.Config.FindProfile(id) ?? throw new ActionFailedException($"there is no profile '{id}'");
-                    var revert = RevertRule.Create(effective.GetString("revert_on") ?? "auto", context.Event);
+                    var revert = RevertRule.Create(effective.GetString("revert_on") ?? "auto", context.Event, OppositeEventOf);
                     await _profiles.ApplyAsync(profile, context, revert, cancellationToken).ConfigureAwait(false);
                     return true;
                 }

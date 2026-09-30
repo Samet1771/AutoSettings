@@ -38,7 +38,14 @@ public static class Strings
 
     /// <summary>Translated title of a trigger, condition or action (English catalog title as fallback).</summary>
     public static string Title(ComponentDescriptor descriptor) =>
-        CatalogManager.GetString($"{descriptor.Kind}.{descriptor.Type}", Culture) ?? descriptor.Title;
+        CatalogManager.GetString($"{descriptor.Kind}.{descriptor.Type}", Culture)
+        ?? Localized(descriptor)?.Title
+        ?? descriptor.Title;
+
+    /// <summary>A plugin component's text in the UI language, if the plugin has it.</summary>
+    private static LocalizedText? Localized(ComponentDescriptor descriptor) =>
+        descriptor.Localized.GetValueOrDefault(Culture.TwoLetterISOLanguageName)
+        ?? descriptor.Localized.GetValueOrDefault(Culture.Name);
 
     /// <summary>Translated category name.</summary>
     public static string Category(string category) =>

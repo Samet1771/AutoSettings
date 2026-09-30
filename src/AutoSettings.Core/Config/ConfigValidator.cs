@@ -51,8 +51,9 @@ public sealed class ConfigValidator
             if (profile.Actions.Count == 0)
                 issues.Add(new ConfigIssue(IssueSeverity.Warning, $"{label}: has no actions.", profile.Location));
 
+            var profileMissing = new List<string>();
             for (var j = 0; j < profile.Actions.Count; j++)
-                ValidateComponent(ComponentKind.Action, profile.Actions[j], $"{label}, action {j + 1}", scope, profile.Location, issues, profileIds: null);
+                ValidateComponent(ComponentKind.Action, profile.Actions[j], $"{label}, action {j + 1}", scope, profile.Location, issues, profileIds: null, profileMissing);
         }
 
         var automationIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -73,12 +74,19 @@ public sealed class ConfigValidator
             if (automation.Actions.Count == 0)
                 issues.Add(new ConfigIssue(IssueSeverity.Error, $"{label}: needs at least one action.", automation.Location));
 
+            var missing = new List<string>();
             for (var j = 0; j < automation.Triggers.Count; j++)
-                ValidateComponent(ComponentKind.Trigger, automation.Triggers[j], $"{label}, trigger {j + 1}", scope, automation.Location, issues, profileIds);
+                ValidateComponent(ComponentKind.Trigger, automation.Triggers[j], $"{label}, trigger {j + 1}", scope, automation.Location, issues, profileIds, missing);
             for (var j = 0; j < automation.Conditions.Count; j++)
-                ValidateComponent(ComponentKind.Condition, automation.Conditions[j], $"{label}, condition {j + 1}", scope, automation.Location, issues, profileIds);
+                ValidateComponent(ComponentKind.Condition, automation.Conditions[j], $"{label}, condition {j + 1}", scope, automation.Location, issues, profileIds, missing);
             for (var j = 0; j < automation.Actions.Count; j++)
-                ValidateComponent(ComponentKind.Action, automation.Actions[j], $"{label}, action {j + 1}", scope, automation.Location, issues, profileIds);
+                ValidateComponent(ComponentKind.Action, automation.Actions[j], $"{label}, action {j + 1}", scope, automation.Location, issues, profileIds, missing);
+            automation.MissingPlugins = missing;
+            if (missing.Count > 0)
+            {
+                issues.Add(new ConfigIssue(IssueSeverity.Warning,
+                    $"{label}: does not run until the plugin {string.Join(", ", missing)} is installed and turned on.", automation.Location));
+            }
         }
 
         return issues;
@@ -90,7 +98,7 @@ public sealed class ConfigValidator
     public List<ConfigIssue> NormalizeComponent(ComponentKind kind, ComponentConfig component, ExecutionScope scope)
     {
         var issues = new List<ConfigIssue>();
-        ValidateComponent(kind, component, component.Type, scope, null, issues, profileIds: null, checkProfileReferences: false);
+        ValidateComponent(kind, component, component.Type, scope, null, issues, profileIds: null, missingPlugins: null, checkProfileReferences: false);
         return issues;
     }
 
@@ -102,6 +110,7 @@ public sealed class ConfigValidator
         SourceLocation? fallbackLocation,
         List<ConfigIssue> issues,
         HashSet<string>? profileIds,
+        List<string>? missingPlugins,
         bool checkProfileReferences = true)
     {
         var location = component.Location ?? fallbackLocation;
@@ -109,6 +118,23 @@ public sealed class ConfigValidator
         label = $"{label} ({component.Type})";
 
         var descriptor = _catalog.Find(kind, component.Type);
+        if (descriptor is null && PluginIds.PluginOf(component.Type) is { } plugin)
+        {
+            // Uninstalling or turning off a plugin must not break the whole file: the automations that use it
+            // are kept and just do not run (missingPlugins collects them). Elsewhere it is an error.
+            var message = $"{label}: needs the plugin '{plugin}', which is not installed or is turned off.";
+            if (missingPlugins is null)
+            {
+                issues.Add(new ConfigIssue(IssueSeverity.Error, message, location));
+            }
+            else
+            {
+                issues.Add(new ConfigIssue(IssueSeverity.Warning, message, location));
+                if (!missingPlugins.Contains(plugin, StringComparer.OrdinalIgnoreCase))
+                    missingPlugins.Add(plugin);
+            }
+            return;
+        }
         if (descriptor is null)
         {
             var known = _catalog.OfKind(kind).Select(d => d.Type);
@@ -150,7 +176,7 @@ public sealed class ConfigValidator
                     ?? (raw as IEnumerable<ComponentConfig>)?.ToList()
                     ?? YamlConfigReader.ReadComponents(raw, ComponentKind.Condition, label, location, issues);
                 for (var i = 0; i < nested.Count; i++)
-                    ValidateComponent(ComponentKind.Condition, nested[i], $"{label}, condition {i + 1}", scope, location, issues, profileIds, checkProfileReferences);
+                    ValidateComponent(ComponentKind.Condition, nested[i], $"{label}, condition {i + 1}", scope, location, issues, profileIds, missingPlugins, checkProfileReferences);
                 component.Parameters[key] = nested;
                 continue;
             }
