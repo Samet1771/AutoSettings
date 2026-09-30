@@ -56,6 +56,9 @@ nav:
   - Reference:
       - Overview: reference/index.md
       - Placeholders: reference/placeholders.md
+  - Plugins (preview):
+      - Overview: plugins/index.md
+      - plugin.yaml reference: plugins/manifest.md
   - Developers:
       - Architecture: dev/architecture.md
       - Rule engine: dev/engine.md

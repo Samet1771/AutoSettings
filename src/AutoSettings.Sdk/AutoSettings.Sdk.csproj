@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The public SDK for AutoSettings plugins. It has no dependencies and does not reference Core, so the app can
+    change its internals without breaking plugins. It is versioned on its own (SdkVersion); see
+    docs/plugins/versioning.md before changing anything public.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AutoSettings.Sdk</RootNamespace>
+    <SdkVersion>1.0.0</SdkVersion>
+    <Version>$(SdkVersion)</Version>
+    <!-- Every public type and member must be documented. -->
+    <WarningsAsErrors>$(WarningsAsErrors);CS1591</WarningsAsErrors>
+    <IsPackable>true</IsPackable>
+    <PackageId>AutoSettings.Sdk</PackageId>
+    <Description>SDK for writing AutoSettings plugins: actions, conditions and triggers.</Description>
+    <PackageProjectUrl>https://github.com/Samet1771/AutoSettings</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+</Project>

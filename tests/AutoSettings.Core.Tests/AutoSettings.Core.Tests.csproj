@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AutoSettings.Core\AutoSettings.Core.csproj" />
+    <ProjectReference Include="..\..\src\AutoSettings.Sdk\AutoSettings.Sdk.csproj" />
   </ItemGroup>
 
 </Project>
