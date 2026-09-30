@@ -9,6 +9,8 @@
     as `{{ event.data.<name> }}`. A profile applied by a plugin event can be reverted by the opposite event.
   - An automation that uses a plugin that is not installed or is turned off is kept and marked "needs plugin" in
     the list. It does not run until the plugin is back; the rest of the file keeps working.
+  - `AutoSettings.Sdk`, the API for .NET plugins, and the `plugin.yaml` manifest format, with its reference in
+    the docs (Plugins section). Plugins cannot be installed yet.
 
 ## 0.2.0 (2026-09-30)
 

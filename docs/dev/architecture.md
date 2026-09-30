@@ -39,6 +39,7 @@ flowchart LR
 | **Platform** | `src/AutoSettings.Platform` (net10.0-windows) | library | Win32/WinRT interop, process/focus monitors, session helpers, all action and condition handlers |
 | **Service** | `src/AutoSettings.Service` | SYSTEM, session 0 | Boot/sign-in/lock/process events, machine automations, agent supervision, pipe server, routing of user actions, updates (`UpdateService`) |
 | **Agent** | `src/AutoSettings.Agent` (WPF) | the user | Focus events, personal automations, tray icon, window (WPF-UI), visual and YAML editors (AvalonEdit), localization, notifications |
+| **Sdk** | `src/AutoSettings.Sdk` (net10.0, no dependencies) | library (NuGet) | Public API for .NET plugins: `IPlugin`, actions, conditions, triggers, `Parameters`, attributes. Versioned on its own; does not reference Core |
 | **DocGen** | `src/AutoSettings.DocGen` | tool | Generates `docs/reference` and the JSON Schema from the catalog |
 | **Tests** | `tests/AutoSettings.Core.Tests` | tool | Unit tests for Core; validates every example and every catalog entry |
 
@@ -103,6 +104,10 @@ built-in ones, and leaves out a whole plugin when one of its types is already ta
 `Source` that says whether it is built in or which plugin it comes from. When the catalog changes, the service
 routes the new actions and removes the old ones in its `HandlerRegistry`. It then calls `RuleEngine.UseCatalog`
 and `ConfigFileStore.UseCatalog`, so automations are validated and prepared again.
+
+Plugins describe their components in `plugin.yaml` (`Core/Plugins`). `PluginManifestReader.Load` reads and
+validates it (`PluginManifestValidator`), and `ManifestMapping.ToContribution` turns it into catalog entries for
+`ComponentCatalog.Compose`. See [plugin.yaml reference](../plugins/manifest.md).
 
 ## Technology
 
