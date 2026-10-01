@@ -168,7 +168,8 @@ internal sealed class ScriptPoller : IDisposable
                     new Dictionary<string, object?>(), null, context.User, null, null, context, stop, first).ConfigureAwait(false);
                 if (result.ExitCode != 0)
                     throw new ActionFailedException(result.FailureMessage);
-                foreach (var report in PluginOutput.ParseEvents(plugin.Id, result.Output, out var ignored))
+                var reports = PluginOutput.ParseEvents(plugin.Id, result.Output, out var ignored);
+                foreach (var report in reports)
                     raise(report);
                 foreach (var reason in ignored)
                     context.Log.Warning(ActivitySources.Plugin, $"{component.Type}: ignored output {reason}");

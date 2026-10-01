@@ -65,7 +65,7 @@ public sealed class PluginStoreTests : IDisposable
         Assert.True(plugin.IsValid);
         Assert.False(plugin.IsActive);
         Assert.Equal("abc", plugin.PackageSha256);
-        Assert.Empty(PluginStore.Compose([plugin]).Catalog.All.Where(d => !d.Source.IsBuiltIn));
+        Assert.DoesNotContain(PluginStore.Compose([plugin]).Catalog.All, d => !d.Source.IsBuiltIn);
     }
 
     [Fact]
