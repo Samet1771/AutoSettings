@@ -78,32 +78,62 @@ public sealed class PluginManager : IDisposable
         SemVersion? newerThan = null,
         CancellationToken cancellationToken = default)
     {
+        var root = _roots(scope);
+        var downloads = Path.Combine(root, ".staging");
+        var (file, _) = await DownloadFromGitHubAsync(repository, downloads, includePrereleases, assetPattern, expectedId, newerThan, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return PluginInstaller.Install(root, file, scope, AppVersion.Current, $"github:{repository}").Manifest;
+        }
+        finally
+        {
+            TryDelete(file);
+        }
+    }
+
+    /// <summary>
+    /// Downloads and verifies the newest package of a GitHub repository into <paramref name="folder"/> without
+    /// installing it (the app shows what the plugin is before asking to install). The caller deletes the file.
+    /// </summary>
+    public async Task<(string File, PluginRelease Release)> DownloadFromGitHubAsync(
+        string repository,
+        string folder,
+        bool includePrereleases = false,
+        string assetPattern = "*.aspkg",
+        string? expectedId = null,
+        SemVersion? newerThan = null,
+        CancellationToken cancellationToken = default)
+    {
         var release = await FindReleaseAsync(repository, assetPattern, includePrereleases, newerThan, cancellationToken).ConfigureAwait(false)
             ?? throw new PluginInstallException(newerThan is null
                 ? $"No release of {repository} has a plugin package ({assetPattern})."
                 : $"There is no version of {expectedId ?? repository} newer than {newerThan}.");
 
-        var root = _roots(scope);
-        var downloads = Path.Combine(root, ".staging");
-        Directory.CreateDirectory(downloads);
-        var file = Path.Combine(downloads, $"{Guid.NewGuid():N}{PluginPackage.Extension}");
+        Directory.CreateDirectory(folder);
+        var file = Path.Combine(folder, $"{Guid.NewGuid():N}-{Path.GetFileName(release.AssetName)}");
         try
         {
             await DownloadAndVerifyAsync(release, file, cancellationToken).ConfigureAwait(false);
             var (manifest, _) = PluginPackage.Inspect(file);
             if (expectedId is not null && !string.Equals(manifest?.Id, expectedId, StringComparison.Ordinal))
                 throw new PluginInstallException($"The package in {repository} is for '{manifest?.Id}', not '{expectedId}'.");
-            return PluginInstaller.Install(root, file, scope, AppVersion.Current, $"github:{repository}").Manifest;
+            return (file, release);
         }
-        finally
+        catch
         {
-            try
-            {
-                File.Delete(file);
-            }
-            catch (IOException)
-            {
-            }
+            TryDelete(file);
+            throw;
+        }
+    }
+
+    private static void TryDelete(string file)
+    {
+        try
+        {
+            File.Delete(file);
+        }
+        catch (IOException)
+        {
         }
     }
 

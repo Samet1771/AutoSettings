@@ -80,10 +80,13 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         AutomationsPage.Visibility = page == "automations" ? Visibility.Visible : Visibility.Collapsed;
         ProfilesPage.Visibility = page == "profiles" ? Visibility.Visible : Visibility.Collapsed;
         TemplatesPage.Visibility = page == "templates" ? Visibility.Visible : Visibility.Collapsed;
+        PluginsPage.Visibility = page == "plugins" ? Visibility.Visible : Visibility.Collapsed;
         ActivityPage.Visibility = page == "activity" ? Visibility.Visible : Visibility.Collapsed;
         SettingsPage.Visibility = page == "settings" ? Visibility.Visible : Visibility.Collapsed;
         if (page == "settings")
             StatusDetails.Text = BuildStatus();
+        if (page == "plugins")
+            OnPluginsPageShown();
     }
 
     private void ShowPage(string page)
@@ -136,6 +139,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         HeaderStatus.Text = $"{state}{profiles}\n{(_host.Service.IsConnected ? Strings.Get("ServiceConnected") : Strings.Get("ServiceNotConnected"))}{errors}";
         PauseButton.Content = engine.IsPaused ? Strings.Get("Resume") : Strings.Get("PauseOneHour");
 
+        if (PluginsPage.Visibility == Visibility.Visible)
+            RefreshPlugins();
         if (SettingsPage.Visibility == Visibility.Visible)
             StatusDetails.Text = BuildStatus();
     }

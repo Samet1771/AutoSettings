@@ -22,6 +22,9 @@
   - Plugins can be installed from a `.aspkg` file or a GitHub repository, updated (with checksum checks) and rolled
     back, from the command line: `AutoSettings.Agent.exe --plugin list|install|uninstall|enable|disable|update|rollback`.
     Machine plugins ask for administrator permission. A plugin uninstalled while running is removed once it stopped.
+  - New **Plugins** page: install from a file or from GitHub (with a dialog showing the plugin's declared permissions
+    and who it is installed for), turn on/off, update, go back to the previous version, remove. .NET plugins show
+    whether they are signed.
 
 ## 0.2.0 (2026-09-30)
 

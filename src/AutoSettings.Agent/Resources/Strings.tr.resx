@@ -26,6 +26,7 @@
   <data name="Browse" xml:space="preserve"><value>Gözat…</value></data>
   <data name="Cancel" xml:space="preserve"><value>İptal</value></data>
   <data name="CheckNow" xml:space="preserve"><value>Şimdi denetle</value></data>
+  <data name="CheckPluginUpdates" xml:space="preserve"><value>Güncellemeleri denetle</value></data>
   <data name="Clear" xml:space="preserve"><value>Temizle</value></data>
   <data name="Connected" xml:space="preserve"><value>bağlı</value></data>
   <data name="Cooldown" xml:space="preserve"><value>Bekleme süresi</value></data>
@@ -40,6 +41,7 @@
   <data name="DiscardChanges" xml:space="preserve"><value>Değişiklikleri at</value></data>
   <data name="DiscardQuestion" xml:space="preserve"><value>Kaydedilmemiş değişiklikler var. Yine de kapatılsın mı?</value></data>
   <data name="Documentation" xml:space="preserve"><value>Belgeler</value></data>
+  <data name="Downloading" xml:space="preserve"><value>{0} indiriliyor…</value></data>
   <data name="DryRun" xml:space="preserve"><value>Deneme modu: eylemleri çalıştırmak yerine günlüğe yaz</value></data>
   <data name="DryRunSuffix" xml:space="preserve"><value> (deneme modu)</value></data>
   <data name="Duplicate" xml:space="preserve"><value>Çoğalt</value></data>
@@ -60,7 +62,10 @@
   <data name="FollowWindows" xml:space="preserve"><value>Windows ile aynı</value></data>
   <data name="For15Minutes" xml:space="preserve"><value>15 dakika</value></data>
   <data name="For1Hour" xml:space="preserve"><value>1 saat</value></data>
+  <data name="ForEveryone" xml:space="preserve"><value>Herkes</value></data>
+  <data name="ForMe" xml:space="preserve"><value>Ben</value></data>
   <data name="Found" xml:space="preserve"><value>Kaynak</value></data>
+  <data name="GitHubRepository" xml:space="preserve"><value>GitHub deposu: sahip/ad veya bir bağlantı</value></data>
   <data name="HasErrors" xml:space="preserve"><value>Hatalar var.</value></data>
   <data name="Id" xml:space="preserve"><value>Kimlik</value></data>
   <data name="If" xml:space="preserve"><value>Eğer</value></data>
@@ -70,9 +75,18 @@
   <data name="ImportInvalid" xml:space="preserve"><value>Dosya içe aktarılamıyor:</value></data>
   <data name="Imported" xml:space="preserve"><value>{0} otomasyon ve {1} profil içe aktarıldı.</value></data>
   <data name="IncludeBetas" xml:space="preserve"><value>Beta sürümlerini de dahil et</value></data>
+  <data name="Install" xml:space="preserve"><value>Yükle</value></data>
+  <data name="InstallForEveryoneQuestion" xml:space="preserve"><value>{0} bu bilgisayardaki herkes için yüklensin mi?
+
+Evet: herkes için (Windows yönetici izni ister)
+Hayır: yalnızca sizin için</value></data>
+  <data name="InstallFromFile" xml:space="preserve"><value>Dosyadan yükle…</value></data>
+  <data name="InstallFromGitHub" xml:space="preserve"><value>GitHub'dan yükle…</value></data>
   <data name="InstallUpdate" xml:space="preserve"><value>{0} sürümünü yükle</value></data>
   <data name="InstallUpdateMenu" xml:space="preserve"><value>{0} güncellemesini yükle</value></data>
+  <data name="InstalledFor" xml:space="preserve"><value>Kimin için</value></data>
   <data name="InstalledVersion" xml:space="preserve"><value>Yüklü sürüm: {0}</value></data>
+  <data name="Kind" xml:space="preserve"><value>Tür</value></data>
   <data name="Language" xml:space="preserve"><value>Dil</value></data>
   <data name="LastChecked" xml:space="preserve"><value>Son denetim: {0}</value></data>
   <data name="Light" xml:space="preserve"><value>Açık</value></data>
@@ -87,16 +101,19 @@
   <data name="NewAutomationName" xml:space="preserve"><value>Yeni otomasyon</value></data>
   <data name="NewProfileName" xml:space="preserve"><value>Yeni profil</value></data>
   <data name="NoMachineActivity" xml:space="preserve"><value>Henüz makine etkinliği yok.</value></data>
+  <data name="NoPlugins" xml:space="preserve"><value>Yüklü eklenti yok. Bir dosyadan (.aspkg) veya GitHub'dan yükleyebilirsiniz.</value></data>
   <data name="NoProfilesYet" xml:space="preserve"><value>Henüz profil yok</value></data>
   <data name="NotConnectedLong" xml:space="preserve"><value>bağlı değil (oturum açma ve kilit algılama için hizmet gerekir)</value></data>
   <data name="NotSaved" xml:space="preserve"><value>Kaydedilmedi:</value></data>
   <data name="NotSavedFixErrors" xml:space="preserve"><value>Kaydedilmedi: önce hataları düzeltin.</value></data>
   <data name="NotSet" xml:space="preserve"><value>(ayarlanmadı)</value></data>
+  <data name="NotSigned" xml:space="preserve"><value>imzasız</value></data>
   <data name="Off" xml:space="preserve"><value>Kapalı</value></data>
   <data name="On" xml:space="preserve"><value>Açık</value></data>
   <data name="OpenAutomationsFolder" xml:space="preserve"><value>Otomasyon klasörünü aç</value></data>
   <data name="OpenInOtherEditor" xml:space="preserve"><value>Başka düzenleyicide aç</value></data>
   <data name="OpenLogFolder" xml:space="preserve"><value>Günlük klasörünü aç</value></data>
+  <data name="OpenPluginFolder" xml:space="preserve"><value>Eklenti klasörünü aç</value></data>
   <data name="OpenProduct" xml:space="preserve"><value>{0} aç</value></data>
   <data name="OrSeparator" xml:space="preserve"><value> veya </value></data>
   <data name="PathColumn" xml:space="preserve"><value>Yol</value></data>
@@ -104,13 +121,40 @@
   <data name="PauseOneHour" xml:space="preserve"><value>1 saat duraklat</value></data>
   <data name="Paused" xml:space="preserve"><value>Duraklatıldı</value></data>
   <data name="PausedUntil" xml:space="preserve"><value>{0} saatine kadar duraklatıldı</value></data>
+  <data name="Permission.filesystem_machine" xml:space="preserve"><value>Kendi klasörleriniz dışındaki dosyaları değiştirir.</value></data>
+  <data name="Permission.network" xml:space="preserve"><value>Ağı veya interneti kullanır.</value></data>
+  <data name="Permission.powershell" xml:space="preserve"><value>PowerShell betikleri çalıştırır.</value></data>
+  <data name="Permission.process_launch" xml:space="preserve"><value>Başka programlar başlatır.</value></data>
+  <data name="Permission.registry_machine" xml:space="preserve"><value>Bilgisayar genelindeki kayıt defteri ayarlarını değiştirir.</value></data>
+  <data name="Permission.run_as_system" xml:space="preserve"><value>Bazı bölümlerini SYSTEM olarak, bu bilgisayarın tam denetimiyle çalıştırır.</value></data>
   <data name="PickApp" xml:space="preserve"><value>Uygulama seç…</value></data>
   <data name="PickAppTitle" xml:space="preserve"><value>Uygulama seçin</value></data>
   <data name="PickUser" xml:space="preserve"><value>Kullanıcı seç…</value></data>
   <data name="PickUserTitle" xml:space="preserve"><value>Kullanıcı seçin</value></data>
+  <data name="PluginError" xml:space="preserve"><value>Hata: {0}</value></data>
+  <data name="PluginForEveryoneNote" xml:space="preserve"><value>Bu bilgisayardaki herkes için yüklenecek. Makine eylemleri bilgisayarın tam denetimiyle çalışır.</value></data>
+  <data name="PluginForMeNote" xml:space="preserve"><value>Yalnızca sizin için yüklenecek ve sizin haklarınızla çalışacak.</value></data>
+  <data name="PluginInstallConfirm" xml:space="preserve"><value>{2} tarafından yayımlanan {0} {1} yüklensin mi?</value></data>
+  <data name="PluginInvalid" xml:space="preserve"><value>Bu eklenti yüklenemez:
+
+{0}</value></data>
+  <data name="PluginNoPermissions" xml:space="preserve"><value>Eklenti özel bir izin bildirmiyor.</value></data>
+  <data name="PluginNotLoaded" xml:space="preserve"><value>Yüklenmedi (Etkinlik'e bakın)</value></data>
+  <data name="PluginPackageFilter" xml:space="preserve"><value>AutoSettings eklentisi (*.aspkg)|*.aspkg</value></data>
+  <data name="PluginPermissionsTitle" xml:space="preserve"><value>Eklentinin bildirdikleri:</value></data>
+  <data name="PluginRemoveQuestion" xml:space="preserve"><value>{0} kaldırılsın mı?
+
+Onu kullanan otomasyonlar silinmez, ancak yeniden yüklenene kadar çalışmaz.</value></data>
+  <data name="PluginTrust" xml:space="preserve"><value>Eklentiler korumalı bir alanda çalışmaz; bunlar yazarın beyanlarıdır. Yalnızca güvendiğiniz eklentileri yükleyin.</value></data>
+  <data name="PluginUpdateAvailable" xml:space="preserve"><value>{0} kullanılabilir</value></data>
+  <data name="PluginUpdatesFound" xml:space="preserve"><value>{0} güncelleme var.</value></data>
+  <data name="Plugins" xml:space="preserve"><value>Eklentiler</value></data>
+  <data name="PluginsHint" xml:space="preserve"><value>Eklentiler yeni tetikleyiciler, koşullar ve eylemler ekler. Yalnızca güvendiğiniz eklentileri yükleyin: bir eklenti sizin haklarınızla çalışır, herkes için yüklenen bir eklenti ise bilgisayarın tamamını denetleyebilir.</value></data>
+  <data name="PluginsUpToDate" xml:space="preserve"><value>Tüm eklentiler güncel.</value></data>
   <data name="Priority" xml:space="preserve"><value>Öncelik</value></data>
   <data name="Profiles" xml:space="preserve"><value>Profiller</value></data>
   <data name="ProfilesHint" xml:space="preserve"><value>Profil, birlikte uygulanan ve birlikte geri alınan bir ayar grubudur.</value></data>
+  <data name="Publisher" xml:space="preserve"><value>Yayıncı</value></data>
   <data name="ReloadAutomations" xml:space="preserve"><value>Otomasyonları yeniden yükle</value></data>
   <data name="Remove" xml:space="preserve"><value>Kaldır</value></data>
   <data name="RestartForLanguage" xml:space="preserve"><value>Dili değiştirmek için AutoSettings'i yeniden başlatın (tepsi simgesi → Çıkış, sonra tekrar başlatın).</value></data>
@@ -120,6 +164,7 @@
   <data name="RewriteNotice" xml:space="preserve"><value>Düzenleyici automations.yaml dosyasını standart biçimde kaydeder. Dosyadaki yorumlar ve özel biçimlendirme korunmaz. Bunları korumak istiyorsanız 'Tüm dosyayı düzenle'yi kullanın.
 
 Devam edilsin mi?</value></data>
+  <data name="RollBack" xml:space="preserve"><value>Önceki sürüm</value></data>
   <data name="RunIgnoringConditions" xml:space="preserve"><value>Koşulları yok sayarak çalıştır</value></data>
   <data name="RunNow" xml:space="preserve"><value>Şimdi çalıştır</value></data>
   <data name="Running" xml:space="preserve"><value>çalışıyor</value></data>
@@ -130,6 +175,7 @@ Devam edilsin mi?</value></data>
   <data name="ServiceConnected" xml:space="preserve"><value>Hizmet bağlı</value></data>
   <data name="ServiceNotConnected" xml:space="preserve"><value>Hizmet bağlı değil</value></data>
   <data name="Settings" xml:space="preserve"><value>Ayarlar</value></data>
+  <data name="SignedBy" xml:space="preserve"><value>{0} tarafından imzalı</value></data>
   <data name="SignedIn" xml:space="preserve"><value>Oturum açık</value></data>
   <data name="StartMenu" xml:space="preserve"><value>Başlat menüsü</value></data>
   <data name="Status" xml:space="preserve"><value>Durum</value></data>
@@ -167,6 +213,7 @@ Devam edilsin mi?</value></data>
   <data name="UpdateModeLabel" xml:space="preserve"><value>Yeni sürüm çıktığında</value></data>
   <data name="UpdateModeNotify" xml:space="preserve"><value>Yalnızca bana haber ver</value></data>
   <data name="UpdateModeOff" xml:space="preserve"><value>Hiçbir şey yapma (güncellemeler kapalı)</value></data>
+  <data name="UpdatePlugin" xml:space="preserve"><value>Güncelle</value></data>
   <data name="UpdateSettingsLocked" xml:space="preserve"><value>Bu ayarlar yöneticiniz tarafından belirlendi.</value></data>
   <data name="UpdateStateAvailable" xml:space="preserve"><value>{0} sürümü kullanılabilir.</value></data>
   <data name="UpdateStateChecking" xml:space="preserve"><value>Güncellemeler denetleniyor…</value></data>
@@ -184,6 +231,7 @@ Devam edilsin mi?</value></data>
   <data name="UseDomainName" xml:space="preserve"><value>ETKİ ALANI\ad kullan</value></data>
   <data name="UseFullPath" xml:space="preserve"><value>Dosya adı yerine tam yolu kullan</value></data>
   <data name="User" xml:space="preserve"><value>Kullanıcı</value></data>
+  <data name="Version" xml:space="preserve"><value>Sürüm</value></data>
   <data name="Visual" xml:space="preserve"><value>Görsel</value></data>
   <data name="WhatHappened" xml:space="preserve"><value>Ne oldu</value></data>
   <data name="WhatsNew" xml:space="preserve"><value>Yenilikler</value></data>
