@@ -32,6 +32,7 @@
                     <ListBoxItem Tag="automations" Padding="12,10" Content="{loc:T Automations}" IsSelected="True" />
                     <ListBoxItem Tag="profiles" Padding="12,10" Content="{loc:T Profiles}" />
                     <ListBoxItem Tag="templates" Padding="12,10" Content="{loc:T Templates}" />
+                    <ListBoxItem Tag="plugins" Padding="12,10" Content="{loc:T Plugins}" />
                     <ListBoxItem Tag="activity" Padding="12,10" Content="{loc:T Activity}" />
                     <ListBoxItem Tag="settings" Padding="12,10" Content="{loc:T Settings}" />
                 </ListBox>
@@ -133,6 +134,43 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
+                </DockPanel>
+
+                <!-- Plugins -->
+                <DockPanel x:Name="PluginsPage" Visibility="Collapsed">
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:T Plugins}" />
+                        <TextBlock Style="{StaticResource Hint}" Text="{loc:T PluginsHint}" />
+                        <WrapPanel x:Name="PluginToolbar">
+                            <ui:Button Margin="0,0,8,8" Appearance="Primary" Content="{loc:T InstallFromFile}" Click="OnInstallPluginFileClick" />
+                            <Button Style="{StaticResource ToolbarButton}" Content="{loc:T InstallFromGitHub}" Click="OnInstallPluginGitHubClick" />
+                            <Button Style="{StaticResource ToolbarButton}" Content="{loc:T UpdatePlugin}" Click="OnUpdatePluginClick" />
+                            <Button Style="{StaticResource ToolbarButton}" Content="{loc:T RollBack}" Click="OnRollBackPluginClick" />
+                            <Button Style="{StaticResource ToolbarButton}" Content="{loc:T Remove}" Click="OnRemovePluginClick" />
+                            <Button Style="{StaticResource ToolbarButton}" Content="{loc:T CheckPluginUpdates}" Click="OnCheckPluginUpdatesClick" />
+                            <Button Style="{StaticResource ToolbarButton}" Content="{loc:T OpenPluginFolder}" Click="OnOpenPluginFolderClick" />
+                        </WrapPanel>
+                        <TextBlock x:Name="PluginStatus" TextWrapping="Wrap" Opacity="0.75" Margin="0,0,0,8" />
+                    </StackPanel>
+                    <ListView x:Name="PluginList">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="{loc:T On}" Width="70">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ui:ToggleSwitch IsChecked="{Binding Enabled, Mode=OneWay}" Click="OnTogglePluginClick" Tag="{Binding Key}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="{loc:T Name}" Width="200" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="{loc:T Version}" Width="90" DisplayMemberBinding="{Binding Version}" />
+                                <GridViewColumn Header="{loc:T Publisher}" Width="130" DisplayMemberBinding="{Binding Publisher}" />
+                                <GridViewColumn Header="{loc:T InstalledFor}" Width="90" DisplayMemberBinding="{Binding For}" />
+                                <GridViewColumn Header="{loc:T Kind}" Width="160" DisplayMemberBinding="{Binding Kind}" />
+                                <GridViewColumn Header="{loc:T Status}" Width="260" DisplayMemberBinding="{Binding Status}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </DockPanel>
 
                 <!-- Activity -->

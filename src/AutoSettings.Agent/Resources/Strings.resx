@@ -26,6 +26,7 @@
   <data name="Browse" xml:space="preserve"><value>Browse…</value></data>
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="CheckNow" xml:space="preserve"><value>Check now</value></data>
+  <data name="CheckPluginUpdates" xml:space="preserve"><value>Check for updates</value></data>
   <data name="Clear" xml:space="preserve"><value>Clear</value></data>
   <data name="Connected" xml:space="preserve"><value>connected</value></data>
   <data name="Cooldown" xml:space="preserve"><value>Cooldown</value></data>
@@ -40,6 +41,7 @@
   <data name="DiscardChanges" xml:space="preserve"><value>Discard changes</value></data>
   <data name="DiscardQuestion" xml:space="preserve"><value>You have unsaved changes. Close anyway?</value></data>
   <data name="Documentation" xml:space="preserve"><value>Documentation</value></data>
+  <data name="Downloading" xml:space="preserve"><value>Downloading {0}…</value></data>
   <data name="DryRun" xml:space="preserve"><value>Dry run: log actions instead of running them</value></data>
   <data name="DryRunSuffix" xml:space="preserve"><value> (dry run)</value></data>
   <data name="Duplicate" xml:space="preserve"><value>Duplicate</value></data>
@@ -60,7 +62,10 @@
   <data name="FollowWindows" xml:space="preserve"><value>Same as Windows</value></data>
   <data name="For15Minutes" xml:space="preserve"><value>For 15 minutes</value></data>
   <data name="For1Hour" xml:space="preserve"><value>For 1 hour</value></data>
+  <data name="ForEveryone" xml:space="preserve"><value>Everyone</value></data>
+  <data name="ForMe" xml:space="preserve"><value>Me</value></data>
   <data name="Found" xml:space="preserve"><value>Found</value></data>
+  <data name="GitHubRepository" xml:space="preserve"><value>GitHub repository: owner/name or a link</value></data>
   <data name="HasErrors" xml:space="preserve"><value>There are errors.</value></data>
   <data name="Id" xml:space="preserve"><value>Id</value></data>
   <data name="If" xml:space="preserve"><value>If</value></data>
@@ -70,9 +75,18 @@
   <data name="ImportInvalid" xml:space="preserve"><value>The file cannot be imported:</value></data>
   <data name="Imported" xml:space="preserve"><value>Imported {0} automation(s) and {1} profile(s).</value></data>
   <data name="IncludeBetas" xml:space="preserve"><value>Include beta versions</value></data>
+  <data name="Install" xml:space="preserve"><value>Install</value></data>
+  <data name="InstallForEveryoneQuestion" xml:space="preserve"><value>Install {0} for everyone on this computer?
+
+Yes: for everyone (Windows asks for administrator permission)
+No: only for you</value></data>
+  <data name="InstallFromFile" xml:space="preserve"><value>Install from file…</value></data>
+  <data name="InstallFromGitHub" xml:space="preserve"><value>Install from GitHub…</value></data>
   <data name="InstallUpdate" xml:space="preserve"><value>Install {0}</value></data>
   <data name="InstallUpdateMenu" xml:space="preserve"><value>Install update {0}</value></data>
+  <data name="InstalledFor" xml:space="preserve"><value>For</value></data>
   <data name="InstalledVersion" xml:space="preserve"><value>Installed version: {0}</value></data>
+  <data name="Kind" xml:space="preserve"><value>Kind</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
   <data name="LastChecked" xml:space="preserve"><value>Last checked: {0}</value></data>
   <data name="Light" xml:space="preserve"><value>Light</value></data>
@@ -87,16 +101,19 @@
   <data name="NewAutomationName" xml:space="preserve"><value>New automation</value></data>
   <data name="NewProfileName" xml:space="preserve"><value>New profile</value></data>
   <data name="NoMachineActivity" xml:space="preserve"><value>No machine activity yet.</value></data>
+  <data name="NoPlugins" xml:space="preserve"><value>No plugins are installed. Install one from a file (.aspkg) or from GitHub.</value></data>
   <data name="NoProfilesYet" xml:space="preserve"><value>No profiles yet</value></data>
   <data name="NotConnectedLong" xml:space="preserve"><value>not connected (sign-in and lock detection need the service)</value></data>
   <data name="NotSaved" xml:space="preserve"><value>Not saved:</value></data>
   <data name="NotSavedFixErrors" xml:space="preserve"><value>Not saved: fix the errors first.</value></data>
   <data name="NotSet" xml:space="preserve"><value>(not set)</value></data>
+  <data name="NotSigned" xml:space="preserve"><value>not signed</value></data>
   <data name="Off" xml:space="preserve"><value>Off</value></data>
   <data name="On" xml:space="preserve"><value>On</value></data>
   <data name="OpenAutomationsFolder" xml:space="preserve"><value>Open automations folder</value></data>
   <data name="OpenInOtherEditor" xml:space="preserve"><value>Open in another editor</value></data>
   <data name="OpenLogFolder" xml:space="preserve"><value>Open log folder</value></data>
+  <data name="OpenPluginFolder" xml:space="preserve"><value>Open plugin folder</value></data>
   <data name="OpenProduct" xml:space="preserve"><value>Open {0}</value></data>
   <data name="OrSeparator" xml:space="preserve"><value> or </value></data>
   <data name="PathColumn" xml:space="preserve"><value>Path</value></data>
@@ -104,13 +121,40 @@
   <data name="PauseOneHour" xml:space="preserve"><value>Pause for 1 hour</value></data>
   <data name="Paused" xml:space="preserve"><value>Paused</value></data>
   <data name="PausedUntil" xml:space="preserve"><value>Paused until {0}</value></data>
+  <data name="Permission.filesystem_machine" xml:space="preserve"><value>Changes files outside your own folders.</value></data>
+  <data name="Permission.network" xml:space="preserve"><value>Uses the network or the internet.</value></data>
+  <data name="Permission.powershell" xml:space="preserve"><value>Runs PowerShell scripts.</value></data>
+  <data name="Permission.process_launch" xml:space="preserve"><value>Starts other programs.</value></data>
+  <data name="Permission.registry_machine" xml:space="preserve"><value>Changes machine-wide registry settings.</value></data>
+  <data name="Permission.run_as_system" xml:space="preserve"><value>Runs parts of itself as SYSTEM, with full control of this computer.</value></data>
   <data name="PickApp" xml:space="preserve"><value>Pick app…</value></data>
   <data name="PickAppTitle" xml:space="preserve"><value>Choose an app</value></data>
   <data name="PickUser" xml:space="preserve"><value>Pick user…</value></data>
   <data name="PickUserTitle" xml:space="preserve"><value>Choose a user</value></data>
+  <data name="PluginError" xml:space="preserve"><value>Error: {0}</value></data>
+  <data name="PluginForEveryoneNote" xml:space="preserve"><value>It will be installed for everyone on this computer. Its machine actions run with full control of the computer.</value></data>
+  <data name="PluginForMeNote" xml:space="preserve"><value>It will be installed only for you and runs with your rights.</value></data>
+  <data name="PluginInstallConfirm" xml:space="preserve"><value>Install {0} {1} from {2}?</value></data>
+  <data name="PluginInvalid" xml:space="preserve"><value>This plugin cannot be installed:
+
+{0}</value></data>
+  <data name="PluginNoPermissions" xml:space="preserve"><value>The plugin declares no special permissions.</value></data>
+  <data name="PluginNotLoaded" xml:space="preserve"><value>Not loaded (see Activity)</value></data>
+  <data name="PluginPackageFilter" xml:space="preserve"><value>AutoSettings plugin (*.aspkg)|*.aspkg</value></data>
+  <data name="PluginPermissionsTitle" xml:space="preserve"><value>The plugin says it:</value></data>
+  <data name="PluginRemoveQuestion" xml:space="preserve"><value>Remove {0}?
+
+Automations that use it are kept, but they do not run until it is installed again.</value></data>
+  <data name="PluginTrust" xml:space="preserve"><value>Plugins are not sandboxed: these are the author's statements. Only install plugins you trust.</value></data>
+  <data name="PluginUpdateAvailable" xml:space="preserve"><value>{0} available</value></data>
+  <data name="PluginUpdatesFound" xml:space="preserve"><value>{0} update(s) available.</value></data>
+  <data name="Plugins" xml:space="preserve"><value>Plugins</value></data>
+  <data name="PluginsHint" xml:space="preserve"><value>Plugins add new triggers, conditions and actions. Only install plugins you trust: a plugin runs with your rights, and a plugin installed for everyone can control the whole computer.</value></data>
+  <data name="PluginsUpToDate" xml:space="preserve"><value>All plugins are up to date.</value></data>
   <data name="Priority" xml:space="preserve"><value>Priority</value></data>
   <data name="Profiles" xml:space="preserve"><value>Profiles</value></data>
   <data name="ProfilesHint" xml:space="preserve"><value>A profile is a set of settings that is applied together and undone together.</value></data>
+  <data name="Publisher" xml:space="preserve"><value>Publisher</value></data>
   <data name="ReloadAutomations" xml:space="preserve"><value>Reload automations</value></data>
   <data name="Remove" xml:space="preserve"><value>Remove</value></data>
   <data name="RestartForLanguage" xml:space="preserve"><value>Restart AutoSettings (tray icon → Exit, then start it again) to change the language.</value></data>
@@ -120,6 +164,7 @@
   <data name="RewriteNotice" xml:space="preserve"><value>The editor saves automations.yaml in a standard format. Comments and custom formatting in the file are not kept. Use 'Edit whole file' if you want to keep them.
 
 Continue?</value></data>
+  <data name="RollBack" xml:space="preserve"><value>Previous version</value></data>
   <data name="RunIgnoringConditions" xml:space="preserve"><value>Run, ignoring conditions</value></data>
   <data name="RunNow" xml:space="preserve"><value>Run now</value></data>
   <data name="Running" xml:space="preserve"><value>running</value></data>
@@ -130,6 +175,7 @@ Continue?</value></data>
   <data name="ServiceConnected" xml:space="preserve"><value>Service connected</value></data>
   <data name="ServiceNotConnected" xml:space="preserve"><value>Service not connected</value></data>
   <data name="Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="SignedBy" xml:space="preserve"><value>signed by {0}</value></data>
   <data name="SignedIn" xml:space="preserve"><value>Signed in</value></data>
   <data name="StartMenu" xml:space="preserve"><value>Start menu</value></data>
   <data name="Status" xml:space="preserve"><value>Status</value></data>
@@ -167,6 +213,7 @@ Continue?</value></data>
   <data name="UpdateModeLabel" xml:space="preserve"><value>When a new version is released</value></data>
   <data name="UpdateModeNotify" xml:space="preserve"><value>Only tell me</value></data>
   <data name="UpdateModeOff" xml:space="preserve"><value>Do nothing (updates off)</value></data>
+  <data name="UpdatePlugin" xml:space="preserve"><value>Update</value></data>
   <data name="UpdateSettingsLocked" xml:space="preserve"><value>These settings were set by your administrator.</value></data>
   <data name="UpdateStateAvailable" xml:space="preserve"><value>Version {0} is available.</value></data>
   <data name="UpdateStateChecking" xml:space="preserve"><value>Checking for updates…</value></data>
@@ -184,6 +231,7 @@ Continue?</value></data>
   <data name="UseDomainName" xml:space="preserve"><value>Use DOMAIN\name</value></data>
   <data name="UseFullPath" xml:space="preserve"><value>Use the full path instead of the file name</value></data>
   <data name="User" xml:space="preserve"><value>User</value></data>
+  <data name="Version" xml:space="preserve"><value>Version</value></data>
   <data name="Visual" xml:space="preserve"><value>Visual</value></data>
   <data name="WhatHappened" xml:space="preserve"><value>What happened</value></data>
   <data name="WhatsNew" xml:space="preserve"><value>What's new</value></data>
