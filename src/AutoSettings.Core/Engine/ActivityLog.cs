@@ -35,6 +35,8 @@ public static class ActivitySources
     public const string Connection = "connection";
     /// <summary>Update checks, downloads and installs.</summary>
     public const string Update = "update";
+    /// <summary>Plugins: loading, errors and output.</summary>
+    public const string Plugin = "plugin";
 }
 
 /// <summary>One line in the activity timeline.</summary>

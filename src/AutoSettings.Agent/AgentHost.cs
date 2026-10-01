@@ -7,6 +7,7 @@ using AutoSettings.Core.Updates;
 using AutoSettings.Platform;
 using AutoSettings.Platform.Actions;
 using AutoSettings.Platform.Monitoring;
+using AutoSettings.Platform.Plugins;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
@@ -34,6 +35,19 @@ public sealed class AgentHost
         Activity = new ActivityLog(1000, loggerFactory.CreateLogger("Activity"));
         Foreground = new ForegroundMonitor();
         Handlers = PlatformHandlers.CreateUserRegistry(notifier, Foreground);
+
+        // Plugins installed for the machine and for this user, loaded before the engine so their components validate.
+        Plugins = new PluginRuntime(
+            new PluginHostContext(ExecutionScope.User, Activity, User, SessionId),
+            [new PluginRoot(Product.MachinePluginDirectory, ExecutionScope.Machine), new PluginRoot(Product.UserPluginDirectory, ExecutionScope.User)],
+            Handlers,
+            [new ScriptBackend()],
+            e => Engine?.Post(e),
+            AppVersion.Current,
+            loggerFactory.CreateLogger<PluginRuntime>());
+        Plugins.Load();
+        AgentCatalog.Provider.Update(Plugins.Catalog);
+
         Engine = new RuleEngine(ExecutionScope.User, Handlers, Activity, catalog: AgentCatalog.Current, logger: loggerFactory.CreateLogger<RuleEngine>())
         {
             CurrentUser = User,
@@ -53,6 +67,9 @@ public sealed class AgentHost
     public ForegroundMonitor Foreground { get; }
 
     public HandlerRegistry Handlers { get; }
+
+    /// <summary>The plugins of this computer and this user.</summary>
+    public PluginRuntime Plugins { get; }
 
     public RuleEngine Engine { get; }
 
@@ -116,6 +133,8 @@ public sealed class AgentHost
         Engine.StateChanged += (_, _) => RaiseStatusChanged();
 
         Store.Loaded += OnConfigLoaded;
+        Plugins.Changed += OnPluginsChanged;
+        Plugins.StartWatching();
         Store.EnsureExists(StarterConfig.User);
         Store.Load();
         Store.StartWatching();
@@ -167,6 +186,8 @@ public sealed class AgentHost
         await Service.DisposeAsync().ConfigureAwait(false);
         StopFallback();
         Foreground.Dispose();
+        Plugins.Changed -= OnPluginsChanged;
+        Plugins.Dispose();
         Store.Dispose();
         if (_engineTask is not null)
             await _engineTask.ConfigureAwait(false);
@@ -238,9 +259,27 @@ public sealed class AgentHost
         else
         {
             Engine.UpdateConfig(result.Config);
+            Plugins.UseConfig(result.Config);
             var warnings = result.Warnings.Count();
             Activity.Info(ActivitySources.Config,
                 $"Loaded {result.Config.Automations.Count} automation(s) and {result.Config.Profiles.Count} profile(s){(warnings > 0 ? $" with {warnings} warning(s)" : "")}.");
+        }
+        RaiseStatusChanged();
+    }
+
+    /// <summary>Plugins were added, removed or changed: switch to the new catalog and load the automations again.</summary>
+    private void OnPluginsChanged(object? sender, EventArgs e)
+    {
+        try
+        {
+            var catalog = Plugins.Catalog;
+            AgentCatalog.Provider.Update(catalog);
+            Engine.UseCatalog(catalog);
+            Store.UseCatalog(catalog);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not switch to the new plugins");
         }
         RaiseStatusChanged();
     }

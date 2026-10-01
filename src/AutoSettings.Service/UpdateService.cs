@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -80,7 +79,7 @@ public sealed class UpdateService : BackgroundService
         _supervisor = supervisor;
         _activity = activity;
         _logger = logger;
-        _current = CurrentVersion();
+        _current = AppVersion.Current;
         _method = InstallInfo.Detect();
         _stored = LoadState();
 
@@ -539,15 +538,6 @@ public sealed class UpdateService : BackgroundService
         catch (OperationCanceledException)
         {
         }
-    }
-
-    private static SemVersion CurrentVersion()
-    {
-        var assembly = Assembly.GetEntryAssembly() ?? typeof(UpdateService).Assembly;
-        var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-        return SemVersion.TryParse(informational)
-            ?? SemVersion.TryParse(assembly.GetName().Version?.ToString(3))
-            ?? SemVersion.Parse("0.0.0");
     }
 
     private static string Describe(UpdateSettings settings) =>

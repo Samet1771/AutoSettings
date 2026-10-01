@@ -48,6 +48,18 @@ public static class Product
     /// <summary>Folder for the current user's agent logs.</summary>
     public static string AgentLogDirectory => Path.Combine(UserLocalDirectory, "logs");
 
+    /// <summary>Plugins installed for every user (<c>%ProgramData%\AutoSettings\plugins</c>); only administrators can change it.</summary>
+    public static string MachinePluginDirectory => Path.Combine(MachineDataDirectory, "plugins");
+
+    /// <summary>Plugins the current user installed for themselves (<c>%LocalAppData%\AutoSettings\plugins</c>).</summary>
+    public static string UserPluginDirectory => Path.Combine(UserLocalDirectory, "plugins");
+
+    /// <summary>Where machine plugins may keep data between runs (<c>%ProgramData%\AutoSettings\plugin-data</c>).</summary>
+    public static string MachinePluginDataDirectory => Path.Combine(MachineDataDirectory, "plugin-data");
+
+    /// <summary>Where plugins running for the current user may keep data (<c>%LocalAppData%\AutoSettings\plugin-data</c>).</summary>
+    public static string UserPluginDataDirectory => Path.Combine(UserLocalDirectory, "plugin-data");
+
     /// <summary>Link to the documentation site.</summary>
     public const string DocumentationUrl = "https://github.com/Samet1771/AutoSettings/tree/main/docs";
 }
