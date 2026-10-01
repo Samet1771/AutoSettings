@@ -39,7 +39,9 @@ public class SdkApiTests
             foreach (var member in members)
                 sb.Append("  ").Append(member).Append('\n');
         }
-        return sb.ToString();
+        // Generic arguments are printed with their assembly version ([[X, AutoSettings.Sdk, Version=...]]), which
+        // changes with builds; keep just the type name.
+        return System.Text.RegularExpressions.Regex.Replace(sb.ToString(), @"\[\[([^\[\],]+), [^\]]+\]\]", "[$1]");
     }
 
     [Fact]

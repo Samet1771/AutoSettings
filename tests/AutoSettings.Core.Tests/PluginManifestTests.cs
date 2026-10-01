@@ -272,7 +272,7 @@ public class PluginManifestTests
             // pack adds the components from the attributes.
             manifest.Components = SdkDescriber.Describe([typeof(TemplateLikeAction)]);
         }
-        Assert.Empty(PluginManifestValidator.Validate(manifest).Where(i => i.Severity == IssueSeverity.Error));
+        Assert.DoesNotContain(PluginManifestValidator.Validate(manifest), i => i.Severity == IssueSeverity.Error);
         Assert.Equal("acme.usbtools", manifest.Id);
     }
 
