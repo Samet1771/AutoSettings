@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Core reads the SDK's attributes to describe .NET plugins; the SDK never references Core. -->
+    <ProjectReference Include="..\AutoSettings.Sdk\AutoSettings.Sdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="AutoSettings.Core.Tests" />
   </ItemGroup>
 

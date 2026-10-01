@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Runs one .NET plugin in its own process, so a plugin that crashes or hangs never takes AutoSettings down.
+    The service starts it as SYSTEM for machine plugins; the user's app starts it as the user.
+    It talks JSON-RPC with its parent over standard input and output (see IPluginHostRpc in Core).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <RootNamespace>AutoSettings.PluginHost</RootNamespace>
+    <AssemblyName>AutoSettings.PluginHost</AssemblyName>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StreamJsonRpc" Version="2.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoSettings.Core\AutoSettings.Core.csproj" />
+  </ItemGroup>
+
+</Project>

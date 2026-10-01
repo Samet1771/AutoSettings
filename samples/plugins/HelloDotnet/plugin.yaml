@@ -1,0 +1,15 @@
+# The plugin's details. "autosettings-plugin pack" adds the components from the
+# [PluginComponent] attributes in the code, so they are not listed here.
+id: example.dotnet
+name:
+  en: Hello .NET (sample)
+  tr: Merhaba .NET (örnek)
+description: Sample .NET plugin. Sets user environment variables and reacts to files instantly.
+version: 1.0.0
+publisher: AutoSettings
+homepage: https://github.com/Samet1771/AutoSettings/tree/main/samples/plugins/HelloDotnet
+kind: dotnet
+scope: user
+sdk: "1.0"
+min_app_version: 0.3.0
+entry: Example.HelloDotnet.dll

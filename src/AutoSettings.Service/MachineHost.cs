@@ -77,7 +77,7 @@ public sealed class MachineHost : BackgroundService
             new PluginHostContext(ExecutionScope.Machine, _activity),
             [new PluginRoot(Product.MachinePluginDirectory, ExecutionScope.Machine)],
             handlers,
-            [new ScriptBackend()],
+            [new ScriptBackend(), new DotnetBackend(logger: _loggerFactory.CreateLogger<DotnetBackend>())],
             e => running?.Post(e),
             AppVersion.Current,
             _loggerFactory.CreateLogger<PluginRuntime>());

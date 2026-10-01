@@ -212,8 +212,8 @@ How the scripts receive parameters and report results is described in
 
 For `kind: dotnet`, `entry` names the plugin's assembly. It contains a class that implements
 `AutoSettings.Sdk.IPlugin`. Its components are classes with `[PluginComponent]` and `[Field]` attributes, and the
-packing tool writes the `components` section from them, so you do not write it by hand. A guide and the API
-reference come with the beta that runs .NET plugins.
+packing tool writes the `components` section from them, so you do not write it by hand. See
+[Writing a .NET plugin](dotnet-plugins.md).
 
 ## Checks
 

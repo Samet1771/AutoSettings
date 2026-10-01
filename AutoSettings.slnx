@@ -6,6 +6,11 @@
     <Project Path="src/AutoSettings.Agent/AutoSettings.Agent.csproj" />
     <Project Path="src/AutoSettings.DocGen/AutoSettings.DocGen.csproj" />
     <Project Path="src/AutoSettings.Sdk/AutoSettings.Sdk.csproj" />
+    <Project Path="src/AutoSettings.PluginHost/AutoSettings.PluginHost.csproj" />
+    <Project Path="src/AutoSettings.PluginTool/AutoSettings.PluginTool.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/plugins/HelloDotnet/HelloDotnet.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/AutoSettings.Core.Tests/AutoSettings.Core.Tests.csproj" />
