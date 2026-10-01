@@ -1,0 +1,88 @@
+# A small script plugin that shows every part of the plugin API:
+# a revertible action, a condition and two triggers raised by one poll script.
+# Install it by copying the folder "1.0.0" to %LocalAppData%\AutoSettings\plugins\example.hello\1.0.0
+id: example.hello
+name:
+  en: Hello (sample)
+  tr: Merhaba (örnek)
+description: Sample script plugin. Writes text files and reacts to files in your "AutoSettings Hello" folder.
+version: 1.0.0
+publisher: AutoSettings
+homepage: https://github.com/Samet1771/AutoSettings/tree/main/samples/plugins/hello-script
+kind: script
+scope: user
+sdk: "1.0"
+min_app_version: 0.3.0
+permissions: [powershell]
+
+components:
+  - type: example.hello.write_text
+    kind: action
+    title:
+      en: Write a text file
+      tr: Metin dosyası yaz
+    description: Writes text to a file. In a profile, the file's old content comes back when the profile ends.
+    revertible: true
+    scripts:
+      apply: scripts/write.ps1
+      capture: scripts/read.ps1
+      restore: scripts/restore.ps1
+    fields:
+      - name: path
+        type: path
+        description: The file, for example %USERPROFILE%\Desktop\status.txt. Environment variables are expanded.
+        required: true
+        key: true
+        example: '%USERPROFILE%\Desktop\status.txt'
+      - name: text
+        type: multiline
+        description: What to write. Placeholders such as {{ user }} work.
+        required: true
+        example: Hello {{ user }}
+
+  - type: example.hello.file_contains
+    kind: condition
+    title:
+      en: File contains text
+      tr: Dosya metin içeriyor
+    description: True when the file exists and contains the text (ignoring case).
+    scripts:
+      evaluate: scripts/contains.ps1
+    fields:
+      - name: path
+        type: path
+        description: The file.
+        required: true
+        example: '%USERPROFILE%\Desktop\status.txt'
+      - name: text
+        type: string
+        description: The text to look for.
+        required: true
+        example: busy
+
+  - type: example.hello.file_added
+    kind: trigger
+    title:
+      en: File added to the Hello folder
+      tr: Hello klasörüne dosya eklendi
+    description: Fires when a file appears in the "AutoSettings Hello" folder in your user folder (checked every 5 seconds).
+    opposite: example.hello.file_removed
+    interval: 5s
+    scripts:
+      poll: scripts/poll.ps1
+    fields:
+      - name: name
+        type: string
+        description: Only files with this name; wildcards work (*.txt). Leave empty for any file.
+        example: '*.txt'
+
+  - type: example.hello.file_removed
+    kind: trigger
+    title:
+      en: File removed from the Hello folder
+      tr: Hello klasöründen dosya silindi
+    description: Fires when a file disappears from the "AutoSettings Hello" folder.
+    fields:
+      - name: name
+        type: string
+        description: Only files with this name; wildcards work.

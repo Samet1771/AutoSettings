@@ -17,9 +17,11 @@ public static class ManifestMapping
     /// The components the plugin adds to the catalog, marked with the plugin as their <see cref="ComponentDescriptor.Source"/>.
     /// Call it only for manifests without validation errors.
     /// </summary>
-    public static PluginContribution ToContribution(PluginManifest manifest)
+    /// <param name="manifest">The plugin's manifest.</param>
+    /// <param name="installedFor">Where the plugin is installed (machine or user); defaults to the manifest's scope.</param>
+    public static PluginContribution ToContribution(PluginManifest manifest, ExecutionScope? installedFor = null)
     {
-        var source = ComponentSource.Plugin(manifest.Id, manifest.Version, manifest.Scope);
+        var source = ComponentSource.Plugin(manifest.Id, manifest.Version, installedFor ?? manifest.Scope);
         return new PluginContribution(source, manifest.Components.Select(c => ToDescriptor(manifest, c) with { Source = source }).ToList());
     }
 

@@ -10,7 +10,11 @@
   - An automation that uses a plugin that is not installed or is turned off is kept and marked "needs plugin" in
     the list. It does not run until the plugin is back; the rest of the file keeps working.
   - `AutoSettings.Sdk`, the API for .NET plugins, and the `plugin.yaml` manifest format, with its reference in
-    the docs (Plugins section). Plugins cannot be installed yet.
+    the docs (Plugins section).
+  - Script plugins run: PowerShell actions (revertible ones included), conditions and polling triggers. Copy a plugin
+    into `%LocalAppData%\AutoSettings\plugins` (or `%ProgramData%\AutoSettings\plugins` for machine plugins) and
+    it loads within seconds. The service only runs machine plugins from folders that only administrators can change.
+    Sample: `samples/plugins/hello-script`. Guide: "Writing a script plugin".
 
 ## 0.2.0 (2026-09-30)
 

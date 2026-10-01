@@ -58,6 +58,7 @@ nav:
       - Placeholders: reference/placeholders.md
   - Plugins (preview):
       - Overview: plugins/index.md
+      - Writing a script plugin: plugins/script-plugins.md
       - plugin.yaml reference: plugins/manifest.md
   - Developers:
       - Architecture: dev/architecture.md

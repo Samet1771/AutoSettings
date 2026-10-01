@@ -5,8 +5,10 @@ using AutoSettings.Core.Catalog;
 using AutoSettings.Core.Config;
 using AutoSettings.Core.Engine;
 using AutoSettings.Core.Events;
+using AutoSettings.Core.Updates;
 using AutoSettings.Platform;
 using AutoSettings.Platform.Monitoring;
+using AutoSettings.Platform.Plugins;
 using AutoSettings.Platform.Security;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.WindowsServices;
@@ -25,12 +27,13 @@ public sealed class MachineHost : BackgroundService
     private readonly AgentHub _hub;
     private readonly AgentSupervisor _supervisor;
     private readonly ActivityLog _activity;
-    private readonly IComponentCatalogProvider _catalogs;
+    private readonly ComponentCatalogProvider _catalogs;
     private readonly ServiceOptions _options;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<MachineHost> _logger;
     private readonly ConcurrentDictionary<int, UserInfo?> _sessionUsers = new();
     private RuleEngine? _engine;
+    private PluginRuntime? _plugins;
     private IProcessMonitor? _processMonitor;
 
     public MachineHost(
@@ -38,7 +41,7 @@ public sealed class MachineHost : BackgroundService
         AgentHub hub,
         AgentSupervisor supervisor,
         ActivityLog activity,
-        IComponentCatalogProvider catalogs,
+        ComponentCatalogProvider catalogs,
         IOptions<ServiceOptions> options,
         ILoggerFactory loggerFactory)
     {
@@ -64,10 +67,25 @@ public sealed class MachineHost : BackgroundService
         if (runningAsService)
             SecureDataDirectory(Product.MachineDataDirectory);
 
-        var catalog = _catalogs.Current;
         var handlers = new HandlerRegistry();
         foreach (var condition in PlatformHandlers.CommonConditions())
             handlers.Add(condition);
+
+        // Machine plugins: loaded before the engine so automations that use them validate on the first load.
+        RuleEngine? running = null;
+        using var plugins = new PluginRuntime(
+            new PluginHostContext(ExecutionScope.Machine, _activity),
+            [new PluginRoot(Product.MachinePluginDirectory, ExecutionScope.Machine)],
+            handlers,
+            [new ScriptBackend()],
+            e => running?.Post(e),
+            AppVersion.Current,
+            _loggerFactory.CreateLogger<PluginRuntime>());
+        _plugins = plugins;
+        plugins.Load();
+        _catalogs.Update(plugins.Catalog);
+
+        var catalog = _catalogs.Current;
         AddActionHandlers(handlers, catalog);
         var engine = new RuleEngine(
             ExecutionScope.Machine,
@@ -77,9 +95,15 @@ public sealed class MachineHost : BackgroundService
             catalog,
             logger: _loggerFactory.CreateLogger<RuleEngine>());
         _engine = engine;
+        running = engine;
 
         using var store = new ConfigFileStore(Product.MachineConfigPath, ExecutionScope.Machine, catalog, _loggerFactory.CreateLogger<ConfigFileStore>());
-        store.Loaded += (_, result) => OnConfigLoaded(engine, result);
+        store.Loaded += (_, result) =>
+        {
+            OnConfigLoaded(engine, result);
+            if (!result.HasErrors)
+                plugins.UseConfig(result.Config);
+        };
         try
         {
             store.EnsureExists(StarterConfig.Machine);
@@ -93,6 +117,8 @@ public sealed class MachineHost : BackgroundService
 
         EventHandler onCatalogChanged = (_, _) => OnCatalogChanged(engine, handlers, store);
         _catalogs.Changed += onCatalogChanged;
+        plugins.Changed += (_, _) => _catalogs.Update(plugins.Catalog);
+        plugins.StartWatching();
 
         try
         {
@@ -136,6 +162,8 @@ public sealed class MachineHost : BackgroundService
     private void AddActionHandlers(HandlerRegistry registry, ComponentCatalog catalog)
     {
         var local = PlatformHandlers.MachineActions().ToDictionary(h => h.Type, StringComparer.OrdinalIgnoreCase);
+        foreach (var (type, handler) in _plugins?.MachineActions ?? new Dictionary<string, IActionHandler>())
+            local[type] = handler;
         foreach (var descriptor in catalog.OfKind(ComponentKind.Action))
         {
             if (descriptor.Type is BuiltInActions.ProfileApply or BuiltInActions.ProfileRevert or BuiltInActions.Delay)

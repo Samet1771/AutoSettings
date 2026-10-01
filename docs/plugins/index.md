@@ -1,8 +1,8 @@
 # Plugins
 
 !!! warning "Preview"
-    Plugin support is being built for AutoSettings 0.3. This section describes what is already settled and
-    grows with each beta. You cannot install plugins yet. The [status](#status) table shows what works today.
+    Plugin support is being built for AutoSettings 0.3. This section grows with each beta. The [status](#status)
+    table shows what works today.
 
 Plugins add new **triggers**, **conditions** and **actions** to AutoSettings. Once a plugin is installed, its
 components appear in the editor next to the built-in ones and work in automations and profiles like them.
@@ -61,8 +61,8 @@ marks it **⚠ needs plugin x** and does not run it until the plugin is back. Th
 | Catalog that can change while the app runs | done (0.3.0-beta.1) |
 | Plugin triggers, `{{ event.data.* }}`, missing-plugin handling | done (0.3.0-beta.1) |
 | `plugin.yaml` format and the `AutoSettings.Sdk` API | done (this page, [manifest](manifest.md)) |
-| Running script plugins | next |
-| Running .NET plugins (separate process per plugin) | planned |
+| Running script plugins (copied into the plugins folder by hand) | done ([guide](script-plugins.md)) |
+| Running .NET plugins (separate process per plugin) | next |
 | Installing from a file or GitHub, updates | planned |
 | Plugins page in the app | planned |
 | SDK on NuGet, `dotnet new` template, full guides and API reference | planned |

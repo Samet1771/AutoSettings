@@ -205,8 +205,8 @@ folder: no `..`, no drive letters and no absolute paths.
 | condition | `evaluate` |
 | trigger | `poll` (optional: one trigger's poll script can raise the events of the others, such as `connected` and `disconnected`) |
 
-How the scripts receive parameters and report results is described in the script plugin guide, which comes with the
-beta that runs script plugins.
+How the scripts receive parameters and report results is described in
+[Writing a script plugin](script-plugins.md).
 
 ## .NET plugins
 
