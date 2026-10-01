@@ -57,17 +57,20 @@ nav:
   - Reference:
       - Overview: reference/index.md
       - Placeholders: reference/placeholders.md
-  - Plugins (preview):
+  - Plugins:
       - Overview: plugins/index.md
       - Writing a script plugin: plugins/script-plugins.md
       - Writing a .NET plugin: plugins/dotnet-plugins.md
       - plugin.yaml reference: plugins/manifest.md
       - Packaging and publishing: plugins/publishing.md
+      - Versions and compatibility: plugins/versioning.md
+      - SDK API reference: plugins/api/index.md
   - Developers:
       - Architecture: dev/architecture.md
       - Rule engine: dev/engine.md
       - Service and agent protocol: dev/ipc.md
       - Security model: dev/security.md
+      - Plugins architecture: dev/plugins-architecture.md
       - Building and testing: dev/building.md
       - Adding actions, conditions, triggers: dev/adding-an-action.md
   - Roadmap: roadmap.md

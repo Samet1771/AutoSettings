@@ -1,0 +1,15 @@
+# The plugin's details. "autosettings-plugin pack" adds the components from the attributes in the code.
+# Reference: https://github.com/Samet1771/AutoSettings/blob/main/docs/plugins/manifest.md
+id: mypublisher.myplugin
+name: MyPlugin
+description: What MyPlugin does.
+version: 1.0.0
+publisher: mypublisher
+kind: dotnet
+scope: user
+sdk: "1.0"
+min_app_version: 0.3.0
+entry: MyPlugin.dll
+# permissions: [network]
+# update:
+#   github: owner/repository

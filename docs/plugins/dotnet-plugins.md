@@ -191,6 +191,13 @@ personal automations) runs as the user. Be careful with SYSTEM code: treat param
 
 ## Tools
 
+Start a new plugin from the template (`--kind script` for a PowerShell plugin):
+
+```powershell
+dotnet new install AutoSettings.Templates
+dotnet new autosettings-plugin --name UsbTools --publisher acme   # plugin id: acme.usbtools
+```
+
 The `autosettings-plugin` tool packs and checks plugins:
 
 ```powershell
@@ -201,8 +208,12 @@ autosettings-plugin validate bin\Release\net10.0                # check without 
 autosettings-plugin pack bin\Release\net10.0 --out dist         # dist\acme.usb-1.0.0.aspkg + SHA256SUMS.txt
 ```
 
-Before the tool is on NuGet, run it from a clone of the AutoSettings repository:
-`dotnet run --project src/AutoSettings.PluginTool -- pack ...`.
+The SDK, the tool and the templates are NuGet packages (see [Versions](versioning.md#packages-on-nuget)). Until they are
+published, use them from a clone of the AutoSettings repository: reference `src/AutoSettings.Sdk` with
+`Private="false"`, run the tool with `dotnet run --project src/AutoSettings.PluginTool -- pack ...`, and install the
+template with `dotnet new install templates/content/autosettings-plugin`.
+
+Every public type and member of the SDK is described in the [API reference](api/index.md).
 
 While developing, unpack the package (or copy the build output plus the packed `plugin.yaml`) to
 `%LocalAppData%\AutoSettings\plugins\<id>\<version>`. AutoSettings loads it within seconds. To debug, attach Visual

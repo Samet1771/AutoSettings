@@ -1,8 +1,7 @@
 # Plugins
 
-!!! warning "Preview"
-    Plugin support is being built for AutoSettings 0.3. This section grows with each beta. The [status](#status)
-    table shows what works today.
+!!! note "New in 0.3"
+    Plugin support is new in AutoSettings 0.3 and is being tested in the 0.3 betas.
 
 Plugins add new **triggers**, **conditions** and **actions** to AutoSettings. Once a plugin is installed, its
 components appear in the editor next to the built-in ones and work in automations and profiles like them.
@@ -54,6 +53,16 @@ trust.**
 If an automation uses a plugin that is not installed or is turned off, AutoSettings keeps the automation. It
 marks it **⚠ needs plugin x** and does not run it until the plugin is back. The rest of the file keeps working.
 
+## Where to go next
+
+- [Writing a script plugin](script-plugins.md): PowerShell, nothing to compile.
+- [Writing a .NET plugin](dotnet-plugins.md): C# and the SDK.
+- [plugin.yaml reference](manifest.md), [Packaging and publishing](publishing.md), [Versions and compatibility](versioning.md).
+- [SDK API reference](api/index.md): every type of `AutoSettings.Sdk`.
+- Samples: [hello-script](https://github.com/Samet1771/AutoSettings/tree/main/samples/plugins/hello-script) and
+  [HelloDotnet](https://github.com/Samet1771/AutoSettings/tree/main/samples/plugins/HelloDotnet).
+- For users: [installing and managing plugins](../guide/plugins.md).
+
 ## Status
 
 | Part | Status |
@@ -65,4 +74,4 @@ marks it **⚠ needs plugin x** and does not run it until the plugin is back. Th
 | Running .NET plugins (separate process per plugin), `autosettings-plugin` tool | done ([guide](dotnet-plugins.md)) |
 | Installing from a file or GitHub, updates and rollback (command line) | done ([publishing](publishing.md)) |
 | Plugins page in the app ([user guide](../guide/plugins.md)) | done |
-| SDK on NuGet, `dotnet new` template, API reference | next |
+| `dotnet new` template, [API reference](api/index.md), [versioning](versioning.md), NuGet packaging | done (publishing needs a NuGet key) |

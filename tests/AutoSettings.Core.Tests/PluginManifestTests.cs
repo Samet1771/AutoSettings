@@ -254,6 +254,35 @@ public class PluginManifestTests
         Assert.Equal("acme.usb", manifest.Id);
     }
 
+    [Theory]
+    [InlineData("script")]
+    [InlineData("dotnet")]
+    public void The_dotnet_new_template_manifests_are_valid(string kind)
+    {
+        var root = TestSupport.FindRepositoryRoot();
+        if (root is null)
+            return;
+        // What "dotnet new autosettings-plugin --publisher acme -n UsbTools" produces.
+        var yaml = File.ReadAllText(Path.Combine(root, "templates", "content", "autosettings-plugin", kind, "plugin.yaml"))
+            .Replace("mypublisher", "acme").Replace("myplugin", "usbtools").Replace("MyPlugin", "UsbTools");
+        var (manifest, issues) = PluginManifestReader.Read(yaml);
+        Assert.Empty(issues);
+        if (kind == "dotnet")
+        {
+            // pack adds the components from the attributes.
+            manifest.Components = SdkDescriber.Describe([typeof(TemplateLikeAction)]);
+        }
+        Assert.DoesNotContain(PluginManifestValidator.Validate(manifest), i => i.Severity == IssueSeverity.Error);
+        Assert.Equal("acme.usbtools", manifest.Id);
+    }
+
+    [AutoSettings.Sdk.PluginComponent("acme.usbtools.say_hello", Title = "Say hello", Description = "Test.")]
+    [AutoSettings.Sdk.Field("name", AutoSettings.Sdk.FieldKind.String, Description = "Who.", Required = true)]
+    private sealed class TemplateLikeAction : AutoSettings.Sdk.IPluginAction
+    {
+        public Task ExecuteAsync(AutoSettings.Sdk.ActionRequest request, CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
     [Fact]
     public void Permissions_have_names_and_descriptions()
     {

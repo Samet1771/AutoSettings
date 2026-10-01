@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "AutoSettings",
+  "classifications": ["AutoSettings", "Plugin"],
+  "identity": "AutoSettings.Plugin",
+  "name": "AutoSettings plugin",
+  "description": "A new plugin for AutoSettings: actions, conditions and triggers in C# (.NET) or PowerShell.",
+  "shortName": "autosettings-plugin",
+  "sourceName": "MyPlugin",
+  "preferNameDirectory": true,
+  "tags": { "language": "C#", "type": "project" },
+  "symbols": {
+    "kind": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "dotnet",
+      "description": "How the plugin is written.",
+      "choices": [
+        { "choice": "dotnet", "description": ".NET plugin in C# (AutoSettings.Sdk)" },
+        { "choice": "script", "description": "Script plugin in PowerShell (nothing to compile)" }
+      ]
+    },
+    "publisher": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "me",
+      "replaces": "mypublisher",
+      "description": "Your publisher id: lower-case letters, digits and dashes. The plugin id becomes <publisher>.<name>."
+    },
+    "pluginId": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "lowerCase",
+      "replaces": "myplugin"
+    }
+  },
+  "forms": {
+    "lowerCase": { "identifier": "lowerCase" }
+  },
+  "sources": [
+    { "source": "./dotnet/", "target": "./", "condition": "(kind == \"dotnet\")" },
+    { "source": "./script/", "target": "./", "condition": "(kind == \"script\")" }
+  ],
+  "postActions": []
+}

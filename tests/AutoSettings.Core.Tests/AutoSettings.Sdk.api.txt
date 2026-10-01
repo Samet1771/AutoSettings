@@ -1,0 +1,138 @@
+class AutoSettings.Sdk.ActionRequest
+  constructor Void .ctor(AutoSettings.Sdk.Parameters, AutoSettings.Sdk.IPluginLog)
+  property AutoSettings.Sdk.IPluginLog Log
+  property AutoSettings.Sdk.Parameters Parameters
+  property AutoSettings.Sdk.PluginEventInfo Event
+  property AutoSettings.Sdk.PluginUser User
+  property Boolean DryRun
+  property System.String AutomationName
+class AutoSettings.Sdk.ConditionRequest
+  constructor Void .ctor(AutoSettings.Sdk.Parameters, AutoSettings.Sdk.IPluginLog)
+  property AutoSettings.Sdk.IPluginLog Log
+  property AutoSettings.Sdk.Parameters Parameters
+  property AutoSettings.Sdk.PluginEventInfo Event
+  property AutoSettings.Sdk.PluginUser User
+class AutoSettings.Sdk.FieldAttribute : System.Attribute
+  constructor Void .ctor(System.String, AutoSettings.Sdk.FieldKind)
+  property AutoSettings.Sdk.FieldKind Kind
+  property Boolean KeyField
+  property Boolean Placeholders
+  property Boolean Required
+  property Double Maximum
+  property Double Minimum
+  property System.String Default
+  property System.String Description
+  property System.String Example
+  property System.String Name
+  property System.String[] Values
+enum AutoSettings.Sdk.FieldKind : System.Enum, System.IComparable, System.IConvertible, System.IFormattable, System.ISpanFormattable
+  const AutoSettings.Sdk.FieldKind AppList=10
+  const AutoSettings.Sdk.FieldKind Boolean=5
+  const AutoSettings.Sdk.FieldKind Duration=7
+  const AutoSettings.Sdk.FieldKind Enum=6
+  const AutoSettings.Sdk.FieldKind Integer=3
+  const AutoSettings.Sdk.FieldKind Multiline=1
+  const AutoSettings.Sdk.FieldKind Number=4
+  const AutoSettings.Sdk.FieldKind Path=2
+  const AutoSettings.Sdk.FieldKind String=0
+  const AutoSettings.Sdk.FieldKind StringList=9
+  const AutoSettings.Sdk.FieldKind Time=8
+  const AutoSettings.Sdk.FieldKind UserList=11
+  field Int32 value__
+interface AutoSettings.Sdk.IPlugin
+  method Void Configure(AutoSettings.Sdk.IPluginBuilder)
+interface AutoSettings.Sdk.IPluginAction
+  method System.Threading.Tasks.Task ExecuteAsync(AutoSettings.Sdk.ActionRequest, System.Threading.CancellationToken)
+interface AutoSettings.Sdk.IPluginBuilder
+  method AutoSettings.Sdk.IPluginBuilder AddAction(AutoSettings.Sdk.IPluginAction)
+  method AutoSettings.Sdk.IPluginBuilder AddCondition(AutoSettings.Sdk.IPluginCondition)
+  method AutoSettings.Sdk.IPluginBuilder AddTrigger(AutoSettings.Sdk.IPluginTrigger)
+interface AutoSettings.Sdk.IPluginCondition
+  method System.Threading.Tasks.ValueTask`1[System.Boolean] EvaluateAsync(AutoSettings.Sdk.ConditionRequest, System.Threading.CancellationToken)
+interface AutoSettings.Sdk.IPluginLog
+  method Void Error(System.String)
+  method Void Info(System.String)
+  method Void Warning(System.String)
+interface AutoSettings.Sdk.IPluginTrigger
+  method System.Threading.Tasks.Task RunAsync(AutoSettings.Sdk.ITriggerSink, System.Threading.CancellationToken)
+interface AutoSettings.Sdk.IRevertiblePluginAction : AutoSettings.Sdk.IPluginAction
+  method System.Threading.Tasks.Task RestoreAsync(AutoSettings.Sdk.ActionRequest, System.String, System.Threading.CancellationToken)
+  method System.Threading.Tasks.Task`1[System.String] CaptureAsync(AutoSettings.Sdk.ActionRequest, System.Threading.CancellationToken)
+interface AutoSettings.Sdk.ITriggerSink
+  method Void Raise(System.String, System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String], AutoSettings.Sdk.PluginUser)
+  property AutoSettings.Sdk.IPluginLog Log
+class AutoSettings.Sdk.LocalizedAttribute : System.Attribute
+  constructor Void .ctor(System.String, System.String)
+  property System.String Description
+  property System.String Language
+  property System.String Title
+  property System.String Type
+class AutoSettings.Sdk.Parameters
+  constructor Void .ctor(System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.Text.Json.JsonElement])
+  method AutoSettings.Sdk.Parameters From(System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.Object])
+  method AutoSettings.Sdk.Parameters FromJson(System.String)
+  method Boolean Has(System.String)
+  method System.Collections.Generic.IReadOnlyList`1[System.String] GetStringList(System.String)
+  method System.Nullable`1[System.Boolean] GetBoolean(System.String)
+  method System.Nullable`1[System.Double] GetNumber(System.String)
+  method System.Nullable`1[System.Int64] GetInteger(System.String)
+  method System.Nullable`1[System.Text.Json.JsonElement] GetRaw(System.String)
+  method System.Nullable`1[System.TimeOnly] GetTime(System.String)
+  method System.Nullable`1[System.TimeSpan] GetDuration(System.String)
+  method System.Nullable`1[System.TimeSpan] ParseDuration(System.String)
+  method System.String GetString(System.String)
+  property AutoSettings.Sdk.Parameters Empty
+  property System.Collections.Generic.IEnumerable`1[System.String] Names
+class AutoSettings.Sdk.PluginActionException : System.Exception, System.Runtime.Serialization.ISerializable
+  constructor Void .ctor(System.String)
+  constructor Void .ctor(System.String, System.Exception)
+enum AutoSettings.Sdk.PluginAvailability : System.Enum, System.IComparable, System.IConvertible, System.IFormattable, System.ISpanFormattable
+  const AutoSettings.Sdk.PluginAvailability Both=3
+  const AutoSettings.Sdk.PluginAvailability Machine=2
+  const AutoSettings.Sdk.PluginAvailability User=1
+  field Int32 value__
+class AutoSettings.Sdk.PluginComponentAttribute : System.Attribute
+  constructor Void .ctor(System.String)
+  property AutoSettings.Sdk.PluginAvailability AvailableIn
+  property AutoSettings.Sdk.PluginScope RunsAs
+  property System.String Category
+  property System.String Description
+  property System.String Example
+  property System.String Notes
+  property System.String OppositeEvent
+  property System.String Title
+  property System.String Type
+class AutoSettings.Sdk.PluginEventInfo : System.IEquatable`1[AutoSettings.Sdk.PluginEventInfo]
+  constructor Void .ctor(System.String)
+  method AutoSettings.Sdk.PluginEventInfo <Clone>$()
+  method Boolean Equals(AutoSettings.Sdk.PluginEventInfo)
+  method Boolean Equals(System.Object)
+  method Int32 GetHashCode()
+  method System.String ToString()
+  method Void Deconstruct(System.String ByRef)
+  property AutoSettings.Sdk.PluginUser User
+  property System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String] Data
+  property System.Nullable`1[System.Int32] SessionId
+  property System.String AppName
+  property System.String AppPath
+  property System.String Name
+  property System.String WindowTitle
+enum AutoSettings.Sdk.PluginScope : System.Enum, System.IComparable, System.IConvertible, System.IFormattable, System.ISpanFormattable
+  const AutoSettings.Sdk.PluginScope Machine=1
+  const AutoSettings.Sdk.PluginScope User=0
+  field Int32 value__
+class AutoSettings.Sdk.PluginUser : System.IEquatable`1[AutoSettings.Sdk.PluginUser]
+  constructor Void .ctor(System.String, System.String, System.String)
+  method AutoSettings.Sdk.PluginUser <Clone>$()
+  method Boolean Equals(AutoSettings.Sdk.PluginUser)
+  method Boolean Equals(System.Object)
+  method Int32 GetHashCode()
+  method System.String ToString()
+  method Void Deconstruct(System.String ByRef, System.String ByRef, System.String ByRef)
+  property System.String Domain
+  property System.String Name
+  property System.String Sid
+class AutoSettings.Sdk.SdkInfo
+  const Int32 MajorVersion=1
+  const Int32 ProtocolVersion=1
+  const System.String Version=1.0.0

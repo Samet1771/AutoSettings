@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Use net10.0-windows10.0.19041.0 to call Windows APIs. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>MyPlugin</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- AutoSettings provides the SDK at run time, so it is not copied next to the plugin. -->
+    <PackageReference Include="AutoSettings.Sdk" Version="1.*" ExcludeAssets="runtime" />
+    <None Update="plugin.yaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
