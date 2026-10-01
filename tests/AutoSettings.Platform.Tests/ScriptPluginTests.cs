@@ -172,10 +172,16 @@ public sealed class ScriptPluginTests : IDisposable
                 Assert.False(config.HasErrors, string.Join("\n", config.Errors));
                 runtime.UseConfig(config.Config);
 
-                // The first poll only records old.txt; then a new file must be reported.
-                await Task.Delay(TimeSpan.FromSeconds(3));
+                // The first poll only records old.txt; then a new file must be reported. Wait for the first poll's
+                // state file rather than a fixed time: PowerShell can take several seconds to start on a busy machine,
+                // and a file written before the first poll counts as already there.
+                var stateFile = Path.Combine(_temp, "state", "example.hello", "files.txt");
+                var deadline = DateTime.UtcNow.AddSeconds(60);
+                while (!File.Exists(stateFile) && DateTime.UtcNow < deadline)
+                    await Task.Delay(250);
+                Assert.True(File.Exists(stateFile), "The first poll did not run. Log:\n" + string.Join("\n", log.Snapshot().Select(x => x.Message)));
                 File.WriteAllText(Path.Combine(watched, "new.txt"), "hello");
-                var deadline = DateTime.UtcNow.AddSeconds(30);
+                deadline = DateTime.UtcNow.AddSeconds(30);
                 while (DateTime.UtcNow < deadline)
                 {
                     lock (events)
