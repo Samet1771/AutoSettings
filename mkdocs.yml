@@ -61,6 +61,7 @@ nav:
       - Writing a script plugin: plugins/script-plugins.md
       - Writing a .NET plugin: plugins/dotnet-plugins.md
       - plugin.yaml reference: plugins/manifest.md
+      - Packaging and publishing: plugins/publishing.md
   - Developers:
       - Architecture: dev/architecture.md
       - Rule engine: dev/engine.md

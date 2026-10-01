@@ -19,6 +19,9 @@
     down; the host restarts when needed, and a plugin that crashes 3 times in 10 minutes is turned off. Triggers
     react instantly. The `autosettings-plugin` tool packs (`.aspkg`), validates and describes plugins.
     Sample: `samples/plugins/HelloDotnet`. Guide: "Writing a .NET plugin".
+  - Plugins can be installed from a `.aspkg` file or a GitHub repository, updated (with checksum checks) and rolled
+    back, from the command line: `AutoSettings.Agent.exe --plugin list|install|uninstall|enable|disable|update|rollback`.
+    Machine plugins ask for administrator permission. A plugin uninstalled while running is removed once it stopped.
 
 ## 0.2.0 (2026-09-30)
 

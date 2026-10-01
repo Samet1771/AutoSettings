@@ -13,7 +13,8 @@ namespace AutoSettings.Agent;
 
 /// <summary>
 /// Entry point. Runs one agent per user session: a tray icon plus the personal automation engine.
-/// Command line: <c>--background</c> starts in the tray without opening the window.
+/// Command line: <c>--background</c> starts in the tray without opening the window; <c>--plugin ...</c> manages
+/// plugins (see <see cref="Plugins.PluginCommands"/>).
 /// </summary>
 public partial class App : Application
 {
@@ -49,6 +50,14 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // "--plugin ..." manages plugins and exits, without a window (also used for the elevated step).
+        if (Plugins.PluginCommands.IsCommand(e.Args))
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            Shutdown(await Plugins.PluginCommands.RunFromCommandLineAsync(e.Args));
+            return;
+        }
 
         _singleInstance = new Mutex(initiallyOwned: true, MutexName, out var isFirstInstance);
         if (!isFirstInstance)

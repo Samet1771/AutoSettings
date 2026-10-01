@@ -67,6 +67,44 @@ The service installs updates as SYSTEM, so the update path is treated as privile
   in `%ProgramData%\AutoSettings\appsettings.json`.
 - `msiexec` is started with an argument list (no shell), with a verbose log next to the download.
 
+## Plugins
+
+Plugins run code with the rights of whoever runs them, so the rules depend on where they run:
+
+- **Who can install what.**
+  - User plugins live in `%LocalAppData%\AutoSettings\plugins` and only run in that user's app, as that user. A user
+    can only harm themselves with them.
+  - Machine plugins live in `%ProgramData%\AutoSettings\plugins`. That folder inherits the data folder's ACL: SYSTEM
+    and Administrators have full control, and Users can read.
+  - Installing, removing or turning off a machine plugin needs administrator rights. The app runs itself elevated
+    (`AutoSettings.Agent.exe --plugin ... --scope machine`, with a UAC prompt). The service itself has no IPC call
+    that installs anything; it notices the change in the folder.
+- **What the service runs.**
+  - The service only loads machine plugins. It runs their `runs_as: machine` actions and their conditions as SYSTEM.
+  - Before loading a plugin folder, it checks the folder's owner and ACL (`SecureDirectory.IsAdminOnly`). A folder
+    that anyone other than SYSTEM, Administrators or TrustedInstaller can change is refused with an Activity entry.
+  - A user plugin can never declare a machine action: the manifest validation refuses `runs_as: machine` without
+    `scope: machine`.
+- **Declared, not sandboxed.** The `permissions` in `plugin.yaml` are shown before installing so users can decide.
+  They are not enforced. The documentation says so plainly: only install plugins you trust.
+- **Packages.** `.aspkg` files are checked before anything is extracted:
+  - no path may leave the plugin folder;
+  - there are limits on size and file count;
+  - the manifest must be valid;
+  - no bundled SDK.
+
+  They are unpacked into a staging folder inside the plugin folder (same ACL) and moved into place in one step.
+- **Downloads.** Packages from GitHub follow the same rules as app updates:
+  - HTTPS from `github.com` or `*.githubusercontent.com` only;
+  - the SHA-256 must match `SHA256SUMS.txt` and/or the API digest, and at least one is required;
+  - an update must keep the plugin id.
+- **Isolation.**
+  - .NET plugins run in their own `AutoSettings.PluginHost.exe` process, so a crash or hang cannot take the service
+    or the app down. The host exits with its parent. Call timeouts and the crash limit stop runaway plugins.
+  - Script plugins run in a new PowerShell process for each call.
+  - Parameters reach plugins as data (JSON and environment variables), never pasted into code.
+  - `ScriptRunner` refuses scripts outside the plugin folder.
+
 ## Reporting a vulnerability
 
 Please open a private security advisory on the GitHub repository instead of a public issue.

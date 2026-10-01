@@ -133,6 +133,16 @@ public sealed class PluginRuntime : IDisposable
             var found = new List<InstalledPlugin>();
             foreach (var root in _roots)
             {
+                // Plugins uninstalled while their host was running can be deleted now that it stopped.
+                try
+                {
+                    PluginInstaller.FinishRemovals(root.Path);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    _logger.LogDebug(ex, "Cannot finish removals in {Path}", root.Path);
+                }
+
                 foreach (var plugin in PluginStore.Discover(root.Path, root.Scope, _appVersion))
                     found.Add(CheckFolder(plugin, root));
             }
