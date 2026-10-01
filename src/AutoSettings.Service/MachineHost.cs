@@ -27,7 +27,7 @@ public sealed class MachineHost : BackgroundService
     private readonly AgentHub _hub;
     private readonly AgentSupervisor _supervisor;
     private readonly ActivityLog _activity;
-    private readonly IComponentCatalogProvider _catalogs;
+    private readonly ComponentCatalogProvider _catalogs;
     private readonly ServiceOptions _options;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<MachineHost> _logger;
@@ -41,7 +41,7 @@ public sealed class MachineHost : BackgroundService
         AgentHub hub,
         AgentSupervisor supervisor,
         ActivityLog activity,
-        IComponentCatalogProvider catalogs,
+        ComponentCatalogProvider catalogs,
         IOptions<ServiceOptions> options,
         ILoggerFactory loggerFactory)
     {
