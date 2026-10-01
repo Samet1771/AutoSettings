@@ -101,6 +101,21 @@ public sealed class InstalledPluginEntry
     /// <summary>When it was installed.</summary>
     [JsonPropertyName("installed")]
     public DateTimeOffset? Installed { get; set; }
+
+    /// <summary>The version used before the last update, kept so the update can be undone.</summary>
+    [JsonPropertyName("previous")]
+    public string? Previous { get; set; }
+
+    /// <summary>
+    /// The plugin was uninstalled but its files were in use; they are deleted the next time plugins are loaded.
+    /// Such a plugin is no longer loaded.
+    /// </summary>
+    [JsonPropertyName("remove")]
+    public bool Remove { get; set; }
+
+    /// <summary>Where the plugin was installed from: a file name or a GitHub repository.</summary>
+    [JsonPropertyName("source")]
+    public string? Source { get; set; }
 }
 
 /// <summary>
@@ -129,6 +144,8 @@ public static class PluginStore
             if (id.StartsWith('.') || id.StartsWith('_'))
                 continue; // staging and backup folders of the installer
             var entry = state.Find(id);
+            if (entry?.Remove == true)
+                continue;
             var versions = SafeDirectories(pluginDirectory)
                 .Where(d => File.Exists(Path.Combine(d, ManifestFileName)))
                 .Select(d => (Directory: d, Version: SemVersion.TryParse(Path.GetFileName(d))))

@@ -63,6 +63,6 @@ marks it **⚠ needs plugin x** and does not run it until the plugin is back. Th
 | `plugin.yaml` format and the `AutoSettings.Sdk` API | done (this page, [manifest](manifest.md)) |
 | Running script plugins (copied into the plugins folder by hand) | done ([guide](script-plugins.md)) |
 | Running .NET plugins (separate process per plugin), `autosettings-plugin` tool | done ([guide](dotnet-plugins.md)) |
-| Installing from a file or GitHub, updates | next |
-| Plugins page in the app | planned |
+| Installing from a file or GitHub, updates and rollback (command line) | done ([publishing](publishing.md)) |
+| Plugins page in the app | next |
 | SDK on NuGet, `dotnet new` template, full guides and API reference | planned |
