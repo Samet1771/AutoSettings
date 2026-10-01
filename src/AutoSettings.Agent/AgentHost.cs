@@ -41,7 +41,7 @@ public sealed class AgentHost
             new PluginHostContext(ExecutionScope.User, Activity, User, SessionId),
             [new PluginRoot(Product.MachinePluginDirectory, ExecutionScope.Machine), new PluginRoot(Product.UserPluginDirectory, ExecutionScope.User)],
             Handlers,
-            [new ScriptBackend()],
+            [new ScriptBackend(), new DotnetBackend(logger: loggerFactory.CreateLogger<DotnetBackend>())],
             e => Engine?.Post(e),
             AppVersion.Current,
             loggerFactory.CreateLogger<PluginRuntime>());

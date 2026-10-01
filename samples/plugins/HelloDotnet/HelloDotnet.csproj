@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Sample .NET plugin. Outside this repository, reference the NuGet package instead of the project:
+      <PackageReference Include="AutoSettings.Sdk" Version="1.*" ExcludeAssets="runtime" />
+    The SDK must not be copied next to the plugin: AutoSettings provides it.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Example.Hello</RootNamespace>
+    <AssemblyName>Example.HelloDotnet</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Version is the plugin's own; it does not follow AutoSettings. -->
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\AutoSettings.Sdk\AutoSettings.Sdk.csproj" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="plugin.yaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -59,6 +59,7 @@ nav:
   - Plugins (preview):
       - Overview: plugins/index.md
       - Writing a script plugin: plugins/script-plugins.md
+      - Writing a .NET plugin: plugins/dotnet-plugins.md
       - plugin.yaml reference: plugins/manifest.md
   - Developers:
       - Architecture: dev/architecture.md

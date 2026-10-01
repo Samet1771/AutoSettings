@@ -15,6 +15,10 @@
     into `%LocalAppData%\AutoSettings\plugins` (or `%ProgramData%\AutoSettings\plugins` for machine plugins) and
     it loads within seconds. The service only runs machine plugins from folders that only administrators can change.
     Sample: `samples/plugins/hello-script`. Guide: "Writing a script plugin".
+  - .NET plugins run, each in its own `AutoSettings.PluginHost.exe` process. A crash or hang never takes AutoSettings
+    down; the host restarts when needed, and a plugin that crashes 3 times in 10 minutes is turned off. Triggers
+    react instantly. The `autosettings-plugin` tool packs (`.aspkg`), validates and describes plugins.
+    Sample: `samples/plugins/HelloDotnet`. Guide: "Writing a .NET plugin".
 
 ## 0.2.0 (2026-09-30)
 

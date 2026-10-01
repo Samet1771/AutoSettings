@@ -39,6 +39,7 @@ jobs:
           $out = "artifacts/AutoSettings"
           dotnet publish src/AutoSettings.Service -c Release -r win-x64 --self-contained -o $out
           dotnet publish src/AutoSettings.Agent -c Release -r win-x64 --self-contained -o $out
+          dotnet publish src/AutoSettings.PluginHost -c Release -r win-x64 --self-contained -o $out
           Copy-Item scripts/install.ps1, scripts/uninstall.ps1 $out
 
       - name: Build MSI installer

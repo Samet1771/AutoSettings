@@ -8,6 +8,8 @@ using AutoSettings.Platform.Plugins;
 
 namespace AutoSettings.Platform.Tests;
 
+// Tests that set process environment variables run one at a time.
+[Collection("Environment")]
 public sealed class ScriptPluginTests : IDisposable
 {
     private static readonly UserInfo Tester = new("tester", "PC");

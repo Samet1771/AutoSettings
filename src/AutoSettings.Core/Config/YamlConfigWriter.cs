@@ -128,7 +128,7 @@ public static partial class YamlConfigWriter
 
     private static YamlScalarNode Quoted(string value) => new(value) { Style = ScalarStyle.DoubleQuoted };
 
-    private static YamlNode Text(string value)
+    internal static YamlNode Text(string value)
     {
         if (value.Contains('\n'))
             return new YamlScalarNode(value.Replace("\r\n", "\n")) { Style = ScalarStyle.Literal };
