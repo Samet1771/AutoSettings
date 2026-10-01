@@ -103,7 +103,10 @@ jobs:
           "value=$version" >> $env:GITHUB_OUTPUT
 
       - name: Test
-        run: dotnet test AutoSettings.slnx -c Release -p:Version=${{ steps.version.outputs.value }}
+        # Build everything first: some tests run the plugin host and the sample plugin, which no test project references.
+        run: |
+          dotnet build AutoSettings.slnx -c Release -p:Version=${{ steps.version.outputs.value }}
+          dotnet test AutoSettings.slnx -c Release --no-build
 
       - name: Publish
         shell: pwsh
