@@ -209,7 +209,7 @@ public static class PluginStore
             BuiltInComponents.All,
             plugins.Where(p => p.IsActive)
                 .OrderBy(p => p.Scope == ExecutionScope.Machine ? 0 : 1)
-                .Select(p => ManifestMapping.ToContribution(p.Manifest!)));
+                .Select(p => ManifestMapping.ToContribution(p.Manifest!, p.Scope)));
 
     private static IEnumerable<string> SafeDirectories(string path)
     {
