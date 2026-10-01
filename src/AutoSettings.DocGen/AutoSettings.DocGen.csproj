@@ -2,7 +2,8 @@
 
   <!--
     Generates docs/reference (one page per trigger, condition and action) and the JSON Schema
-    from the component catalog, so the documentation always matches the code.
+    from the component catalog, and docs/plugins/api from the SDK's XML documentation, so the
+    documentation always matches the code.
     See docs/dev/building.md for the command line (write, or check mode used by CI).
   -->
   <PropertyGroup>
@@ -14,6 +15,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AutoSettings.Core\AutoSettings.Core.csproj" />
+    <!-- Direct reference so AutoSettings.Sdk.xml (the API documentation) is copied next to DocGen. -->
+    <ProjectReference Include="..\AutoSettings.Sdk\AutoSettings.Sdk.csproj" />
   </ItemGroup>
 
 </Project>

@@ -59,6 +59,7 @@ profiles:
 - **Personal and machine automations** — each user has their own; administrators can add machine-wide ones (e.g. at boot or for a specific user signing in).
 - **Visual and YAML editor, like Home Assistant** — build automations with forms (app and user pickers included) or write YAML with autocomplete, hover help and error squiggles; switch between them at any time.
 - **Templates** — gaming, presentation, night, meeting, battery saver and focus, ready to adjust.
+- **Plugins** — add new triggers, conditions and actions written in PowerShell or C#: install them from a file or GitHub, update and turn them off from the Plugins page. .NET plugins run in their own process, so a broken plugin cannot take AutoSettings down. A [documented SDK](docs/plugins/index.md) with samples, a `dotnet new` template and a packing tool.
 - **Automatic updates** from GitHub releases — asks before installing by default; checksums verified.
 - **English and Turkish**, light and dark theme.
 - **Readable YAML with helpful errors** — line numbers and "did you mean ...?" suggestions; a bad edit never replaces a working configuration.
@@ -86,6 +87,8 @@ Full guide: **[docs/guide/getting-started.md](docs/guide/getting-started.md)**.
 | [The app](docs/guide/the-app.md) | window, tray menu, activity timeline, settings, pause, dry run |
 | [The editor](docs/guide/editor.md) | visual and YAML editor, templates, import/export |
 | [Updates](docs/guide/updates.md) | automatic updates, beta versions, company settings |
+| [Plugins](docs/guide/plugins.md) | installing, updating and removing plugins |
+| [Writing plugins](docs/plugins/index.md) | script and .NET plugins, `plugin.yaml`, packaging, the SDK API reference |
 | [Examples](docs/examples/) | gaming mode, presentations, day/night, meetings, company PCs |
 | [Reference](docs/reference/index.md) | every trigger, condition and action with all fields (generated) |
 | [Troubleshooting & FAQ](docs/guide/troubleshooting.md) | logs, common problems |

@@ -1,0 +1,53 @@
+# Packs the plugin SDK, the autosettings-plugin tool and the dotnet new templates, and publishes them to nuget.org.
+# Run it by hand (Actions → Release plugin SDK → Run workflow) after changing the SDK version
+# (src/AutoSettings.Sdk/AutoSettings.Sdk.csproj, SdkVersion) — see docs/plugins/versioning.md.
+# Publishing needs the repository secret NUGET_API_KEY (an API key from nuget.org with push rights for the
+# AutoSettings.* packages). Without it the packages are built and attached to the run, but not published.
+name: Release plugin SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to nuget.org (needs the NUGET_API_KEY secret)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Test
+        run: dotnet test tests/AutoSettings.Core.Tests --configuration Release
+
+      - name: Pack
+        run: |
+          dotnet pack src/AutoSettings.Sdk --configuration Release --output artifacts/nuget
+          dotnet pack src/AutoSettings.PluginTool --configuration Release --output artifacts/nuget
+          dotnet pack templates/AutoSettings.Templates.csproj --configuration Release --output artifacts/nuget
+          ls -l artifacts/nuget
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: nuget-packages
+          path: artifacts/nuget/*.nupkg
+
+      - name: Publish to nuget.org
+        if: ${{ inputs.publish }}
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "::notice::NUGET_API_KEY is not set, so the packages were built but not published. Add the secret (Settings → Secrets and variables → Actions) and run this workflow again."
+            exit 0
+          fi
+          dotnet nuget push "artifacts/nuget/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate

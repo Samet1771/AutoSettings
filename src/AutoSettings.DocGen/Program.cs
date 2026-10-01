@@ -9,8 +9,13 @@ if (docs is null)
     return 2;
 }
 
-var files = ReferenceGenerator.Generate();
-var referenceRoot = Path.Combine(docs, "reference");
+// Paths relative to docs/: the component reference and the plugin SDK API reference.
+var files = new SortedDictionary<string, string>(StringComparer.Ordinal);
+foreach (var (relative, content) in ReferenceGenerator.Generate())
+    files["reference/" + relative] = content;
+foreach (var (relative, content) in ApiReferenceGenerator.Generate())
+    files["plugins/api/" + relative] = content;
+var referenceRoot = docs;
 
 if (check)
 {
@@ -28,10 +33,10 @@ if (check)
     }
     if (stale.Count == 0)
     {
-        Console.WriteLine($"Reference docs are up to date ({files.Count} files).");
+        Console.WriteLine($"Generated docs are up to date ({files.Count} files).");
         return 0;
     }
-    Console.Error.WriteLine("Reference docs are out of date. Run: dotnet run --project src/AutoSettings.DocGen");
+    Console.Error.WriteLine("Generated docs are out of date. Run: dotnet run --project src/AutoSettings.DocGen");
     foreach (var file in stale)
         Console.Error.WriteLine("  " + file);
     return 1;
@@ -52,7 +57,7 @@ static string Normalize(string text) => text.Replace("\r\n", "\n");
 
 static IEnumerable<string> GeneratedFilesOnDisk(string referenceRoot)
 {
-    foreach (var folder in new[] { "triggers", "conditions", "actions" })
+    foreach (var folder in new[] { "reference/triggers", "reference/conditions", "reference/actions", "plugins/api" })
     {
         var directory = Path.Combine(referenceRoot, folder);
         if (!Directory.Exists(directory))

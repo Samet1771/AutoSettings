@@ -25,6 +25,9 @@
   - New **Plugins** page: install from a file or from GitHub (with a dialog showing the plugin's declared permissions
     and who it is installed for), turn on/off, update, go back to the previous version, remove. .NET plugins show
     whether they are signed.
+  - For plugin authors: `dotnet new autosettings-plugin` (C# or PowerShell), an SDK API reference generated from the
+    code, a versioning policy with an API snapshot test, and a workflow that publishes the SDK, the tool and the
+    templates to NuGet (needs the `NUGET_API_KEY` secret).
 
 ## 0.2.0 (2026-09-30)
 

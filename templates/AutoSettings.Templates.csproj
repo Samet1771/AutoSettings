@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Packs the "dotnet new autosettings-plugin" template. Install: dotnet new install AutoSettings.Templates -->
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageId>AutoSettings.Templates</PackageId>
+    <Version>1.0.0</Version>
+    <Title>AutoSettings plugin templates</Title>
+    <Description>"dotnet new autosettings-plugin": a new AutoSettings plugin, in C# or PowerShell.</Description>
+    <PackageProjectUrl>https://github.com/Samet1771/AutoSettings</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <TargetFramework>net10.0</TargetFramework>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**" />
+    <Compile Remove="**\*" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+</Project>

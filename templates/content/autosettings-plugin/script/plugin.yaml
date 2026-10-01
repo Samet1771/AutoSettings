@@ -1,0 +1,27 @@
+# A script plugin: PowerShell files described here. Nothing to compile.
+# Reference: https://github.com/Samet1771/AutoSettings/blob/main/docs/plugins/manifest.md
+# Guide:     https://github.com/Samet1771/AutoSettings/blob/main/docs/plugins/script-plugins.md
+id: mypublisher.myplugin
+name: MyPlugin
+description: What MyPlugin does.
+version: 1.0.0
+publisher: mypublisher
+kind: script
+scope: user
+sdk: "1.0"
+min_app_version: 0.3.0
+permissions: [powershell]
+
+components:
+  - type: mypublisher.myplugin.say_hello
+    kind: action
+    title: Say hello
+    description: Writes a greeting to the Activity page.
+    scripts:
+      apply: scripts/say-hello.ps1
+    fields:
+      - name: name
+        type: string
+        description: Who to greet. Placeholders such as {{ user }} work.
+        required: true
+        example: "{{ user }}"
